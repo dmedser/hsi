@@ -8,12 +8,12 @@ module payload_generator (
 );
 
 parameter OFF = 0,
-			 ON  = 1;
+			 ON  = 1;	
 			 
 /********** GENERATION PERIOD TIMER **********/
 
 reg [4:0] ticks;
-parameter GEN_PERIOD = 31;  			 
+parameter GEN_PERIOD =    31;// 10			 
 
 always@(posedge clk or negedge n_rst)
 begin
@@ -39,11 +39,11 @@ begin
 	if(n_rst == 0)
 		begin
 			pl_rdy = OFF;
-			q = 0;
+			q = 8'h55;
 		end
 	else if(clk_en == ON)
-		begin
-			if(cd_busy == OFF)
+		begin								
+			if(cd_busy == OFF)		// 
 				begin
 					if(ticks == 0)
 						begin
@@ -54,7 +54,7 @@ begin
 							q = q + 1;
 						end
 				end
-			else
+			else							//
 				begin
 					pl_rdy = OFF;
 				end

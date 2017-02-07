@@ -284,26 +284,29 @@ assign FH4_C2_DE	= 0;
 /********************   WIRES  ********************/
 
 wire CLK_24 = CLK;
-wire CLK_192_STP;
+wire CLK_8;
+wire STP_CLK_24x8_192;
+wire STP_CLK_8x8_64;
 wire N_RST;
-wire CLK_EN;
+wire CLK_24_EN;
 wire [7:0] PG_Q_CD_D;
 wire PG_PL_RDY_CD_WR_EN;
 wire CD_BUSY;
 wire CD_Q;
 
-
 /********************  MODULES ********************/
 
 pll PLL(
 	.inclk0(CLK_24),
-	.c0(CLK_192_STP)
+	.c0(STP_CLK_24x8_192),
+	.c1(CLK_8),
+	.c2(STP_CLK_8x8_64)
 );
 
 clk_enable_controller CLK_EN_CTRL (
 	.clk(CLK_24),
 	.n_rst(N_RST),
-	.clk_en(CLK_EN)
+	.clk_en(CLK_24_EN)
 );
 
 reset_controller RST_CTRL (
@@ -311,23 +314,32 @@ reset_controller RST_CTRL (
 	.n_rst(N_RST)
 );
 
+payload_generator PL_GEN (
+	.clk(CLK_24),
+	.n_rst(N_RST),
+	.clk_en(CLK_24_EN),
+	.cd_busy(CD_BUSY),
+	.q(PG_Q_CD_D),
+	.pl_rdy(PG_PL_RDY_CD_WR_EN)
+);
+
 coder CD (
 	.clk(CLK_24),
 	.n_rst(N_RST),
-	.clk_en(CLK_EN),
+	.clk_en(CLK_24_EN),
 	.d(PG_Q_CD_D),
 	.wr_en(PG_PL_RDY_CD_WR_EN),
 	.busy(CD_BUSY),
 	.q(CD_Q)
 );
 
-payload_generator PL_GEN (
-	.clk(CLK_24),
+decoder DC (
+	.clk(CLK_8),
 	.n_rst(N_RST),
-	.clk_en(CLK_EN),
-	.cd_busy(CD_BUSY),
-	.q(PG_Q_CD_D),
-	.pl_rdy(PG_PL_RDY_CD_WR_EN)
+	.d(CD_Q),
+	.q(),
+	.q_rdy(),
+	.err()
 );
 
 endmodule
