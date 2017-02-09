@@ -13,7 +13,7 @@ parameter OFF = 0,
 /********** GENERATION PERIOD TIMER **********/
 
 reg [4:0] ticks;
-parameter GEN_PERIOD =    31;// 10			 
+parameter GEN_PERIOD = 31;  // 10			 
 
 always@(posedge clk or negedge n_rst)
 begin
@@ -43,7 +43,7 @@ begin
 		end
 	else if(clk_en == ON)
 		begin								
-			if(cd_busy == OFF)		// 
+		if(cd_busy == OFF)		// 
 				begin
 					if(ticks == 0)
 						begin

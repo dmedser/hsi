@@ -76,27 +76,64 @@ begin
 end			
 
 
-reg MSG_END_CHECK_TIMER_START;
 reg MSG_END_CHECK_TIMER_EN;
-reg [2:0] mec_time; // Message End Check Time
-parameter MSG_END_CHECK_TIME = 4;
+reg [1:0] mec_time; 	// Message End Check Time
+parameter MSG_END_CHECK_TIME = 3;
+
+/***************** TASKS *****************/
+
+reg FRAME_RX_EN;	
+reg [8:0] FRAME_REG;
+
+task reset;
+	begin
+		FRAME_RX_EN = OFF;
+		MSG_END_CHECK_TIMER_EN = OFF;
+		msg_end = OFF;
+		q = 0;
+		FRAME_REG = 0;
+		q_rdy = OFF;
+		err = OFF;
+		t_sample = 8;
+		fr_idx = 0;
+		dc_state = DC_STATE_CTRL;
+	end
+endtask
 
 
-always@(posedge clk)
-begin
-	if(n_rst == 0)
-		begin
-			MSG_END_CHECK_TIMER_EN = OFF;
-		end
-	else if(MSG_END_CHECK_TIMER_START == ON)
-		begin
-			MSG_END_CHECK_TIMER_EN = ON;
-		end
-	else if(mec_time == MSG_END_CHECK_TIME)
-		begin
-			MSG_END_CHECK_TIMER_EN = OFF;
-		end
-end
+task control;
+	begin
+		if(d == START_BIT)
+			begin
+				FRAME_RX_EN = ON;
+				MSG_END_CHECK_TIMER_EN = OFF;
+				msg_end = OFF;
+				q = 0;
+				FRAME_REG = 0;
+				q_rdy = OFF;
+				err = OFF;
+				dc_state = DC_STATE_SIPO_CONV;
+			end
+		else 
+			begin
+				if(mec_time == MSG_END_CHECK_TIME)
+					begin
+						msg_end = ON;
+						MSG_END_CHECK_TIMER_EN = OFF;
+					end
+				else
+					begin
+						msg_end = OFF;
+						q = 0;
+						FRAME_REG = 0;
+						q_rdy = OFF;
+						err = OFF;
+						dc_state = DC_STATE_CTRL;
+					end
+			end
+	end
+endtask
+
 
 always@(posedge clk)
 begin
@@ -110,66 +147,16 @@ begin
 				begin
 					mec_time = mec_time + 1;
 				end
-			else if(d == START_BIT)
-				begin
-					msg_end = OFF;
-				end
 			else
 				begin
-					msg_end = ON;
+					mec_time = 0;
 				end
 		end
 	else
 		begin
-			msg_end = OFF;
 			mec_time = 0;
 		end
 end
-
-/***************** TASKS *****************/
-
-reg FRAME_RX_EN;	
-reg [8:0] FRAME_REG;
-
-task reset;
-	begin
-		FRAME_RX_EN = OFF;
-		q = 0;
-		FRAME_REG = 0;
-		q_rdy = OFF;
-		err = OFF;
-		t_sample = 8;
-		fr_idx = 0;
-		MSG_END_CHECK_TIMER_START = OFF;
-		dc_state = DC_STATE_CTRL;
-	end
-endtask
-
-
-task control;
-	begin
-		if(d == START_BIT)
-			begin
-				FRAME_RX_EN = ON;
-				q = 0;
-				FRAME_REG = 0;
-				q_rdy = OFF;
-				err = OFF;
-				MSG_END_CHECK_TIMER_START = OFF;
-				dc_state = DC_STATE_SIPO_CONV;
-			end
-		else 
-			begin
-				FRAME_RX_EN = OFF;
-				q = 0;
-				FRAME_REG = 0;
-				q_rdy = OFF;
-				err = OFF;
-				MSG_END_CHECK_TIMER_START = OFF;
-				dc_state = DC_STATE_CTRL;
-			end
-	end
-endtask
 
 reg [6:0] t_sample;
 reg [3:0] fr_idx;
@@ -206,7 +193,7 @@ task sipo_conversion;
 								q_rdy = ON;
 								err = OFF;
 								FRAME_RX_EN = OFF;
-								MSG_END_CHECK_TIMER_START = ON;
+								MSG_END_CHECK_TIMER_EN = ON;
 								dc_state = DC_STATE_CTRL;
 							end
 						else	
@@ -217,7 +204,7 @@ task sipo_conversion;
 								q_rdy = OFF;
 								err = ON;
 								FRAME_RX_EN = OFF;
-								MSG_END_CHECK_TIMER_START = OFF;
+								MSG_END_CHECK_TIMER_EN = OFF;
 								dc_state = DC_STATE_CTRL;
 							end
 					end
@@ -231,7 +218,7 @@ task sipo_conversion;
 								q_rdy = ON;
 								err = OFF;
 								FRAME_RX_EN = OFF;
-								MSG_END_CHECK_TIMER_START = ON;
+								MSG_END_CHECK_TIMER_EN = ON;
 								dc_state = DC_STATE_CTRL;
 							end
 						else	
@@ -242,7 +229,7 @@ task sipo_conversion;
 								q_rdy = OFF;
 								err = ON;
 								FRAME_RX_EN = OFF;
-								MSG_END_CHECK_TIMER_START = OFF;
+								MSG_END_CHECK_TIMER_EN = OFF;
 								dc_state = DC_STATE_CTRL;
 							end
 					end
