@@ -3,145 +3,138 @@ module coder (
 	input n_rst,
 	input clk_en,
 	input [7:0] d,
-	input wr_en,
-	output reg busy,
-	output reg q
+	input d_rdy,
+	output busy,
+	output q
 ); 
 
-parameter LSB_FST = 0,
-			 MSB_FST = 1;
+`include "src/code/vh/hsi_master_config.vh"		
 
-parameter ml_fst = LSB_FST;
+assign busy = (cd_state == CD_STATE_PISO_CONV);		 
 
-parameter OFF = 0,
-			 ON  = 1;				 
+wire q_src = (`ML_FST == `LSB) ? FRAME_REG[0] : FRAME_REG[10];
+assign q = (cd_state == CD_STATE_PISO_CONV) ? q_src : STOP_BIT;
+
+piso_timer PISO_TIM (
+	.clk(clk),
+	.clk_en(clk_en),
+	.n_rst(n_rst & (cd_state == CD_STATE_PISO_CONV)),
+	.conv_is_over(PISO_CONVERSION_IS_OVER)
+);
 			 
 /********** CODER STATE MACHINE **********/
  			 
-reg [1:0] cd_state;
-parameter CD_STATE_CTRL 	  = 0,
-			 CD_STATE_PISO_CONV = 1;
-
-
+reg [2:0] cd_state;
+parameter CD_STATE_CTRL 	  			 = 0,
+			 CD_STATE_PISO_CONV_PREPARE = 1,
+			 CD_STATE_PISO_CONV 			 = 2;
 always@(posedge clk or negedge n_rst)
 begin
 	if(n_rst == 0)
 		begin
-			reset();
+			cd_state = CD_STATE_CTRL;
 		end
-	else if(clk_en == ON)
+	else if(clk_en == 1)
 		begin
-			case (cd_state)	
+			case(cd_state)	
 			CD_STATE_CTRL:
 				begin
-					control();
+					if(d_rdy == 1)
+						begin
+							cd_state = CD_STATE_PISO_CONV;
+						end 
+					else
+						begin
+							cd_state = CD_STATE_CTRL;
+						end
 				end
 			CD_STATE_PISO_CONV:
 				begin
-					piso_conversion();
+					if(PISO_CONVERSION_IS_OVER)
+						begin
+							cd_state = CD_STATE_CTRL;
+						end
+					else
+						begin
+							cd_state = CD_STATE_PISO_CONV;
+						end
 				end
 			default:
 				begin
-					control();
+				
 				end
 			endcase 
 		end
 end
 
-/********* PISO CONVERSION TIMER *********/
 
-reg [3:0] tx_time;	
-parameter FRAME_TX_TIME = 9;			 
+reg [10:0] FRAME_REG;		 			 
+parameter START_BIT = 0,
+			 STOP_BIT  = 1;	
 
+`define PARITY_BIT (~(d[7]^d[6]^d[5]^d[4]^d[3]^d[2]^d[1]^d[0]))
 always@(posedge clk or negedge n_rst)
 begin
 	if(n_rst == 0)
 		begin
-			tx_time = 0;
+			FRAME_REG = 8'hFF;
 		end
-	else if(clk_en == ON)
+	else if(clk_en == 1)
 		begin
-			if(cd_state == CD_STATE_PISO_CONV)
+			if(d_rdy == 1)
 				begin
-					tx_time = tx_time + 1;
+					if(`ML_FST == `LSB)
+						begin
+							FRAME_REG[0] = START_BIT;
+							FRAME_REG[8:1] = d;
+							FRAME_REG[9] = `PARITY_BIT;
+							FRAME_REG[10] = STOP_BIT;
+						end 
+					else
+						begin
+							FRAME_REG[10] = START_BIT;
+							FRAME_REG[9:2] = d;
+							FRAME_REG[1] = `PARITY_BIT;
+							FRAME_REG[0] = STOP_BIT;
+						end
 				end
-			else
-				begin
-					tx_time = 0;
+			else if(cd_state == CD_STATE_PISO_CONV)	
+				begin	
+					if(`ML_FST == `LSB)
+						begin
+							FRAME_REG = (FRAME_REG >> 1);
+						end
+					else 
+						begin
+							FRAME_REG = (FRAME_REG << 1);
+						end
 				end
 		end
 end
 
-/***************** TASKS *****************/
-
-reg [8:0] FRAME_REG;
-		 			 
-parameter START_BIT = 0,
-			 STOP_BIT  = 1;	
-
-task reset;
-	begin
-		busy = OFF;
-		FRAME_REG = 0;
-		q = STOP_BIT;
-		cd_state = CD_STATE_CTRL;
-	end
-endtask
-
-
-task control;
-	begin
-		if(wr_en == ON)
-			begin
-				if(ml_fst == LSB_FST)
-					begin
-						busy = ON;
-						FRAME_REG[7:0] = d;
-						FRAME_REG[8] = ~(d[7]^d[6]^d[5]^d[4]^d[3]^d[2]^d[1]^d[0]);
-						q = START_BIT;
-						cd_state = CD_STATE_PISO_CONV;
-					end 
-				else
-					begin
-						busy = ON;
-						FRAME_REG[8:1] = d;
-						FRAME_REG[0] = ~(d[7]^d[6]^d[5]^d[4]^d[3]^d[2]^d[1]^d[0]);
-						q = START_BIT;
-						cd_state = CD_STATE_PISO_CONV;
-					end
-			end
-		else 
-			begin
-				busy = OFF;
-				FRAME_REG = 0;
-				q = STOP_BIT;
-				cd_state = CD_STATE_CTRL;
-			end
-	end
-endtask
-
-task piso_conversion;
-	begin
-		if(tx_time < FRAME_TX_TIME)
-			begin
-				if(ml_fst == LSB_FST)
-					begin
-						q = FRAME_REG[0];
-						FRAME_REG = (FRAME_REG >> 1);
-					end
-				else 
-					begin
-						q = FRAME_REG[8];
-						FRAME_REG = (FRAME_REG << 1);
-					end
-			end
-		else
-			begin
-				busy = OFF;
-				q = STOP_BIT;
-				cd_state = CD_STATE_CTRL;
-			end
-	end
-endtask
 
 endmodule
+
+module piso_timer (
+	input clk,
+	input clk_en,
+	input n_rst,
+	output conv_is_over
+);
+
+parameter PISO_CONVERSION_TIME = 9;
+assign conv_is_over = (ticks == PISO_CONVERSION_TIME);
+reg[3:0] ticks;
+always@(posedge clk or negedge n_rst)
+begin
+	if(n_rst == 0)
+		begin
+			ticks = 0;
+		end
+	else if(clk_en == 1)
+		begin
+			ticks = ticks + 1;
+		end
+end
+
+endmodule 

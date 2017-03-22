@@ -2,7 +2,7 @@ module umio_base (
 
 /*********************** CLK **********************/
 		
-		input CLK,
+		input CLK_24,
 
 /******************* SDRAM DD33 *******************/
 
@@ -280,66 +280,54 @@ assign FH4_C2_D	= 0;
 assign FH4_C2_nRE	= 1;
 assign FH4_C2_DE	= 0;
 
-
-/********************   WIRES  ********************/
-
-wire CLK_24 = CLK;
-wire CLK_8;
-wire STP_CLK_24x8_192;
-wire STP_CLK_8x8_64;
-wire N_RST;
-wire CLK_24_EN;
-wire [7:0] PG_Q_CD_D;
-wire PG_PL_RDY_CD_WR_EN;
-wire CD_BUSY;
-wire CD_Q;
-
 /********************  MODULES ********************/
 
 pll PLL(
 	.inclk0(CLK_24),
-	.c0(STP_CLK_24x8_192),
-	.c1(CLK_8),
+	.c0(CLK_48),
+	.c1(STP_CLK_1x8_8),
 	.c2(STP_CLK_8x8_64)
 );
 
-clk_enable_controller CLK_EN_CTRL (
-	.clk(CLK_24),
-	.n_rst(N_RST),
-	.clk_en(CLK_24_EN)
-);
-
 reset_controller RST_CTRL (
-	.clk(CLK_24),
+	.clk(CLK_48),
 	.n_rst(N_RST)
 );
 
-payload_generator PL_GEN (
-	.clk(CLK_24),
+hsi_master HSI_MSTR(
+	.clk(CLK_48),
 	.n_rst(N_RST),
-	.clk_en(CLK_24_EN),
-	.cd_busy(CD_BUSY),
-	.q(PG_Q_CD_D),
-	.pl_rdy(PG_PL_RDY_CD_WR_EN)
-);
-
-coder CD (
-	.clk(CLK_24),
-	.n_rst(N_RST),
-	.clk_en(CLK_24_EN),
-	.d(PG_Q_CD_D),
-	.wr_en(PG_PL_RDY_CD_WR_EN),
-	.busy(CD_BUSY),
-	.q(CD_Q)
-);
-
-decoder DC (
-	.clk(CLK_8),
-	.n_rst(N_RST),
-	.d(CD_Q),
+	
+	.sdreq_en(),
+	
+	.tm_en(),
+	.tm(TM),
+	.pre_tm(PRE_TM),
+	
+	.btc_en(),
+	.btc(),
+	
+	.ccw(),
+	.ccw_tx_rdy(),
+	.ccw_rx_rdy(),
+	
+	.tx_src(),
+	.rx_src(),
+	
 	.q(),
-	.q_rdy(),
-	.err()
+
+	.com1(),
+	.com2(),
+	.dat1(),
+	.dat2()
 );
+
+tm_gen TM_GEN(
+	.clk(CLK_48),
+	.n_rst(N_RST),
+	.tm(TM),
+	.pre_tm(PRE_TM)
+);
+
 
 endmodule

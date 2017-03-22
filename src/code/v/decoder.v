@@ -1,25 +1,45 @@
 module decoder (
 	input clk,
 	input n_rst,
+	input clk_en,
 	input d,
 	output reg [7:0] q,
 	output reg q_rdy,
 	output reg err,
-	output reg msg_end
+	output msg_end
 );
 
-parameter LSB_FST = 0,
-			 MSB_FST = 1;
-
-parameter ml_fst = LSB_FST;
-
+`include "src/code/vh/hsi_master_config.vh"	
+	
 parameter OFF = 0,
-			 ON  = 1;
+			 ON  = 1,
+			 START_BIT = 0,
+			 STOP_BIT  = 1,
+			 CONVERSION_TIME 	  = 80,
+			 MSG_END_CHECK_TIME = 86;
+			 			 
+wire[6:0] SIPO_TIME;
+wire SIPO_CONVERSION_IS_OVER = (SIPO_TIME == CONVERSION_TIME);
+wire ITS_MSG_END_CHECK_TIME = (SIPO_TIME == MSG_END_CHECK_TIME);
+wire [6:0] SAMPLE_TIME;
+wire [3:0] FRAME_IDX;
 
-parameter START_BIT = 0,
-			 STOP_BIT  = 1; 
-			 
-			
+sipo_timer SIPO_TIM (
+	.clk(clk),
+	.clk_en(clk_en),
+	.n_rst(n_rst & FRAME_RX_EN),
+	.sipo_time(SIPO_TIME)
+);
+
+dc_sample_ctrl DC_SAMPLE_CTRL (
+	.incr(ITS_SAMPLE_TIME),
+	.n_rst(n_rst & ~(dc_state == DC_STATE_CTRL)),
+	.t_sample(SAMPLE_TIME),
+	.fr_idx(FRAME_IDX)
+);		
+
+assign msg_end = ITS_MSG_END_CHECK_TIME & (d == STOP_BIT);
+				
 /********** DECODER STATE MACHINE **********/
 			 
 reg [1:0] dc_state;
@@ -30,212 +50,185 @@ always@(posedge clk or negedge n_rst)
 begin
 	if(n_rst == 0)
 		begin
-			reset();
+			dc_state = DC_STATE_CTRL;
 		end
-	else
+	else if(clk_en == ON)
 		begin
 			case(dc_state)
 			DC_STATE_CTRL:
 				begin
-					control();
+					if(d == START_BIT)
+						begin
+							dc_state = DC_STATE_SIPO_CONV;
+						end
+					else 
+						begin
+							dc_state = DC_STATE_CTRL;
+						end
 				end
 			DC_STATE_SIPO_CONV:
 				begin
-					sipo_conversion();
-				end
+					if(SIPO_CONVERSION_IS_OVER)
+						begin
+							dc_state = DC_STATE_CTRL;
+						end
+					else	
+						begin
+							dc_state = DC_STATE_SIPO_CONV;
+						end
+					end
 			default:
 				begin
-					control();
+					
 				end
 			endcase
 		end
 end
-
-/********** SIPO CONVERSION TIMER **********/
-		 
-reg[6:0] rx_time;
-parameter FRAME_RX_TIME = 80;
-
-always@(posedge clk)
+		
+always@(posedge clk or negedge n_rst)
 begin
 	if(n_rst == 0)
 		begin
-			rx_time = 0;
+			q = 0;
+			q_rdy = OFF;
+			err = OFF;
 		end
-	else
-		begin 
-			if(FRAME_RX_EN == ON)
-				begin
-					rx_time = rx_time + 1;
-				end
-			else 
-				begin
-					rx_time = 0;
-				end
-		end
-end			
-
-
-reg MSG_END_CHECK_TIMER_EN;
-reg [1:0] mec_time; 	// Message End Check Time
-parameter MSG_END_CHECK_TIME = 3;
-
-/***************** TASKS *****************/
-
-reg FRAME_RX_EN;	
-reg [8:0] FRAME_REG;
-
-task reset;
-	begin
-		FRAME_RX_EN = OFF;
-		MSG_END_CHECK_TIMER_EN = OFF;
-		msg_end = OFF;
-		q = 0;
-		FRAME_REG = 0;
-		q_rdy = OFF;
-		err = OFF;
-		t_sample = 8;
-		fr_idx = 0;
-		dc_state = DC_STATE_CTRL;
-	end
-endtask
-
-
-task control;
-	begin
-		if(d == START_BIT)
-			begin
-				FRAME_RX_EN = ON;
-				MSG_END_CHECK_TIMER_EN = OFF;
-				msg_end = OFF;
-				q = 0;
-				FRAME_REG = 0;
-				q_rdy = OFF;
-				err = OFF;
-				dc_state = DC_STATE_SIPO_CONV;
-			end
-		else 
-			begin
-				if(mec_time == MSG_END_CHECK_TIME)
-					begin
-						msg_end = ON;
-						MSG_END_CHECK_TIMER_EN = OFF;
-					end
-				else
-					begin
-						msg_end = OFF;
-						q = 0;
-						FRAME_REG = 0;
-						q_rdy = OFF;
-						err = OFF;
-						dc_state = DC_STATE_CTRL;
-					end
-			end
-	end
-endtask
-
-
-always@(posedge clk)
-begin
-	if(n_rst == 0)
+	else if (clk_en == ON)
 		begin
-			mec_time = 0;
-		end
-	else if(MSG_END_CHECK_TIMER_EN == ON)
-		begin
-			if(mec_time < MSG_END_CHECK_TIME)
+			if(SIPO_CONVERSION_IS_OVER)
 				begin
-					mec_time = mec_time + 1;
+					if(`ML_FST == `LSB)
+						begin
+							if(FRAME_REG[8] == ~(FRAME_REG[7]^FRAME_REG[6]^FRAME_REG[5]^FRAME_REG[4]^FRAME_REG[3]^FRAME_REG[2]^FRAME_REG[1]^FRAME_REG[0]))
+								begin
+									q = FRAME_REG[7:0];
+									q_rdy = ON;
+									err = OFF;
+								end
+							else	
+								begin
+									q = 0;
+									q_rdy = OFF;
+									err = ON;
+								end
+						end
+					else 
+						begin
+							if(FRAME_REG[0] == ~(FRAME_REG[8]^FRAME_REG[7]^FRAME_REG[6]^FRAME_REG[5]^FRAME_REG[4]^FRAME_REG[3]^FRAME_REG[2]^FRAME_REG[1]))
+								begin
+									q = FRAME_REG[8:1];
+									q_rdy = ON;
+									err = OFF;
+								end
+							else	
+								begin
+									q = 0;
+									q_rdy = OFF;
+									err = ON;
+								end
+						end
 				end
-			else
+			else	
 				begin
-					mec_time = 0;
+					q_rdy = OFF;
+					err = OFF;
 				end
-		end
-	else
-		begin
-			mec_time = 0;
 		end
 end
 
-reg [6:0] t_sample;
-reg [3:0] fr_idx;
+reg FRAME_RX_EN;	
+always@(posedge clk or negedge n_rst)
+begin
+	if(n_rst == 0)
+		begin
+			FRAME_RX_EN = OFF;
+		end
+	else if (clk_en == 1)
+		begin
+			if(dc_state == DC_STATE_SIPO_CONV)
+				begin
+					FRAME_RX_EN = ON;
+				end
+			else if(ITS_MSG_END_CHECK_TIME)
+				begin
+					FRAME_RX_EN = OFF;
+				end
+		end
+end
 
-task sipo_conversion;
-	begin
-		if(rx_time < FRAME_RX_TIME)
-			begin
-				if(rx_time == t_sample)
-					begin
-						if(ml_fst == LSB_FST)
-							begin
-								FRAME_REG[fr_idx] = d;
-								fr_idx = fr_idx + 1;
-								t_sample = t_sample + 8;
-							end
-						else
-							begin
-								FRAME_REG[8 - fr_idx] = d;
-								fr_idx = fr_idx + 1;
-								t_sample = t_sample + 8;
-							end
-					end
-			end
-		else
-			begin
-				if(ml_fst == LSB_FST)
-					begin
-						if(FRAME_REG[8] == ~(FRAME_REG[7]^FRAME_REG[6]^FRAME_REG[5]^FRAME_REG[4]^FRAME_REG[3]^FRAME_REG[2]^FRAME_REG[1]^FRAME_REG[0]))
-							begin
-								fr_idx = 0;
-								t_sample = 8;
-								q = FRAME_REG[7:0];
-								q_rdy = ON;
-								err = OFF;
-								FRAME_RX_EN = OFF;
-								MSG_END_CHECK_TIMER_EN = ON;
-								dc_state = DC_STATE_CTRL;
-							end
-						else	
-							begin
-								fr_idx = 0;
-								t_sample = 8;
-								q = 0;
-								q_rdy = OFF;
-								err = ON;
-								FRAME_RX_EN = OFF;
-								MSG_END_CHECK_TIMER_EN = OFF;
-								dc_state = DC_STATE_CTRL;
-							end
-					end
-				else 
-					begin
-						if(FRAME_REG[0] == ~(FRAME_REG[8]^FRAME_REG[7]^FRAME_REG[6]^FRAME_REG[5]^FRAME_REG[4]^FRAME_REG[3]^FRAME_REG[2]^FRAME_REG[1]))
-							begin
-								fr_idx = 0;
-								t_sample = 8;
-								q = FRAME_REG[8:1];
-								q_rdy = ON;
-								err = OFF;
-								FRAME_RX_EN = OFF;
-								MSG_END_CHECK_TIMER_EN = ON;
-								dc_state = DC_STATE_CTRL;
-							end
-						else	
-							begin
-								fr_idx = 0;
-								t_sample = 8;
-								q = 0;
-								q_rdy = OFF;
-								err = ON;
-								FRAME_RX_EN = OFF;
-								MSG_END_CHECK_TIMER_EN = OFF;
-								dc_state = DC_STATE_CTRL;
-							end
-					end
-			end
-	end
-endtask
-			
+reg [8:0] FRAME_REG;
+reg ITS_SAMPLE_TIME;
+always@(posedge clk or negedge n_rst)
+begin
+	if(n_rst == 0)
+		begin
+			ITS_SAMPLE_TIME = OFF;
+			FRAME_REG = 0;
+		end
+	else if(clk_en == ON)
+		begin
+			if((dc_state == DC_STATE_SIPO_CONV) & (SIPO_TIME == SAMPLE_TIME)) 
+				begin
+					if(`ML_FST == `LSB)
+						begin
+							ITS_SAMPLE_TIME = ON;
+							FRAME_REG[FRAME_IDX] = d;
+						end
+					else
+						begin
+							ITS_SAMPLE_TIME = ON;
+							FRAME_REG[8 - FRAME_IDX] = d;
+						end
+				end
+			else 
+				begin
+					ITS_SAMPLE_TIME = OFF; 
+				end
+		end
+end
 			
 endmodule
+
+module sipo_timer (
+	input clk,
+	input clk_en,
+	input n_rst,
+	output reg [6:0] sipo_time
+);
+
+always@(posedge clk or negedge n_rst)
+begin
+	if(n_rst == 0)
+		begin
+			sipo_time = 0;
+		end
+	else if(clk_en == 1)
+		begin
+			sipo_time = sipo_time + 1;
+		end
+end
+
+endmodule 
+
+module dc_sample_ctrl (
+	input incr,
+	input n_rst,
+	output reg [6:0] t_sample,
+	output reg [3:0] fr_idx
+); 
+
+always@(posedge incr or negedge n_rst)
+begin
+	if(n_rst == 0)
+		begin
+			t_sample = 8;
+			fr_idx = 0;
+		end
+	else 
+		begin
+			t_sample = t_sample + 8;
+			fr_idx = fr_idx + 1;
+		end
+end
+
+endmodule 

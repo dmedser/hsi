@@ -3,11 +3,11 @@ module reset_controller (
 	output reg n_rst
 );
 
-`define CLK_FREQ 			24000000
-`define RESET_TIME_SEC	4 
+`include "src/code/vh/hsi_master_config.vh"		
 
-reg[26:0] ticks;
-parameter TICKS_IN_4_SEC = (`CLK_FREQ) * (`RESET_TIME_SEC);
+reg[27:0] ticks;
+
+parameter TICKS_IN_4_SEC = (((`CLK_FREQ) * (`RST_TIME_SEC)) - 1);
 
 always@(posedge clk)
 begin
