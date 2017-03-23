@@ -31,33 +31,23 @@ parameter CD_STATE_CTRL 	  			 = 0,
 always@(posedge clk or negedge n_rst)
 begin
 	if(n_rst == 0)
-		begin
-			cd_state = CD_STATE_CTRL;
-		end
+		cd_state = CD_STATE_CTRL;
 	else if(clk_en == 1)
 		begin
 			case(cd_state)	
 			CD_STATE_CTRL:
 				begin
 					if(d_rdy == 1)
-						begin
-							cd_state = CD_STATE_PISO_CONV;
-						end 
+						cd_state = CD_STATE_PISO_CONV;
 					else
-						begin
-							cd_state = CD_STATE_CTRL;
-						end
+						cd_state = CD_STATE_CTRL;
 				end
 			CD_STATE_PISO_CONV:
 				begin
 					if(PISO_CONVERSION_IS_OVER)
-						begin
-							cd_state = CD_STATE_CTRL;
-						end
+						cd_state = CD_STATE_CTRL;
 					else
-						begin
-							cd_state = CD_STATE_PISO_CONV;
-						end
+						cd_state = CD_STATE_PISO_CONV;
 				end
 			default:
 				begin
@@ -101,13 +91,9 @@ begin
 			else if(cd_state == CD_STATE_PISO_CONV)	
 				begin	
 					if(`ML_FST == `LSB)
-						begin
-							FRAME_REG = (FRAME_REG >> 1);
-						end
+						FRAME_REG = (FRAME_REG >> 1);
 					else 
-						begin
-							FRAME_REG = (FRAME_REG << 1);
-						end
+						FRAME_REG = (FRAME_REG << 1);
 				end
 		end
 end
@@ -128,13 +114,9 @@ reg[3:0] ticks;
 always@(posedge clk or negedge n_rst)
 begin
 	if(n_rst == 0)
-		begin
-			ticks = 0;
-		end
+		ticks = 0;
 	else if(clk_en == 1)
-		begin
-			ticks = ticks + 1;
-		end
+		ticks = ticks + 1;
 end
 
 endmodule 

@@ -3,9 +3,9 @@ module decoder (
 	input n_rst,
 	input clk_en,
 	input d,
-	output reg [7:0] q,
-	output reg q_rdy,
-	output reg err,
+	output  [7:0] q,
+	output  q_rdy,
+	output  err,
 	output msg_end
 );
 
@@ -24,6 +24,19 @@ wire ITS_MSG_END_CHECK_TIME = (SIPO_TIME == MSG_END_CHECK_TIME);
 wire [6:0] SAMPLE_TIME;
 wire [3:0] FRAME_IDX;
 
+assign q = (`ML_FST == `LSB) ? FRAME_REG[7:0] : FRAME_REG[8:1];
+
+`define PARITY_BIT_H FRAME_REG[8]
+`define PARITY_BIT_L FRAME_REG[0]
+
+wire PARITY_BIT_SRC = (`ML_FST == `LSB) ? `PARITY_BIT_H : `PARITY_BIT_L;
+wire PARITY_BIT_VAL = (`ML_FST == `LSB) ? ~(FRAME_REG[7]^FRAME_REG[6]^FRAME_REG[5]^FRAME_REG[4]^FRAME_REG[3]^FRAME_REG[2]^FRAME_REG[1]^FRAME_REG[0]) :
+												      ~(FRAME_REG[8]^FRAME_REG[7]^FRAME_REG[6]^FRAME_REG[5]^FRAME_REG[4]^FRAME_REG[3]^FRAME_REG[2]^FRAME_REG[1]);
+
+wire PARITY_BIT_CORRECT = (PARITY_BIT_SRC == PARITY_BIT_VAL);														
+assign q_rdy = (SIPO_CONVERSION_IS_OVER & PARITY_BIT_CORRECT) ? ON : OFF; 
+assign err = (SIPO_CONVERSION_IS_OVER & ~PARITY_BIT_CORRECT) ? ON : OFF; 										
+									
 sipo_timer SIPO_TIM (
 	.clk(clk),
 	.clk_en(clk_en),
@@ -84,57 +97,59 @@ begin
 			endcase
 		end
 end
+
+//assign q_rdy = SIPO_CONVERSION_IS_OVER ?
 		
-always@(posedge clk or negedge n_rst)
-begin
-	if(n_rst == 0)
-		begin
-			q = 0;
-			q_rdy = OFF;
-			err = OFF;
-		end
-	else if (clk_en == ON)
-		begin
-			if(SIPO_CONVERSION_IS_OVER)
-				begin
-					if(`ML_FST == `LSB)
-						begin
-							if(FRAME_REG[8] == ~(FRAME_REG[7]^FRAME_REG[6]^FRAME_REG[5]^FRAME_REG[4]^FRAME_REG[3]^FRAME_REG[2]^FRAME_REG[1]^FRAME_REG[0]))
-								begin
-									q = FRAME_REG[7:0];
-									q_rdy = ON;
-									err = OFF;
-								end
-							else	
-								begin
-									q = 0;
-									q_rdy = OFF;
-									err = ON;
-								end
-						end
-					else 
-						begin
-							if(FRAME_REG[0] == ~(FRAME_REG[8]^FRAME_REG[7]^FRAME_REG[6]^FRAME_REG[5]^FRAME_REG[4]^FRAME_REG[3]^FRAME_REG[2]^FRAME_REG[1]))
-								begin
-									q = FRAME_REG[8:1];
-									q_rdy = ON;
-									err = OFF;
-								end
-							else	
-								begin
-									q = 0;
-									q_rdy = OFF;
-									err = ON;
-								end
-						end
-				end
-			else	
-				begin
-					q_rdy = OFF;
-					err = OFF;
-				end
-		end
-end
+//always@(posedge clk or negedge n_rst)
+//begin
+//	if(n_rst == 0)
+//		begin
+//		//	q = 0;
+//			q_rdy = OFF;
+//			err = OFF;
+//		end
+//	else if (clk_en == ON)
+//		begin
+//			if(SIPO_CONVERSION_IS_OVER)
+//				begin
+//					if(`ML_FST == `LSB)
+//						begin
+//							if(FRAME_REG[8] == ~(FRAME_REG[7]^FRAME_REG[6]^FRAME_REG[5]^FRAME_REG[4]^FRAME_REG[3]^FRAME_REG[2]^FRAME_REG[1]^FRAME_REG[0]))
+//								begin
+//	//								q = FRAME_REG[7:0];
+//									q_rdy = ON;
+//									err = OFF;
+//								end
+//							else	
+//								begin
+//									//q = 0;
+//									q_rdy = OFF;
+//									err = ON;
+//								end
+//						end
+//					else 
+//						begin
+//							if(FRAME_REG[0] == ~(FRAME_REG[8]^FRAME_REG[7]^FRAME_REG[6]^FRAME_REG[5]^FRAME_REG[4]^FRAME_REG[3]^FRAME_REG[2]^FRAME_REG[1]))
+//								begin
+////									q = FRAME_REG[8:1];
+//									q_rdy = ON;
+//									err = OFF;
+//								end
+//							else	
+//								begin
+//									//q = 0;
+//									q_rdy = OFF;
+//									err = ON;
+//								end
+//						end
+//				end
+//			else	
+//				begin
+//					q_rdy = OFF;
+//					err = OFF;
+//				end
+//		end
+//end
 
 reg FRAME_RX_EN;	
 always@(posedge clk or negedge n_rst)
