@@ -2,6 +2,7 @@
 
 `define CLK_FREQ 		48000000
 `define RST_TIME_SEC	4 
+`define BTC_SEND_DELAY_TICKS (4800 - 1) // 100 мкс
 
 /******************** Частота передачи ********************/ 
 `define TX_DIV_FACTOR (48 - 1)    //   1 МБит/с

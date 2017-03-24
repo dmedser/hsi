@@ -1,6 +1,6 @@
 module crc_sender (
 	input clk,
-	input n_rst,
+	input crc_tx_en,
 	input [15:0] crc,
 	input crc_rdy,
 	input cd_busy,
@@ -13,9 +13,9 @@ module crc_sender (
 `define L crc_reg[7:0]
 
 reg [1:0] byte_cntr;
-always@(posedge cd_busy or negedge n_rst)
+always@(posedge cd_busy or negedge crc_tx_en)
 begin
-	if(n_rst == 0)
+	if(crc_tx_en == 0)
 		byte_cntr = 0;
 	else
 		byte_cntr = byte_cntr + 1;	
@@ -34,7 +34,7 @@ wire [7:0] MASK_Q_CRC_L = (byte_cntr == 1) ? 8'hFF : 0;
 assign q = MASK_Q_CRC_H & `H |
 			  MASK_Q_CRC_L & `L;
 
-assign q_rdy = (~cd_busy) & n_rst;
+assign q_rdy = (~cd_busy) & crc_tx_en;
 
 wire ITS_LAST_BYTE = (byte_cntr == 2) & cd_busy;
 

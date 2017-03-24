@@ -300,12 +300,12 @@ hsi_master HSI_MSTR(
 	
 	.sdreq_en(),
 	
-	.tm_en(),
+	.tm_en(1),
 	.tm(TM),
 	.pre_tm(PRE_TM),
 	
-	.btc_en(),
-	.btc(),
+	.btc_en(1),
+	.btc(40'hABCDEF1122),
 	
 	.ccw(),
 	.ccw_tx_rdy(),
