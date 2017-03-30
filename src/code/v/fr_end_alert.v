@@ -1,6 +1,6 @@
 module frame_end_alert (
 	input clk,
-	input [4:0] me_ctrls,
+	input [2:0] me_ctrls,
 	input me_crc,
 	output [4:0] fe 
 );
@@ -14,11 +14,19 @@ reg[4:0] tmp;
 always@(posedge clk)
 begin
 	if(me_crc)
-		tmp[0] = 0;
+		begin
+			tmp[0] = 0;
+			tmp[2] = 0;
+			tmp[3] = 0;
+		end
 	else 
 		begin
 			if(me_ctrls[0])
-				tmp[0] = 1;	
+				begin
+					tmp[0] = 1;
+					tmp[2] = 1;
+					tmp[3] = 1;
+				end
 		end
 end
 
@@ -36,33 +44,12 @@ end
 always@(posedge clk)
 begin
 	if(me_crc)
-		tmp[2] = 0;
-	else 
-		begin
-			if(me_ctrls[2])
-				tmp[2] = 1;	
-		end
-end
-
-always@(posedge clk)
-begin
-	if(me_crc)
-		tmp[3] = 0;
-	else 
-		begin
-			if(me_ctrls[3])
-				tmp[3] = 1;	
-		end
-end
-
-always@(posedge clk)
-begin
-	if(me_crc)
 		tmp[4] = 0;
 	else 
 		begin
-			if(me_ctrls[4])
+			if(me_ctrls[2])
 				tmp[4] = 1;	
 		end
 end
+
 endmodule 

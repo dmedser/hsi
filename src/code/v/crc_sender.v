@@ -34,7 +34,7 @@ wire [7:0] MASK_Q_CRC_L = (byte_cntr == 1) ? 8'hFF : 0;
 assign q = MASK_Q_CRC_H & `H |
 			  MASK_Q_CRC_L & `L;
 
-assign q_rdy = (~cd_busy) & crc_tx_en;
+assign q_rdy = (~cd_busy) & crc_tx_en & ~msg_end;
 
 wire ITS_LAST_BYTE = (byte_cntr == 2) & cd_busy;
 

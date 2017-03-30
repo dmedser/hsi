@@ -18,8 +18,8 @@ begin
 		byte_cntr = byte_cntr + 1;	
 end
 
-wire [7:0] MASK_Q_MARKER = (byte_cntr == 0) ? 8'hFF : 0;
-wire [7:0] MASK_Q_FLAG   = (byte_cntr == 1) ? 8'hFF : 0;
+wire [7:0] MASK_Q_MARKER = (byte_cntr == 0) ? 8'hFF : 0,
+			  MASK_Q_FLAG   = (byte_cntr == 1) ? 8'hFF : 0;
 
 assign q = MASK_Q_MARKER & `MARKER_MASTER |
 			  MASK_Q_FLAG   & `FLAG_TIME_MARK;

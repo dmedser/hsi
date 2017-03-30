@@ -298,7 +298,7 @@ hsi_master HSI_MSTR(
 	.clk(CLK_48),
 	.n_rst(N_RST),
 	
-	.sdreq_en(),
+	.sdreq_en(1),
 	
 	.tm_en(1),
 	.tm(TM),
@@ -307,9 +307,10 @@ hsi_master HSI_MSTR(
 	.btc_en(1),
 	.btc(40'hABCDEF1122),
 	
-	.ccw(),
-	.ccw_tx_rdy(),
-	.ccw_rx_rdy(),
+	.ccw_d(CCW_D),
+	.ccw_clk(CCW_CLK),
+	.ccw_tx_rdy(CCW_TX_RDY),
+	.ccw_tx_en(CCW_TX_EN),
 	
 	.tx_src(),
 	.rx_src(),
@@ -327,6 +328,17 @@ tm_gen TM_GEN(
 	.n_rst(N_RST),
 	.tm(TM),
 	.pre_tm(PRE_TM)
+);
+wire [7:0] CCW_D;
+
+ccw_gen CCW_GEN (
+	.clk(CLK_48),
+	.n_rst(N_RST),
+	.pre_tm(0),
+	.ccw_d(CCW_D),
+	.ccw_clk(CCW_CLK),
+	.ccw_tx_rdy(CCW_TX_RDY),
+	.ccw_tx_en(CCW_TX_EN)
 );
 
 
