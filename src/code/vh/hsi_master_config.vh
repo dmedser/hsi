@@ -24,7 +24,7 @@
 `define Hz_1  1
 `define Hz_10 10
 
-`define TM_FREQ 10
+`define TM_FREQ 1
 
 `define LSB 0
 `define MSB 1

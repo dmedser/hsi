@@ -5,6 +5,7 @@ module ccw_ctrl (
 	input tx_rdy,
 	output tx_en,
 	input cd_busy,
+	input byte_hold,
 	output [7:0] q,
 	output q_rdy,
 	output msg_end
@@ -56,7 +57,7 @@ begin
 		end
 end
 
-wire SERVICE_DATA_IS_SENT = ~cd_busy & (byte_cntr == 4);
+wire SERVICE_DATA_IS_SENT = ~cd_busy & (byte_cntr == 3);
 reg[2:0] byte_cntr;
 always@(posedge cd_busy or negedge SENDING_SERVICE_DATA)
 begin
@@ -78,7 +79,7 @@ assign q = MASK_Q_MARKER & `MARKER_MASTER  |
 			  MASK_Q_N2 & ccw_d |
 			  MASK_Q_PL & ccw_d;
 			  
-assign q_rdy = ~cd_busy & ~CONTROL & ~SERVICE_DATA_IS_SENT;
+assign q_rdy = SENDING_SERVICE_DATA ? ~cd_busy & ~SERVICE_DATA_IS_SENT : byte_hold;
 assign msg_end = ~tx_rdy & SENDING_PAYLOAD;
 
 endmodule 

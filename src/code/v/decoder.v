@@ -98,59 +98,6 @@ begin
 		end
 end
 
-//assign q_rdy = SIPO_CONVERSION_IS_OVER ?
-		
-//always@(posedge clk or negedge n_rst)
-//begin
-//	if(n_rst == 0)
-//		begin
-//		//	q = 0;
-//			q_rdy = OFF;
-//			err = OFF;
-//		end
-//	else if (clk_en == ON)
-//		begin
-//			if(SIPO_CONVERSION_IS_OVER)
-//				begin
-//					if(`ML_FST == `LSB)
-//						begin
-//							if(FRAME_REG[8] == ~(FRAME_REG[7]^FRAME_REG[6]^FRAME_REG[5]^FRAME_REG[4]^FRAME_REG[3]^FRAME_REG[2]^FRAME_REG[1]^FRAME_REG[0]))
-//								begin
-//	//								q = FRAME_REG[7:0];
-//									q_rdy = ON;
-//									err = OFF;
-//								end
-//							else	
-//								begin
-//									//q = 0;
-//									q_rdy = OFF;
-//									err = ON;
-//								end
-//						end
-//					else 
-//						begin
-//							if(FRAME_REG[0] == ~(FRAME_REG[8]^FRAME_REG[7]^FRAME_REG[6]^FRAME_REG[5]^FRAME_REG[4]^FRAME_REG[3]^FRAME_REG[2]^FRAME_REG[1]))
-//								begin
-////									q = FRAME_REG[8:1];
-//									q_rdy = ON;
-//									err = OFF;
-//								end
-//							else	
-//								begin
-//									//q = 0;
-//									q_rdy = OFF;
-//									err = ON;
-//								end
-//						end
-//				end
-//			else	
-//				begin
-//					q_rdy = OFF;
-//					err = OFF;
-//				end
-//		end
-//end
-
 reg FRAME_RX_EN;	
 always@(posedge clk or negedge n_rst)
 begin

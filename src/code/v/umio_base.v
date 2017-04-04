@@ -178,12 +178,8 @@ assign TP[6:1] = 0;
 /*********** FTDI ***********/
 
 assign FUSB_nRES = 1;
-assign FU_D[7:0] = 8'hzz;
 assign FODD		  = 1;
-assign FOE		  = 1;
 assign FSIWU	  = 1;
-assign FWR		  = 1;
-assign FRD		  = 1;
 
 /************ I2C ************/
 
@@ -308,8 +304,9 @@ hsi_master HSI_MSTR(
 	.btc(40'hABCDEF1122),
 	
 	.ccw_d(CCW_D),
-	.ccw_clk(CCW_CLK),
-	.ccw_tx_rdy(CCW_TX_RDY),
+	.cd_busy(CD_BUSY),
+	.byte_hold(BYTE_HOLD),
+	.ccw_tx_rdy(~FRXF | BYTE_HOLD),
 	.ccw_tx_en(CCW_TX_EN),
 	
 	.tx_src(),
@@ -331,15 +328,21 @@ tm_gen TM_GEN(
 );
 wire [7:0] CCW_D;
 
-ccw_gen CCW_GEN (
-	.clk(CLK_48),
-	.n_rst(N_RST),
-	.pre_tm(0),
-	.ccw_d(CCW_D),
-	.ccw_clk(CCW_CLK),
-	.ccw_tx_rdy(CCW_TX_RDY),
-	.ccw_tx_en(CCW_TX_EN)
-);
 
+ftdi_ctrl FTDI_CTRL (
+	.clk(FCLK_OUT),
+	.n_rst(N_RST),
+	.oe(FOE),
+	.rxf(FRXF),
+	.rd_en(CCW_TX_EN),
+	.cd_busy(CD_BUSY),
+	.byte_hold(BYTE_HOLD),
+	.rd(FRD),
+	.txe(FTXE),
+	.wr(FWR),
+	.dq(FU_D),
+	.d(),
+	.q(CCW_D)
+);
 
 endmodule
