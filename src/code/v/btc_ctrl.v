@@ -1,11 +1,10 @@
 module btc_ctrl (
 	input clk, 
 	input n_rst,
-	input start_delay,
+	input btc_tx_rdy,
 	input btc_tx_en,
 	input cd_busy,
 	input [39:0] btc,
-	output btc_tx_rdy,
 	output [7:0]q,
 	output q_rdy,
 	output msg_end
@@ -13,31 +12,18 @@ module btc_ctrl (
 
 `include "src/code/vh/msg_defs.vh"	
 
-delay DELAY (
+signal_trimmer S_TRIM (
 	.clk(clk),
-	.n_rst(n_rst),
-	.en(delay_en),
-	.btc_tx_rdy(btc_tx_rdy)
+	.s(btc_tx_rdy),
+	.trim_s(BTC_TX_RDY)
 );
-
-
-reg delay_en;
-always@(posedge clk or negedge n_rst)
-begin
-	if(n_rst == 0)
-		delay_en = 0;
-	else if(start_delay)
-		delay_en = 1;
-	else if(btc_tx_rdy)
-		delay_en = 0;
-end 
 
 reg[39:0] btc_reg;
 always@(posedge clk or negedge n_rst)
 begin
 	if(n_rst == 0)
 		btc_reg = 0;
-	else if(btc_tx_rdy)
+	else if(BTC_TX_RDY)
 		btc_reg = btc;
 end
 
@@ -83,27 +69,4 @@ begin
 		tmp = 0;
 end
 assign msg_end = tmp & ~ITS_LAST_BYTE; 
-endmodule 
-
-
-module delay (
-	input clk,
-	input n_rst,
-	input en,
-	output btc_tx_rdy
-);
-reg[12:0] delay;
-always@(posedge clk or negedge n_rst)
-begin
-	if(n_rst == 0)
-		delay = 0;
-	else if(en)
-		begin
-			if(btc_tx_rdy)
-				delay = 0;
-			else
-				delay = delay + 1;
-		end
-end
-assign btc_tx_rdy = (delay == `BTC_SEND_DELAY_TICKS);
 endmodule 

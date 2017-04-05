@@ -3,7 +3,7 @@ module reset_controller (
 	output reg n_rst
 );
 
-`include "src/code/vh/hsi_master_config.vh"		
+`include "src/code/vh/hsi_config.vh"		
 
 reg[27:0] ticks;
 

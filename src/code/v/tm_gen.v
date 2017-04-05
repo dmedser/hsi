@@ -1,11 +1,14 @@
 module tm_gen (
 	input clk,
 	input n_rst,
-	output tm,
+	output reg tm_tx_rdy,
+	input tm_tx_ack,
+	output reg sr_tx_rdy,
+	input sr_tx_ack,
 	output pre_tm
 );
 
-`include "src/code/vh/hsi_master_config.vh"	 
+`include "src/code/vh/hsi_config.vh"	 
 
 /*
  * +-------------------+------------------------+
@@ -29,51 +32,94 @@ module tm_gen (
  *
  */
  
- tm_cntr TM_CNTR (
-	.clk(clk), 
+tim_100_ms TIM_100_MS (
+	.clk(clk),
 	.n_rst(n_rst),
-	.tm(tm),
+	.l00_ms_is_left(l00_MS_IS_LEFT),
+	.pre_tm_en(PRE_TM_EN),
+	.tm(TM),
+	.pre_tm(PRE_TM)
+);
+
+assign pre_tm = PRE_TM;
+
+tm_alert TM_ALERT (
+	.clk(clk),
+	.n_rst(n_rst),
+	.l00_ms_is_left(l00_MS_IS_LEFT),
+	.tm(TM),
 	.pre_tm_en(PRE_TM_EN)
- );
- 
-parameter CCW_TX_TIME = (`TX_FREQ == `Mbps_1) ? ((`CLK_FREQ/1000000)*748) : ((`CLK_FREQ/1000000)*5984);
- 
-parameter PRE_TM_TIME_FOR_TM_1HZ  = `CLK_FREQ - CCW_TX_TIME - 1,
-			 PRE_TM_TIME_FOR_TM_10HZ = ((`CLK_FREQ) / 10) - CCW_TX_TIME - 1;
-			 
-parameter PRE_TM_TIME = (`TM_FREQ == `Hz_1) ? PRE_TM_TIME_FOR_TM_1HZ : PRE_TM_TIME_FOR_TM_10HZ;
+);
 
-assign pre_tm = PRE_TM_EN ? ((ticks >= (PRE_TM_TIME - 2 /*** 3 чтобы УКС передавалась вплоть до метки времени ***/)) & ~tm) : 0;
-
-parameter TICKS_IN_1_SEC = ((`CLK_FREQ) - 1), 
-			 TICKS_IN_100_MSEC = (((`CLK_FREQ) / 10) - 1);
-			 
-reg[25:0] ticks; 			 
-assign tm = (`TM_FREQ == `Hz_1) ? (ticks == TICKS_IN_1_SEC) : (ticks == TICKS_IN_100_MSEC); 
 always@(posedge clk or negedge n_rst)
 begin
 	if(n_rst == 0)
-		ticks = 0;
-	else 
-		begin
-			if(tm)
-				ticks = 0;
-			else
-				ticks = ticks + 1;
-		end
+		tm_tx_rdy = 0;
+	else if(TM)
+		tm_tx_rdy = 1;
+	else if(tm_tx_ack)
+		tm_tx_rdy = 0;
+end
+
+always@(posedge clk or negedge n_rst)
+begin
+	if(n_rst == 0)
+		sr_tx_rdy = 0;
+	else if(l00_MS_IS_LEFT)
+		sr_tx_rdy = 1;
+	else if(sr_tx_ack)
+		sr_tx_rdy = 0;
 end
 
 endmodule
 
-module tm_cntr (
+
+module tim_100_ms (
 	input clk,
 	input n_rst,
+	output l00_ms_is_left,
+	input pre_tm_en,
 	input tm,
+	output pre_tm
+);
+parameter TICKS_IN_100_MS = (((`CLK_FREQ) / 10) - 1);
+assign l00_ms_is_left = (ticks == TICKS_IN_100_MS);
+reg[22:0] ticks;
+always@(posedge clk or negedge n_rst)
+begin
+	if(n_rst == 0)
+		ticks = 0;
+	else if(l00_ms_is_left)
+		ticks = 0;
+	else 
+		ticks = ticks + 1;
+end
+parameter CCW_TX_TIME = (`M_TX_FREQ == `Mbps_1) ? ((`CLK_FREQ/1000000)*748) : ((`CLK_FREQ/1000000)*5984),
+			 PRE_TM_TIME = ((`CLK_FREQ) / 10) - CCW_TX_TIME - 1;
+assign pre_tm = pre_tm_en ? ((ticks >= (PRE_TM_TIME - 2)) & ~tm) : 0;
+endmodule
+
+
+module tm_alert (
+	input clk,
+	input n_rst,
+	input l00_ms_is_left,
+	output tm,
 	output pre_tm_en
-); 
-
-assign pre_tm_en = (`TM_FREQ == `Hz_1) ? 1 : tmp;
-
+);
+assign tm = (`TM_FREQ == `Hz_1) ? l0th_tm : l00_ms_is_left;
+wire l0th_tm = (tm_cntr == 9) & l00_ms_is_left;
+reg[3:0] tm_cntr;
+always@(posedge clk or negedge n_rst)
+begin
+	if(n_rst == 0)
+		tm_cntr = 0;
+	else if(l0th_tm)
+		tm_cntr = 0;
+	else if(l00_ms_is_left)
+		tm_cntr = tm_cntr + 1;
+end
+assign pre_tm_en = (`TM_FREQ == `Hz_1) ? tmp : 1;
 reg tmp;
 always@(posedge clk or negedge n_rst)
 begin
@@ -81,19 +127,7 @@ begin
 		tmp = 0;
 	else if(tm_cntr == 9)
 		tmp = 1;
-	else if(tm_10th)
+	else if(l0th_tm)
 		tmp = 0;
 end
-
-reg[3:0] tm_cntr;
-wire tm_10th = (tm_cntr == 10);
-always@(posedge clk or negedge n_rst)
-begin
-	if(n_rst == 0)
-		tm_cntr = 0;
-	else if(tm_10th)
-		tm_cntr = 0;
-	else if(tm)
-		tm_cntr = tm_cntr + 1;
-end
-endmodule 
+endmodule

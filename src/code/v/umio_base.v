@@ -295,9 +295,12 @@ hsi_master HSI_MSTR(
 	.n_rst(N_RST),
 	
 	.sdreq_en(1),
+	.sr_tx_rdy(SR_TX_RDY),
+	.sr_tx_ack(SR_TX_ACK),
 	
-	.tm_en(1),
-	.tm(TM),
+	.tm_tx_en(1),
+	.tm_tx_rdy(TM_TX_RDY),
+	.tm_tx_ack(TM_TX_ACK),
 	.pre_tm(PRE_TM),
 	
 	.btc_en(1),
@@ -309,23 +312,28 @@ hsi_master HSI_MSTR(
 	.ccw_tx_rdy(~FRXF | BYTE_HOLD),
 	.ccw_tx_en(CCW_TX_EN),
 	
-	.tx_src(),
-	.rx_src(),
+	.com_src(1),
+	.dat_src(1),
 	
 	.q(),
 
-	.com1(),
-	.com2(),
-	.dat1(),
-	.dat2()
+	.com1(COM1),
+	.com2(COM2),
+	.dat1(DAT1),
+	.dat2(DAT2)
 );
+
 
 tm_gen TM_GEN(
 	.clk(CLK_48),
 	.n_rst(N_RST),
-	.tm(TM),
+	.tm_tx_rdy(TM_TX_RDY),
+	.tm_tx_ack(TM_TX_ACK),
+	.sr_tx_rdy(SR_TX_RDY),
+	.sr_tx_ack(SR_TX_ACK),
 	.pre_tm(PRE_TM)
 );
+
 wire [7:0] CCW_D;
 
 
@@ -343,6 +351,22 @@ ftdi_ctrl FTDI_CTRL (
 	.dq(FU_D),
 	.d(),
 	.q(CCW_D)
+);
+
+
+hsi_slave  HSI_SLV (
+	.clk(CLK_48),
+	.n_rst(N_RST),
+	.sd_busy(),
+	.sr(),
+	
+	.com1(COM1),
+	.com2(COM2),
+	
+	.dat1(DAT1),
+	.dat2(DAT2),
+	
+	.q()
 );
 
 endmodule

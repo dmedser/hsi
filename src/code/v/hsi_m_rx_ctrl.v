@@ -1,11 +1,12 @@
-module hsi_rx_ctrl (
+module hsi_m_rx_ctrl (
 	input clk,
 	input clk_en,
 	input n_rst,
 	input sdreq_en,
 	input dat_src,
 	
-	output reg [7:0] q,
+	output [7:0] q,
+	output q_rdy,
 
 	input dat1,
 	input dat2
@@ -18,8 +19,8 @@ decoder DC (
 	.n_rst(n_rst),
 	.clk_en(clk_en),
 	.d(DC_D),
-	.q(),
-	.q_rdy(),
+	.q(q),
+	.q_rdy(q_rdy),
 	.err(),
 	.msg_end()
 );

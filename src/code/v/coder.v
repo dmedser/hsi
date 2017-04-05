@@ -8,7 +8,7 @@ module coder (
 	output q
 ); 
 
-`include "src/code/vh/hsi_master_config.vh"		
+`include "src/code/vh/hsi_config.vh"		
 
 assign busy = (cd_state == CD_STATE_PISO_CONV);		 
 

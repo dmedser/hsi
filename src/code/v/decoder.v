@@ -9,7 +9,7 @@ module decoder (
 	output msg_end
 );
 
-`include "src/code/vh/hsi_master_config.vh"	
+`include "src/code/vh/hsi_config.vh"	
 	
 parameter OFF = 0,
 			 ON  = 1,

@@ -1,11 +1,17 @@
-module hsi_tx_ctrl (
+module hsi_m_tx_ctrl (
 	input clk,
 	input clk_en,
 	input n_rst,
+	
 	input sdreq_en,
-	input tm_en,
-	input tm,
+	input sr_tx_rdy,
+	output sr_tx_ack,
+	
+	input tm_tx_en,
+	input tm_tx_rdy,
+	output tm_tx_ack,
 	input pre_tm,
+	
 	input btc_en,
 	input [39:0] btc,
 	input [7:0] ccw_d,
@@ -19,8 +25,10 @@ module hsi_tx_ctrl (
 	output com2
 );
 
-`include "src/code/vh/hsi_master_config.vh"
+`include "src/code/vh/hsi_config.vh"
 
+assign tm_tx_ack = SENDING_TM;
+assign sr_tx_ack = SENDING_SR;
 
 assign com1 = CD_Q & com_src;
 assign com2 = CD_Q & (~com_src);
@@ -55,19 +63,19 @@ wire MSG_END_TM,
 	  MSG_END_CCW;
 	  
 	  
-wire TM_TX_RDY_MASKED  = tm_en & tm,
+wire TM_TX_RDY_MASKED  = tm_tx_en & tm_tx_rdy,
 	  BTC_TX_RDY_MASKED = btc_en & BTC_TX_RDY,
-	  CCW_RX_RDY        = ~pre_tm & ccw_tx_rdy, // ccw_tx_rdy чтобы УКС передавалась во время pre_tm
-	  TIME4SR_MASKED    = TIME4SR & sdreq_en;
+	  SR_TX_RDY_MASKED  = sdreq_en & sr_tx_rdy,
+	  CCW_RX_RDY        = ~pre_tm & ccw_tx_rdy & ~DELAY_100_US; // ccw_tx_rdy чтобы УКС передавалась во время pre_tm
 	  
-wire BTC_START_DELAY_MASKED = BTC_START_DELAY & btc_en; 	  
 
 wire SENDING_TM  = (common_state == COM_STATE_SENDING_TM),
 	  SENDING_BTC = (common_state == COM_STATE_SENDING_BTC),
 	  SENDING_SR  = (common_state == COM_STATE_SENDING_SR),
 	  SENDING_DPR = (common_state == COM_STATE_SENDING_DPR),
 	  SENDING_CCW = (common_state == COM_STATE_SENDING_CCW),
-	  SENDING_CRC = (common_state == COM_STATE_SENDING_CRC); 
+	  SENDING_CRC = (common_state == COM_STATE_SENDING_CRC),
+	  DELAY_100_US = (common_state == COM_STATE_DELAY_100_US); 
 	  
 coder CD (
 	.clk(clk),
@@ -125,17 +133,23 @@ crc16_citt_calc CRC16_CITT_CALC (
 	.crc(CRC16)
 );
 
-tm_fe_cntr TM_FE_CNTR (
+tm_cntr TM_CNTR (
 	.clk(clk),
 	.n_rst(n_rst),
-	.tm_fr_end(FRAME_END_TM),
-	.btc_start_delay(BTC_START_DELAY)
+	.tm_msg_end(MSG_END_TM),
+	.sending_btc(SENDING_BTC),
+	.btc_tx_rdy(BTC_TX_RDY)
+);
+
+tim_100_us TIM_100_US (
+	.clk(clk),
+	.n_rst(n_rst & DELAY_100_US),
+	.l00_us_is_left(l00_US_IS_LEFT)
 );
 
 btc_ctrl BTC_CTRL (
 	.clk(clk),
 	.n_rst(n_rst),
-	.start_delay(BTC_START_DELAY_MASKED),
 	.btc(btc),
 	.btc_tx_rdy(BTC_TX_RDY),
 	.btc_tx_en(SENDING_BTC),
@@ -159,19 +173,6 @@ ccw_ctrl CCW_CTRL (
 	.msg_end(MSG_END_CCW)
 );
 
-sr_timer SR_TIMER (
-	.clk(clk),
-	.n_rst(n_rst),
-	.time4sr(TIME4SR)
-);
-
-frame_end_alert FE_ALERT(
-	.clk(clk),
-	.me_ctrls(MSG_END_CTRLS),
-	.me_crc(MSG_END_CRC),
-	.fe(FRAME_END) 
-);
-
 connector CONNECTOR (
 	.common_state(COMMON_STATE_CONNECTOR),
 	.d_rdy_src(D_RDY_SRC),
@@ -179,18 +180,6 @@ connector CONNECTOR (
 	.d_src(D_SRC),
 	.d_dst(TX_D)
 );
-
-wire[4:0] FRAME_END;
-wire FRAME_END_TM  = FRAME_END[0],
-	  FRAME_END_BTC = FRAME_END[1],
-	  FRAME_END_SR  = FRAME_END[2],
-	  FRAME_END_DPR = FRAME_END[3],
-	  FRAME_END_CCW = FRAME_END[4]; 
-
-wire[2:0] MSG_END_CTRLS;
-assign MSG_END_CTRLS[0] = MSG_END_TM_SR_DPR;
-assign MSG_END_CTRLS[1] = MSG_END_BTC;
-assign MSG_END_CTRLS[2] = MSG_END_CCW;
 
 wire[5:0] COMMON_STATE_CONNECTOR;
 assign COMMON_STATE_CONNECTOR[0] = SENDING_TM;
@@ -219,7 +208,8 @@ parameter COM_STATE_CTRL = 0,
 			 COM_STATE_SENDING_SR  = 3, 		 
 			 COM_STATE_SENDING_DPR = 4, 
 			 COM_STATE_SENDING_CCW = 5, 				 
-			 COM_STATE_SENDING_CRC = 6;				 
+			 COM_STATE_SENDING_CRC = 6,
+			 COM_STATE_DELAY_100_US = 7;
 
 always@(posedge clk or negedge n_rst)
 begin
@@ -236,7 +226,7 @@ begin
 						common_state = COM_STATE_SENDING_TM;
 					else if(BTC_TX_RDY_MASKED)
 						common_state = COM_STATE_SENDING_BTC;
-					else if (TIME4SR_MASKED)
+					else if(SR_TX_RDY_MASKED)
 						common_state = COM_STATE_SENDING_SR;
 					else if(CCW_RX_RDY)
 						common_state = COM_STATE_SENDING_CCW;
@@ -279,10 +269,17 @@ begin
 			COM_STATE_SENDING_CRC:	
 				begin
 					if(MSG_END_CRC)
-						common_state = COM_STATE_CTRL;
+						common_state = COM_STATE_DELAY_100_US;
 					else
 						common_state = COM_STATE_SENDING_CRC;
 				end
+			COM_STATE_DELAY_100_US:	
+				begin
+					if(l00_US_IS_LEFT)
+						common_state = COM_STATE_CTRL;
+					else
+						common_state = COM_STATE_DELAY_100_US;
+				end	
 			default:
 				begin
 				
@@ -291,6 +288,7 @@ begin
 		end
 end
 endmodule
+
 
 module signal_trimmer (
 	input clk,
@@ -308,21 +306,52 @@ end
 assign trim_s = s & ~sync_s;
 endmodule
 
-module tm_fe_cntr (
+
+module tim_100_us(
 	input clk,
 	input n_rst,
-	input tm_fr_end,
-	output btc_start_delay
+	output l00_us_is_left
 );
-reg[3:0] tm_fe_cntr;
-assign btc_start_delay = (`TM_FREQ == `Hz_1) ? tm_fr_end : (tm_fe_cntr == `TM_FREQ);
+assign l00_us_is_left = (ticks == (((`CLK_FREQ) / 1000000) * 100) - 1);
+reg[12:0] ticks;
 always@(posedge clk or negedge n_rst)
 begin
 	if(n_rst == 0)
-		tm_fe_cntr = 0;
-	else if(btc_start_delay)
-		tm_fe_cntr = 0;
-	else if(tm_fr_end)
-		tm_fe_cntr = tm_fe_cntr + 1;
+		ticks = 0;
+	else 
+		ticks = ticks + 1;
+end
+endmodule
+
+
+module tm_cntr (
+	input clk,
+	input n_rst,
+	input tm_msg_end,
+	output reg btc_tx_rdy,
+	input sending_btc
+);
+
+wire hz_mark = (`TM_FREQ == `Hz_1) ? tm_msg_end : l0th_tm_msg_end;
+
+wire l0th_tm_msg_end = (tm_me_cntr == 10);
+reg[3:0] tm_me_cntr;
+always@(posedge clk or negedge n_rst)
+begin
+	if(n_rst == 0)
+		tm_me_cntr = 0;
+	else if(sending_btc)
+		tm_me_cntr = 0;
+	else if(tm_msg_end)
+		tm_me_cntr = tm_me_cntr + 1;
 end 
+always@(posedge clk or negedge n_rst)
+begin
+	if(n_rst == 0)
+		btc_tx_rdy = 0;
+	else if(hz_mark)
+		btc_tx_rdy = 1;
+	else if(sending_btc)
+		btc_tx_rdy = 0;
+end
 endmodule 
