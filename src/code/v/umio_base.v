@@ -307,9 +307,9 @@ hsi_master HSI_MSTR(
 	.btc(40'hABCDEF1122),
 	
 	.ccw_d(CCW_D),
-	.cd_busy(CD_BUSY),
-	.byte_hold(BYTE_HOLD),
-	.ccw_tx_rdy(~FRXF | BYTE_HOLD),
+	.ccw_d_sending(CCW_D_SENDING),
+	.ccw_d_rdy(CCW_D_RDY),
+	.ccw_tx_rdy(~FRXF | CCW_D_RDY),
 	.ccw_tx_en(CCW_TX_EN),
 	
 	.com_src(1),
@@ -343,8 +343,8 @@ ftdi_ctrl FTDI_CTRL (
 	.oe(FOE),
 	.rxf(FRXF),
 	.rd_en(CCW_TX_EN),
-	.cd_busy(CD_BUSY),
-	.byte_hold(BYTE_HOLD),
+	.ccw_d_sending(CCW_D_SENDING),
+	.ccw_d_rdy(CCW_D_RDY),
 	.rd(FRD),
 	.txe(FTXE),
 	.wr(FWR),

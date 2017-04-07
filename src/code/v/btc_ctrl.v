@@ -12,18 +12,24 @@ module btc_ctrl (
 
 `include "src/code/vh/msg_defs.vh"	
 
-signal_trimmer S_TRIM (
-	.clk(clk),
-	.s(btc_tx_rdy),
-	.trim_s(BTC_TX_RDY)
-);
+reg tmp2;
+always@(posedge clk or negedge n_rst)
+begin
+	if(n_rst == 0)
+		tmp2 = 0;
+	else if(btc_tx_rdy)
+		tmp2 = 1;
+	else
+		tmp2 = 0;
+end
+wire ITS_TIME_TO_LATCH_BTC = ~btc_tx_rdy & tmp2; 
 
 reg[39:0] btc_reg;
 always@(posedge clk or negedge n_rst)
 begin
 	if(n_rst == 0)
 		btc_reg = 0;
-	else if(BTC_TX_RDY)
+	else if(ITS_TIME_TO_LATCH_BTC)
 		btc_reg = btc;
 end
 

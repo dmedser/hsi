@@ -60,6 +60,7 @@ timing
 *.sopc_builder
 *.summary
 *.tcl
+*.stp
 *.txt # Explicitly add any text files used
 *~
 *example*

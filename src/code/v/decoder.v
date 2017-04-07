@@ -5,7 +5,7 @@ module decoder (
 	input d,
 	output  [7:0] q,
 	output  q_rdy,
-	output  err,
+	output  pb_err,
 	output msg_end
 );
 
@@ -35,7 +35,7 @@ wire PARITY_BIT_VAL = (`ML_FST == `LSB) ? ~(FRAME_REG[7]^FRAME_REG[6]^FRAME_REG[
 
 wire PARITY_BIT_CORRECT = (PARITY_BIT_SRC == PARITY_BIT_VAL);														
 assign q_rdy = (SIPO_CONVERSION_IS_OVER & PARITY_BIT_CORRECT) ? ON : OFF; 
-assign err = (SIPO_CONVERSION_IS_OVER & ~PARITY_BIT_CORRECT) ? ON : OFF; 										
+assign pb_err = (SIPO_CONVERSION_IS_OVER & ~PARITY_BIT_CORRECT) ? ON : OFF; 										
 									
 sipo_timer SIPO_TIM (
 	.clk(clk),

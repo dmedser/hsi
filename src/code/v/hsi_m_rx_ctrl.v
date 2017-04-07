@@ -21,7 +21,7 @@ decoder DC (
 	.d(DC_D),
 	.q(q),
 	.q_rdy(q_rdy),
-	.err(),
+	.pb_err(),
 	.msg_end()
 );
 

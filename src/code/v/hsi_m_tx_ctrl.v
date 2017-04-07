@@ -17,8 +17,8 @@ module hsi_m_tx_ctrl (
 	input [7:0] ccw_d,
 	input ccw_tx_rdy,
 	output ccw_tx_en,
-	output cd_busy,
-	input byte_hold,
+	output ccw_d_sending,
+	input ccw_d_rdy,
 	
 	input com_src,
 	output com1,
@@ -33,7 +33,7 @@ assign sr_tx_ack = SENDING_SR;
 assign com1 = CD_Q & com_src;
 assign com2 = CD_Q & (~com_src);
 
-assign cd_busy = CD_BUSY & ccw_tx_en & ccw_tx_rdy;
+assign ccw_d_sending = CD_BUSY & ccw_tx_en & ccw_tx_rdy;
 
 wire TX_D_RDY,
 	  TX_D_RDY_TRIMMED,
@@ -167,7 +167,7 @@ ccw_ctrl CCW_CTRL (
 	.tx_rdy(CCW_RX_RDY & SENDING_CCW),
 	.tx_en(ccw_tx_en),
 	.cd_busy(CD_BUSY),
-	.byte_hold(byte_hold),
+	.ccw_d_rdy(ccw_d_rdy),
 	.q(D_CCW),
 	.q_rdy(D_RDY_CCW),
 	.msg_end(MSG_END_CCW)

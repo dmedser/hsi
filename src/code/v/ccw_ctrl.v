@@ -5,7 +5,7 @@ module ccw_ctrl (
 	input tx_rdy,
 	output tx_en,
 	input cd_busy,
-	input byte_hold,
+	input ccw_d_rdy,
 	output [7:0] q,
 	output q_rdy,
 	output msg_end
@@ -79,7 +79,7 @@ assign q = MASK_Q_MARKER & `MARKER_MASTER  |
 			  MASK_Q_N2 & ccw_d |
 			  MASK_Q_PL & ccw_d;
 			  
-assign q_rdy = SENDING_SERVICE_DATA ? ~cd_busy & ~SERVICE_DATA_IS_SENT : byte_hold;
+assign q_rdy = SENDING_SERVICE_DATA ? ~cd_busy & ~SERVICE_DATA_IS_SENT : ccw_d_rdy;
 assign msg_end = ~tx_rdy & SENDING_PAYLOAD;
 
 endmodule 

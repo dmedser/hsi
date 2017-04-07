@@ -17,8 +17,8 @@ module hsi_master (
 	input [7:0] ccw_d,
 	input ccw_tx_rdy,
 	output ccw_tx_en,
-	output cd_busy,
-	input byte_hold,
+	output ccw_d_sending,
+	input ccw_d_rdy,
 	
 	input com_src,
 	input dat_src,
@@ -58,8 +58,8 @@ hsi_m_tx_ctrl HSI_M_TX_CTRL(
 	.ccw_d(ccw_d),
 	.ccw_tx_rdy(ccw_tx_rdy),
 	.ccw_tx_en(ccw_tx_en),
-	.cd_busy(cd_busy),
-	.byte_hold(byte_hold),
+	.ccw_d_sending(ccw_d_sending),
+	.ccw_d_rdy(ccw_d_rdy),
 	
 	.com_src(com_src),
 	.com1(com1),

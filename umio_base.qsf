@@ -274,51 +274,133 @@ set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_LEVEL_PIP
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_ENABLE_ADVANCED_TRIGGER=0" -section_id auto_signaltap_0
 set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
 set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[0] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|coder:CD|d[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[1] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|coder:CD|d[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[2] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|coder:CD|d[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[3] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|coder:CD|d[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[4] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|coder:CD|d[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[5] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|coder:CD|d[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[6] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|coder:CD|d[6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[7] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|coder:CD|d[7]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[8] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|coder:CD|d_rdy" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[9] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|coder:CD|q" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[10] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|common_state.COM_STATE_CTRL" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[11] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|common_state.COM_STATE_DELAY_100_US" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[12] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|common_state.COM_STATE_SENDING_BTC" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[13] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|common_state.COM_STATE_SENDING_CCW" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[14] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|common_state.COM_STATE_SENDING_CRC" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[15] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|common_state.COM_STATE_SENDING_SR" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[16] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|common_state.COM_STATE_SENDING_TM" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[0] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|coder:CD|d[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[1] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|coder:CD|d[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[2] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|coder:CD|d[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[3] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|coder:CD|d[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[4] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|coder:CD|d[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[5] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|coder:CD|d[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[6] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|coder:CD|d[6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[7] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|coder:CD|d[7]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[8] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|coder:CD|d_rdy" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[9] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|coder:CD|q" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[10] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|common_state.COM_STATE_CTRL" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[11] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|common_state.COM_STATE_DELAY_100_US" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[12] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|common_state.COM_STATE_SENDING_BTC" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[13] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|common_state.COM_STATE_SENDING_CCW" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[14] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|common_state.COM_STATE_SENDING_CRC" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[15] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|common_state.COM_STATE_SENDING_SR" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[16] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|common_state.COM_STATE_SENDING_TM" -section_id auto_signaltap_0
 set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_clk -to "pll:PLL|c1" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[17] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|com1" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[18] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|crc16_citt_calc:CRC16_CITT_CALC|crc[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[19] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|crc16_citt_calc:CRC16_CITT_CALC|crc[10]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[20] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|crc16_citt_calc:CRC16_CITT_CALC|crc[11]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[21] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|crc16_citt_calc:CRC16_CITT_CALC|crc[12]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[22] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|crc16_citt_calc:CRC16_CITT_CALC|crc[13]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[23] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|crc16_citt_calc:CRC16_CITT_CALC|crc[14]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[24] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|crc16_citt_calc:CRC16_CITT_CALC|crc[15]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[25] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|crc16_citt_calc:CRC16_CITT_CALC|crc[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[26] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|crc16_citt_calc:CRC16_CITT_CALC|crc[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[27] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|crc16_citt_calc:CRC16_CITT_CALC|crc[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[28] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|crc16_citt_calc:CRC16_CITT_CALC|crc[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[29] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|crc16_citt_calc:CRC16_CITT_CALC|crc[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[30] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|crc16_citt_calc:CRC16_CITT_CALC|crc[6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[31] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|crc16_citt_calc:CRC16_CITT_CALC|crc[7]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[32] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|crc16_citt_calc:CRC16_CITT_CALC|crc[8]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[33] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|crc16_citt_calc:CRC16_CITT_CALC|crc[9]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[34] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|crc16_citt_calc:CRC16_CITT_CALC|d[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[35] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|crc16_citt_calc:CRC16_CITT_CALC|d[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[36] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|crc16_citt_calc:CRC16_CITT_CALC|d[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[37] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|crc16_citt_calc:CRC16_CITT_CALC|d[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[38] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|crc16_citt_calc:CRC16_CITT_CALC|d[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[39] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|crc16_citt_calc:CRC16_CITT_CALC|d[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[40] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|crc16_citt_calc:CRC16_CITT_CALC|d[6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[41] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|crc16_citt_calc:CRC16_CITT_CALC|d[7]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[42] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|decoder:DC|d" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[43] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|decoder:DC|dc_state.DC_STATE_CTRL" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[44] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|decoder:DC|dc_state.DC_STATE_SIPO_CONV" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[45] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|decoder:DC|msg_end" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[46] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|decoder:DC|q[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[47] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|decoder:DC|q[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[48] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|decoder:DC|q[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[49] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|decoder:DC|q[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[50] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|decoder:DC|q[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[51] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|decoder:DC|q[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[52] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|decoder:DC|q[6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[53] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|decoder:DC|q[7]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[54] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|decoder:DC|q_rdy" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[55] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|err_check:ERR_CHECK|b_cntr[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[56] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|err_check:ERR_CHECK|b_cntr[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[57] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|err_check:ERR_CHECK|b_cntr[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[58] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|err_check:ERR_CHECK|b_cntr[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[59] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|err_check:ERR_CHECK|b_cntr[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[60] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|err_check:ERR_CHECK|b_cntr[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[61] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|err_check:ERR_CHECK|b_cntr[6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[17] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|com1" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[18] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|crc16_citt_calc:CRC16_CITT_CALC|crc[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[19] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|crc16_citt_calc:CRC16_CITT_CALC|crc[10]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[20] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|crc16_citt_calc:CRC16_CITT_CALC|crc[11]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[21] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|crc16_citt_calc:CRC16_CITT_CALC|crc[12]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[22] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|crc16_citt_calc:CRC16_CITT_CALC|crc[13]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[23] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|crc16_citt_calc:CRC16_CITT_CALC|crc[14]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[24] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|crc16_citt_calc:CRC16_CITT_CALC|crc[15]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[25] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|crc16_citt_calc:CRC16_CITT_CALC|crc[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[26] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|crc16_citt_calc:CRC16_CITT_CALC|crc[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[27] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|crc16_citt_calc:CRC16_CITT_CALC|crc[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[28] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|crc16_citt_calc:CRC16_CITT_CALC|crc[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[29] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|crc16_citt_calc:CRC16_CITT_CALC|crc[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[30] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|crc16_citt_calc:CRC16_CITT_CALC|crc[6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[31] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|crc16_citt_calc:CRC16_CITT_CALC|crc[7]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[32] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|crc16_citt_calc:CRC16_CITT_CALC|crc[8]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[33] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|crc16_citt_calc:CRC16_CITT_CALC|crc[9]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[34] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|crc16_citt_calc:CRC16_CITT_CALC|d[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[35] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|crc16_citt_calc:CRC16_CITT_CALC|d[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[36] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|crc16_citt_calc:CRC16_CITT_CALC|d[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[37] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|crc16_citt_calc:CRC16_CITT_CALC|d[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[38] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|crc16_citt_calc:CRC16_CITT_CALC|d[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[39] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|crc16_citt_calc:CRC16_CITT_CALC|d[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[40] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|crc16_citt_calc:CRC16_CITT_CALC|d[6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[41] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|crc16_citt_calc:CRC16_CITT_CALC|d[7]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[42] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|decoder:DC|d" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[43] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|decoder:DC|dc_state.DC_STATE_CTRL" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[44] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|decoder:DC|dc_state.DC_STATE_SIPO_CONV" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[45] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|decoder:DC|msg_end" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[46] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|decoder:DC|q[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[47] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|decoder:DC|q[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[48] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|decoder:DC|q[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[49] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|decoder:DC|q[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[50] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|decoder:DC|q[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[51] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|decoder:DC|q[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[52] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|decoder:DC|q[6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[53] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|decoder:DC|q[7]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[54] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|decoder:DC|q_rdy" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[55] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|err_check:ERR_CHECK|b_cntr[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[56] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|err_check:ERR_CHECK|b_cntr[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[57] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|err_check:ERR_CHECK|b_cntr[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[58] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|err_check:ERR_CHECK|b_cntr[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[59] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|err_check:ERR_CHECK|b_cntr[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[60] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|err_check:ERR_CHECK|b_cntr[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[61] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|err_check:ERR_CHECK|b_cntr[6]" -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_SEGMENT_SIZE=4096" -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_SAMPLE_DEPTH=4096" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[0] -to "hsi_master:HSI_MSTR|hsi_tx_ctrl:HSI_TX_CTRL|coder:CD|d[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[1] -to "hsi_master:HSI_MSTR|hsi_tx_ctrl:HSI_TX_CTRL|coder:CD|d[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[2] -to "hsi_master:HSI_MSTR|hsi_tx_ctrl:HSI_TX_CTRL|coder:CD|d[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[3] -to "hsi_master:HSI_MSTR|hsi_tx_ctrl:HSI_TX_CTRL|coder:CD|d[3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[4] -to "hsi_master:HSI_MSTR|hsi_tx_ctrl:HSI_TX_CTRL|coder:CD|d[4]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[5] -to "hsi_master:HSI_MSTR|hsi_tx_ctrl:HSI_TX_CTRL|coder:CD|d[5]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[6] -to "hsi_master:HSI_MSTR|hsi_tx_ctrl:HSI_TX_CTRL|coder:CD|d[6]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[7] -to "hsi_master:HSI_MSTR|hsi_tx_ctrl:HSI_TX_CTRL|coder:CD|d[7]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[8] -to "hsi_master:HSI_MSTR|hsi_tx_ctrl:HSI_TX_CTRL|coder:CD|d_rdy" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[9] -to "hsi_master:HSI_MSTR|hsi_tx_ctrl:HSI_TX_CTRL|coder:CD|q" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[10] -to "hsi_master:HSI_MSTR|hsi_tx_ctrl:HSI_TX_CTRL|common_state.COM_STATE_CTRL" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[11] -to "hsi_master:HSI_MSTR|hsi_tx_ctrl:HSI_TX_CTRL|common_state.COM_STATE_SENDING_BTC" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[12] -to "hsi_master:HSI_MSTR|hsi_tx_ctrl:HSI_TX_CTRL|common_state.COM_STATE_SENDING_CCW" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[13] -to "hsi_master:HSI_MSTR|hsi_tx_ctrl:HSI_TX_CTRL|common_state.COM_STATE_SENDING_CRC" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[14] -to "hsi_master:HSI_MSTR|hsi_tx_ctrl:HSI_TX_CTRL|common_state.COM_STATE_SENDING_SR" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[15] -to "hsi_master:HSI_MSTR|hsi_tx_ctrl:HSI_TX_CTRL|common_state.COM_STATE_SENDING_TM" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[0] -to "hsi_master:HSI_MSTR|hsi_tx_ctrl:HSI_TX_CTRL|coder:CD|d[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[1] -to "hsi_master:HSI_MSTR|hsi_tx_ctrl:HSI_TX_CTRL|coder:CD|d[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[2] -to "hsi_master:HSI_MSTR|hsi_tx_ctrl:HSI_TX_CTRL|coder:CD|d[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[3] -to "hsi_master:HSI_MSTR|hsi_tx_ctrl:HSI_TX_CTRL|coder:CD|d[3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[4] -to "hsi_master:HSI_MSTR|hsi_tx_ctrl:HSI_TX_CTRL|coder:CD|d[4]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[5] -to "hsi_master:HSI_MSTR|hsi_tx_ctrl:HSI_TX_CTRL|coder:CD|d[5]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[6] -to "hsi_master:HSI_MSTR|hsi_tx_ctrl:HSI_TX_CTRL|coder:CD|d[6]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[7] -to "hsi_master:HSI_MSTR|hsi_tx_ctrl:HSI_TX_CTRL|coder:CD|d[7]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[8] -to "hsi_master:HSI_MSTR|hsi_tx_ctrl:HSI_TX_CTRL|coder:CD|d_rdy" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[9] -to "hsi_master:HSI_MSTR|hsi_tx_ctrl:HSI_TX_CTRL|coder:CD|q" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[10] -to "hsi_master:HSI_MSTR|hsi_tx_ctrl:HSI_TX_CTRL|common_state.COM_STATE_CTRL" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[11] -to "hsi_master:HSI_MSTR|hsi_tx_ctrl:HSI_TX_CTRL|common_state.COM_STATE_SENDING_BTC" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[12] -to "hsi_master:HSI_MSTR|hsi_tx_ctrl:HSI_TX_CTRL|common_state.COM_STATE_SENDING_CCW" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[13] -to "hsi_master:HSI_MSTR|hsi_tx_ctrl:HSI_TX_CTRL|common_state.COM_STATE_SENDING_CRC" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[14] -to "hsi_master:HSI_MSTR|hsi_tx_ctrl:HSI_TX_CTRL|common_state.COM_STATE_SENDING_SR" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[15] -to "hsi_master:HSI_MSTR|hsi_tx_ctrl:HSI_TX_CTRL|common_state.COM_STATE_SENDING_TM" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[16] -to "hsi_master:HSI_MSTR|hsi_tx_ctrl:HSI_TX_CTRL|pre_tm" -section_id auto_signaltap_0
-set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[17] -to "hsi_master:HSI_MSTR|hsi_tx_ctrl:HSI_TX_CTRL|common_state.COM_STATE_DELAY_100_US" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[16] -to "hsi_master:HSI_MSTR|hsi_tx_ctrl:HSI_TX_CTRL|pre_tm" -section_id auto_signaltap_0
-set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[17] -to "hsi_master:HSI_MSTR|hsi_tx_ctrl:HSI_TX_CTRL|common_state.COM_STATE_DELAY_100_US" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_DATA_BITS=18" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_BITS=18" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK=00000000000000000000000000000000000000000000000000000000000000000000000000000000" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK_LENGTH=80" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_LOWORD=19013" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_HIWORD=40226" -section_id auto_signaltap_0
 set_global_assignment -name VERILOG_FILE src/code/v/clk_en_ctrl.v
 set_global_assignment -name VERILOG_INCLUDE_FILE src/code/vh/hsi_config.vh
 set_global_assignment -name VERILOG_FILE src/code/v/hsi_m_tx_ctrl.v
@@ -338,9 +420,48 @@ set_global_assignment -name VERILOG_FILE src/code/v/btc_ctrl.v
 set_global_assignment -name VERILOG_FILE src/code/v/ccw_ctrl.v
 set_global_assignment -name VERILOG_FILE src/code/v/tm_sr_dpr_ctrl.v
 set_global_assignment -name VERILOG_FILE src/code/v/ftdi_ctrl.v
-set_global_assignment -name SIGNALTAP_FILE src/code/stp/c1_1x8_8.stp
 set_global_assignment -name VERILOG_FILE src/code/v/hsi_slave.v
 set_global_assignment -name VERILOG_FILE src/code/v/hsi_s_rx_ctrl.v
 set_global_assignment -name VERILOG_FILE src/code/v/hsi_s_tx_ctrl.v
+set_global_assignment -name VERILOG_FILE src/code/v/err_check.v
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[62] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|err_check:ERR_CHECK|crc_rst" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[62] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|err_check:ERR_CHECK|crc_rst" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[63] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|err_check:ERR_CHECK|errors[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[64] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|err_check:ERR_CHECK|errors[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[65] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|err_check:ERR_CHECK|errors[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[66] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|err_check:ERR_CHECK|errors[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[67] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|err_check:ERR_CHECK|errors[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[68] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|err_check:ERR_CHECK|errors[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[69] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|err_check:ERR_CHECK|received_n[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[70] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|err_check:ERR_CHECK|received_n[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[71] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|err_check:ERR_CHECK|received_n[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[72] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|err_check:ERR_CHECK|received_n[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[73] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|err_check:ERR_CHECK|received_n[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[74] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|err_check:ERR_CHECK|received_n[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[75] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|err_check:ERR_CHECK|received_n[6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[76] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|err_check:ERR_CHECK|received_n[7]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[77] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|err_check:ERR_CHECK|tmp" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[63] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|err_check:ERR_CHECK|errors[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[64] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|err_check:ERR_CHECK|errors[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[65] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|err_check:ERR_CHECK|errors[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[66] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|err_check:ERR_CHECK|errors[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[67] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|err_check:ERR_CHECK|errors[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[68] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|err_check:ERR_CHECK|errors[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[69] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|err_check:ERR_CHECK|received_n[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[70] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|err_check:ERR_CHECK|received_n[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[71] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|err_check:ERR_CHECK|received_n[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[72] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|err_check:ERR_CHECK|received_n[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[73] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|err_check:ERR_CHECK|received_n[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[74] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|err_check:ERR_CHECK|received_n[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[75] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|err_check:ERR_CHECK|received_n[6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[76] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|err_check:ERR_CHECK|received_n[7]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[77] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|err_check:ERR_CHECK|tmp" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_DATA_BITS=78" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_BITS=78" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK=00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK_LENGTH=260" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_LOWORD=39154" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_HIWORD=29348" -section_id auto_signaltap_0
+set_global_assignment -name SIGNALTAP_FILE src/code/stp/c1_1x8_8.stp
 set_global_assignment -name SLD_FILE db/c1_1x8_8_auto_stripped.stp
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

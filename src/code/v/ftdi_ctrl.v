@@ -4,8 +4,8 @@ module ftdi_ctrl (
 	output  oe,
 	input   rxf,
 	input   rd_en,
-	input   cd_busy,
-	output  reg byte_hold,
+	input   ccw_d_sending,
+	output  reg ccw_d_rdy,
 	output  rd,
 	input   txe,
 	output  wr,
@@ -63,18 +63,18 @@ assign rd = ~READ_BYTE;
 always@(posedge clk or negedge n_rst)
 begin
 	if(n_rst == 0)
-		byte_hold = 0;
+		ccw_d_rdy = 0;
 	else if(rd_en)
 		begin
 			if(rd == 0)
-				byte_hold = 1;
-			else if(cd_busy)
-				byte_hold = 0;
+				ccw_d_rdy = 1;
+			else if(ccw_d_sending)
+				ccw_d_rdy = 0;
 		end
-	else if(cd_busy) 
-		byte_hold = 0;
+	else if(ccw_d_sending)
+		ccw_d_rdy = 0;
 end
-wire byte_rd_en = rd_en & ~cd_busy & ~byte_hold;
+wire byte_rd_en = rd_en & ~ccw_d_sending & ~ccw_d_rdy;
 
 reg[7:0] d_from_usb;
 always@(posedge clk or negedge n_rst)
