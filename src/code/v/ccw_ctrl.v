@@ -58,6 +58,7 @@ begin
 end
 
 wire SERVICE_DATA_IS_SENT = ~cd_busy & (byte_cntr == 3);
+
 reg[2:0] byte_cntr;
 always@(posedge cd_busy or negedge SENDING_SERVICE_DATA)
 begin

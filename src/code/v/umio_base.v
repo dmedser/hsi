@@ -357,8 +357,15 @@ ftdi_ctrl FTDI_CTRL (
 hsi_slave  HSI_SLV (
 	.clk(CLK_48),
 	.n_rst(N_RST),
-	.sd_busy(),
-	.sr(),
+	
+	.sd_busy(1),
+
+	.sd_d_tx_rdy(),
+	.sd_d_tx_en(),
+	
+	.sd_d(),
+	.sd_d_rdy(),
+	.sd_d_sending(),
 	
 	.com1(COM1),
 	.com2(COM2),

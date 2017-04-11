@@ -6,7 +6,7 @@ module decoder (
 	output  [7:0] q,
 	output  q_rdy,
 	output  pb_err,
-	output msg_end
+	output frame_end
 );
 
 `include "src/code/vh/hsi_config.vh"	
@@ -51,7 +51,7 @@ dc_sample_ctrl DC_SAMPLE_CTRL (
 	.fr_idx(FRAME_IDX)
 );		
 
-assign msg_end = ITS_MSG_END_CHECK_TIME & (d == STOP_BIT);
+assign frame_end = ITS_MSG_END_CHECK_TIME & (d == STOP_BIT);
 				
 /********** DECODER STATE MACHINE **********/
 			 

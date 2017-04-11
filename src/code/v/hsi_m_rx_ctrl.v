@@ -22,7 +22,7 @@ decoder DC (
 	.q(q),
 	.q_rdy(q_rdy),
 	.pb_err(),
-	.msg_end()
+	.frame_end()
 );
 
 endmodule

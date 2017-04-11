@@ -6,8 +6,8 @@ module hsi_s_rx_ctrl (
 	input com2,
 	output [7:0] q,
 	output q_rdy,
-	output rx_msg_end,
-	output [7:0] rx_flg,
+	output rx_frame_end,
+	output [7:0] rx_flag,
 	output [5:0] rx_errs
 );
 
@@ -21,25 +21,25 @@ decoder DC (
 	.q(DC_Q),
 	.q_rdy(DC_Q_RDY),
 	.pb_err(PB_ERR),
-	.msg_end(DC_MSG_END)
+	.frame_end(DC_FRAME_END)
 );
 
 wire[7:0] DC_Q;
 assign q_rdy = DC_Q_RDY;
 assign q = DC_Q; 
-assign rx_msg_end = DC_MSG_END;
+assign rx_frame_end = DC_FRAME_END;
 
 err_check ERR_CHECK (
 	.clk(clk),
 	.n_rst(n_rst),
 	.d(DC_Q),
 	.d_rdy(DC_Q_RDY),
-	.rx_flg(rx_flg),
+	.rx_flag(rx_flag),
 	.pb_err(PB_ERR),
 	.crc(CRC16),
 	.crc_update_disable(CRC_UPDATE_DISABLE),
 	.crc_rst(CRC_RST),
-	.rx_msg_end(DC_MSG_END),
+	.rx_frame_end(DC_FRAME_END),
 	.rx_errs(rx_errs)
 );
 

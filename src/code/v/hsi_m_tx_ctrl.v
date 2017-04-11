@@ -69,13 +69,13 @@ wire TM_TX_RDY_MASKED  = tm_tx_en & tm_tx_rdy,
 	  CCW_RX_RDY        = ~pre_tm & ccw_tx_rdy & ~DELAY_100_US; // ccw_tx_rdy чтобы УКС передавалась во время pre_tm
 	  
 
-wire SENDING_TM  = (common_state == COM_STATE_SENDING_TM),
-	  SENDING_BTC = (common_state == COM_STATE_SENDING_BTC),
-	  SENDING_SR  = (common_state == COM_STATE_SENDING_SR),
-	  SENDING_DPR = (common_state == COM_STATE_SENDING_DPR),
-	  SENDING_CCW = (common_state == COM_STATE_SENDING_CCW),
-	  SENDING_CRC = (common_state == COM_STATE_SENDING_CRC),
-	  DELAY_100_US = (common_state == COM_STATE_DELAY_100_US); 
+wire SENDING_TM  = (tx_state == TX_STATE_SENDING_TM),
+	  SENDING_BTC = (tx_state == TX_STATE_SENDING_BTC),
+	  SENDING_SR  = (tx_state == TX_STATE_SENDING_SR),
+	  SENDING_DPR = (tx_state == TX_STATE_SENDING_DPR),
+	  SENDING_CCW = (tx_state == TX_STATE_SENDING_CCW),
+	  SENDING_CRC = (tx_state == TX_STATE_SENDING_CRC),
+	  DELAY_100_US = (tx_state == TX_STATE_DELAY_100_US); 
 	  
 coder CD (
 	.clk(clk),
@@ -89,7 +89,7 @@ coder CD (
 
 tm_sr_dpr_ctrl TM_SR_DPR_CTRL (
 	.clk(clk),
-	.common_state(COMMON_STATE_TM_SR_DPR),
+	.tx_state(TX_STATE_TM_SR_DPR),
 	.cd_busy(CD_BUSY),
 	.q(D_TM_SR_DPR),
 	.q_rdy(D_RDY_TM_SR_DPR),
@@ -98,10 +98,10 @@ tm_sr_dpr_ctrl TM_SR_DPR_CTRL (
 
 wire[7:0] D_TM_SR_DPR;
 
-wire[2:0] COMMON_STATE_TM_SR_DPR;
-assign COMMON_STATE_TM_SR_DPR[0] = SENDING_TM;
-assign COMMON_STATE_TM_SR_DPR[1] = SENDING_SR;
-assign COMMON_STATE_TM_SR_DPR[2] = SENDING_DPR;
+wire[2:0] TX_STATE_TM_SR_DPR;
+assign TX_STATE_TM_SR_DPR[0] = SENDING_TM;
+assign TX_STATE_TM_SR_DPR[1] = SENDING_SR;
+assign TX_STATE_TM_SR_DPR[2] = SENDING_DPR;
 
 
 assign MSG_END_TM  = SENDING_TM  & MSG_END_TM_SR_DPR;
@@ -173,21 +173,21 @@ ccw_ctrl CCW_CTRL (
 	.msg_end(MSG_END_CCW)
 );
 
-connector CONNECTOR (
-	.common_state(COMMON_STATE_CONNECTOR),
+m_connector CONNECTOR (
+	.tx_state(TX_STATE_CONNECTOR),
 	.d_rdy_src(D_RDY_SRC),
 	.d_rdy_dst(TX_D_RDY),
 	.d_src(D_SRC),
 	.d_dst(TX_D)
 );
 
-wire[5:0] COMMON_STATE_CONNECTOR;
-assign COMMON_STATE_CONNECTOR[0] = SENDING_TM;
-assign COMMON_STATE_CONNECTOR[1] = SENDING_BTC;
-assign COMMON_STATE_CONNECTOR[2] = SENDING_SR;
-assign COMMON_STATE_CONNECTOR[3] = SENDING_DPR;
-assign COMMON_STATE_CONNECTOR[4] = SENDING_CCW;
-assign COMMON_STATE_CONNECTOR[5] = SENDING_CRC;
+wire[5:0] TX_STATE_CONNECTOR;
+assign TX_STATE_CONNECTOR[0] = SENDING_TM;
+assign TX_STATE_CONNECTOR[1] = SENDING_BTC;
+assign TX_STATE_CONNECTOR[2] = SENDING_SR;
+assign TX_STATE_CONNECTOR[3] = SENDING_DPR;
+assign TX_STATE_CONNECTOR[4] = SENDING_CCW;
+assign TX_STATE_CONNECTOR[5] = SENDING_CRC;
 
 wire[3:0] D_RDY_SRC;
 assign D_RDY_SRC[0] = D_RDY_TM_SR_DPR;
@@ -201,84 +201,84 @@ assign D_SRC[15:8]  = D_BTC;
 assign D_SRC[23:16] = D_CCW;  
 assign D_SRC[31:24] = D_CRC;
 
-reg[2:0] common_state;
-parameter COM_STATE_CTRL = 0,
-			 COM_STATE_SENDING_TM  = 1,
-			 COM_STATE_SENDING_BTC = 2,
-			 COM_STATE_SENDING_SR  = 3, 		 
-			 COM_STATE_SENDING_DPR = 4, 
-			 COM_STATE_SENDING_CCW = 5, 				 
-			 COM_STATE_SENDING_CRC = 6,
-			 COM_STATE_DELAY_100_US = 7;
+reg[2:0] tx_state;
+parameter TX_STATE_CTRL = 0,
+			 TX_STATE_SENDING_TM  = 1,
+			 TX_STATE_SENDING_BTC = 2,
+			 TX_STATE_SENDING_SR  = 3, 		 
+			 TX_STATE_SENDING_DPR = 4, 
+			 TX_STATE_SENDING_CCW = 5, 				 
+			 TX_STATE_SENDING_CRC = 6,
+			 TX_STATE_DELAY_100_US = 7;
 
 always@(posedge clk or negedge n_rst)
 begin
 	if(n_rst == 0)
 		begin
-			common_state = COM_STATE_CTRL;
+			tx_state = TX_STATE_CTRL;
 		end
 	else
 		begin
-			case(common_state)
-			COM_STATE_CTRL:
+			case(tx_state)
+			TX_STATE_CTRL:
 				begin
 					if(TM_TX_RDY_MASKED)
-						common_state = COM_STATE_SENDING_TM;
+						tx_state = TX_STATE_SENDING_TM;
 					else if(BTC_TX_RDY_MASKED)
-						common_state = COM_STATE_SENDING_BTC;
+						tx_state = TX_STATE_SENDING_BTC;
 					else if(SR_TX_RDY_MASKED)
-						common_state = COM_STATE_SENDING_SR;
+						tx_state = TX_STATE_SENDING_SR;
 					else if(CCW_RX_RDY)
-						common_state = COM_STATE_SENDING_CCW;
+						tx_state = TX_STATE_SENDING_CCW;
 				end
-			COM_STATE_SENDING_TM:
+			TX_STATE_SENDING_TM:
 				begin
 					if(MSG_END_TM)
-						common_state = COM_STATE_SENDING_CRC;
+						tx_state = TX_STATE_SENDING_CRC;
 					else
-						common_state = COM_STATE_SENDING_TM;
+						tx_state = TX_STATE_SENDING_TM;
 				end
-			COM_STATE_SENDING_BTC:
+			TX_STATE_SENDING_BTC:
 				begin
 					if(MSG_END_BTC)
-						common_state = COM_STATE_SENDING_CRC;
+						tx_state = TX_STATE_SENDING_CRC;
 					else
-						common_state = COM_STATE_SENDING_BTC;
+						tx_state = TX_STATE_SENDING_BTC;
 				end
-			COM_STATE_SENDING_SR:
+			TX_STATE_SENDING_SR:
 				begin
 					if(MSG_END_SR)
-						common_state = COM_STATE_SENDING_CRC;
+						tx_state = TX_STATE_SENDING_CRC;
 					else
-						common_state = COM_STATE_SENDING_SR;
+						tx_state = TX_STATE_SENDING_SR;
 				end
-			COM_STATE_SENDING_DPR:
+			TX_STATE_SENDING_DPR:
 				begin
 					if(MSG_END_DPR)
-						common_state = COM_STATE_SENDING_CRC;
+						tx_state = TX_STATE_SENDING_CRC;
 					else
-						common_state = COM_STATE_SENDING_DPR;
+						tx_state = TX_STATE_SENDING_DPR;
 				end		
-			COM_STATE_SENDING_CCW:
+			TX_STATE_SENDING_CCW:
 				begin
 					if(MSG_END_CCW)
-						common_state = COM_STATE_SENDING_CRC;
+						tx_state = TX_STATE_SENDING_CRC;
 					else
-						common_state = COM_STATE_SENDING_CCW;
+						tx_state = TX_STATE_SENDING_CCW;
 				end
-			COM_STATE_SENDING_CRC:	
+			TX_STATE_SENDING_CRC:	
 				begin
 					if(MSG_END_CRC)
-						common_state = COM_STATE_DELAY_100_US;
+						tx_state = TX_STATE_DELAY_100_US;
 					else
-						common_state = COM_STATE_SENDING_CRC;
+						tx_state = TX_STATE_SENDING_CRC;
 				end
-			COM_STATE_DELAY_100_US:	
+			TX_STATE_DELAY_100_US:	
 				begin
 					if(l00_US_IS_LEFT)
-						common_state = COM_STATE_CTRL;
+						tx_state = TX_STATE_CTRL;
 					else
-						common_state = COM_STATE_DELAY_100_US;
+						tx_state = TX_STATE_DELAY_100_US;
 				end	
 			default:
 				begin

@@ -1,15 +1,15 @@
 module tm_sr_dpr_ctrl (
 	input clk,
-	input [2:0] common_state,
+	input [2:0] tx_state,
 	input cd_busy,
 	output [7:0]q,
 	output q_rdy,
 	output msg_end
 );
 
-`define SENDING_TM  common_state[0]
-`define SENDING_SR  common_state[1]
-`define SENDING_DPR common_state[2]
+`define SENDING_TM  tx_state[0]
+`define SENDING_SR  tx_state[1]
+`define SENDING_DPR tx_state[2]
 
 `include "src/code/vh/msg_defs.vh"	
 

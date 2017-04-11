@@ -3,12 +3,12 @@ module err_check (
 	input n_rst,
 	input [7:0] d,
 	input d_rdy,
-	output reg [7:0] rx_flg,
+	output reg [7:0] rx_flag,
 	input pb_err,
 	input [15:0] crc,
 	output crc_update_disable,
 	output crc_rst,
-	input rx_msg_end,
+	input rx_frame_end,
 	output [5:0] rx_errs
 );
 
@@ -26,13 +26,13 @@ always@(posedge clk or negedge n_rst)
 begin
 	if(n_rst == 0)
 		tmp = 0;
-	else if(rx_msg_end)
+	else if(rx_frame_end)
 		tmp = 1;
 	else 
 		tmp = 0;
 end
 
-wire tick_after_msg_end = ~rx_msg_end & tmp;
+wire tick_after_msg_end = ~rx_frame_end & tmp;
 wire N_RST_BY_TICK_AFTER_MSG_END = n_rst & ~tick_after_msg_end;
 reg[6:0] b_cntr;
 always@(posedge d_rdy or negedge N_RST_BY_TICK_AFTER_MSG_END)
@@ -55,9 +55,9 @@ end
 always@(posedge clk or negedge n_rst)
 begin
 	if(n_rst == 0)
-		rx_flg = 0;	
+		rx_flag = 0;	
 	else if((b_cntr == 2) & d_rdy)
-		rx_flg = d;
+		rx_flag = d;
 end
 
 reg received_crc_h_right;
@@ -99,10 +99,10 @@ end
 assign crc_update_disable = (b_cntr > (received_n + 4)); 
 assign crc_rst = tick_after_msg_end;
 
-assign `err_ok  = rx_msg_end & ~(`err_mrk | `err_flg | `err_n | `err_pb | `err_crc);
-assign `err_mrk = rx_msg_end & ~received_mrk_right;
-assign `err_flg = rx_msg_end & ~received_flg_right;
-assign `err_n   = rx_msg_end & ~(received_n == (b_cntr - 6));
-assign `err_pb  = rx_msg_end & pb_err_reg;
-assign `err_crc = rx_msg_end & ~(received_crc_h_right & (d == crc[7:0]));  
+assign `err_ok  = rx_frame_end & ~(`err_mrk | `err_flg | `err_n | `err_pb | `err_crc);
+assign `err_mrk = rx_frame_end & ~received_mrk_right;
+assign `err_flg = rx_frame_end & ~received_flg_right;
+assign `err_n   = rx_frame_end & ~(received_n == (b_cntr - 6));
+assign `err_pb  = rx_frame_end & pb_err_reg;
+assign `err_crc = rx_frame_end & ~(received_crc_h_right & (d == crc[7:0]));  
 endmodule 
