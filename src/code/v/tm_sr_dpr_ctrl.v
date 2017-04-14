@@ -15,7 +15,7 @@ module tm_sr_dpr_ctrl (
 
 wire tx_en = `SENDING_TM|`SENDING_SR|`SENDING_DPR;
 
-reg[1:0] byte_cntr;
+reg[2:0] byte_cntr;
 always@(posedge cd_busy or negedge tx_en)
 begin
 	if(tx_en == 0)
@@ -40,17 +40,17 @@ assign q = MASK_Q_MARKER & `MARKER_MASTER |
 
 assign q_rdy = (~cd_busy) & tx_en;
 
-wire ITS_LAST_BYTE = (byte_cntr == 3);
+wire ITS_LAST_BYTE = (byte_cntr == 4);
 
 reg tmp;
 always@(posedge clk)
 begin
-	if(ITS_LAST_BYTE)
+	if(ITS_LAST_BYTE & cd_busy)
 		tmp = 1;
 	else
 		tmp = 0;
 end
 
-assign msg_end = tmp & ~ITS_LAST_BYTE; 
+assign msg_end = tmp & ~cd_busy; 
 			 
 endmodule 

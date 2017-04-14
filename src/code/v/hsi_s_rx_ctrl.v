@@ -29,7 +29,7 @@ assign q_rdy = DC_Q_RDY;
 assign q = DC_Q; 
 assign rx_frame_end = DC_FRAME_END;
 
-err_check ERR_CHECK (
+s_err_check ERR_CHECK (
 	.clk(clk),
 	.n_rst(n_rst),
 	.d(DC_Q),

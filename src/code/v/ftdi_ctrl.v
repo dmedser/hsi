@@ -3,10 +3,11 @@ module ftdi_ctrl (
 	input   n_rst,
 	output  oe,
 	input   rxf,
-	input   rd_en,
-	input   ccw_d_sending,
-	output  reg ccw_d_rdy,
 	output  rd,
+	
+	output  ccw_accepted,
+	output  sd_d_accepted,
+
 	input   txe,
 	output  wr,
 	inout   [7:0] dq,
@@ -33,7 +34,7 @@ begin
 			case(fc_state)
 				FC_STATE_CTRL:
 					begin
-						if(~rxf & byte_rd_en)
+						if(~rxf)
 							fc_state = FC_STATE_READ_PREPARE;
 						else
 							fc_state = FC_STATE_CTRL;
@@ -47,8 +48,7 @@ begin
 						fc_state = FC_STATE_CTRL;
 					end
 				FC_STATE_WRITE:
-					begin
-					
+					begin					
 					end
 				default: 	
 					begin
@@ -60,30 +60,10 @@ end
 assign oe = ~(READ_PREPARE | READ_BYTE);
 assign rd = ~READ_BYTE;
 
-always@(posedge clk or negedge n_rst)
-begin
-	if(n_rst == 0)
-		ccw_d_rdy = 0;
-	else if(rd_en)
-		begin
-			if(rd == 0)
-				ccw_d_rdy = 1;
-			else if(ccw_d_sending)
-				ccw_d_rdy = 0;
-		end
-	else if(ccw_d_sending)
-		ccw_d_rdy = 0;
-end
-wire byte_rd_en = rd_en & ~ccw_d_sending & ~ccw_d_rdy;
+parameter ID_CCW = 1,
+			 ID_SD_D  = 2;
 
-reg[7:0] d_from_usb;
-always@(posedge clk or negedge n_rst)
-begin
-	if(n_rst == 0)
-		d_from_usb = 0;
-	else if(rd == 0)
-		d_from_usb = dq;
-end
+assign ccw_accepted = ~rd & (dq == ID_CCW);
+assign sd_d_accepted  = ~rd & (dq == ID_SD_D);
 
-assign q = d_from_usb;
 endmodule 

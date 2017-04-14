@@ -306,11 +306,12 @@ hsi_master HSI_MSTR(
 	.btc_en(1),
 	.btc(40'hABCDEF1122),
 	
-	.ccw_d(CCW_D),
-	.ccw_d_sending(CCW_D_SENDING),
-	.ccw_d_rdy(CCW_D_RDY),
-	.ccw_tx_rdy(~FRXF | CCW_D_RDY),
+	.ccw_tx_rdy(CCW_TX_RDY),
 	.ccw_tx_en(CCW_TX_EN),
+	.ccw_d(CCW_D),
+	.ccw_d_rdy(CCW_D_RDY),
+	.ccw_d_sending(CCW_D_SENDING),
+	
 	
 	.com_src(1),
 	.dat_src(1),
@@ -334,38 +335,49 @@ tm_gen TM_GEN(
 	.pre_tm(PRE_TM)
 );
 
-wire [7:0] CCW_D;
-
-
 ftdi_ctrl FTDI_CTRL (
 	.clk(FCLK_OUT),
 	.n_rst(N_RST),
 	.oe(FOE),
 	.rxf(FRXF),
-	.rd_en(CCW_TX_EN),
-	.ccw_d_sending(CCW_D_SENDING),
-	.ccw_d_rdy(CCW_D_RDY),
 	.rd(FRD),
+	.ccw_accepted(CCW_ACCEPTED),
+	.sd_d_accepted(SD_D_ACCEPTED),
 	.txe(FTXE),
 	.wr(FWR),
 	.dq(FU_D),
 	.d(),
-	.q(CCW_D)
+	.q()
+);
+
+wire [7:0] CCW_D;
+ccw_gen CCW_GEN (
+	.clk(CLK_48),
+	.n_rst(N_RST),
+	.ccw_accepted(CCW_ACCEPTED),
+	.ccw_tx_rdy(CCW_TX_RDY),
+	.ccw_tx_en(CCW_TX_EN),
+	.ccw_d(CCW_D),
+	.ccw_d_rdy(CCW_D_RDY),
+	.ccw_d_sending(CCW_D_SENDING)
 );
 
 
-hsi_slave  HSI_SLV (
+hsi_slave HSI_SLV (
 	.clk(CLK_48),
 	.n_rst(N_RST),
 	
-	.sd_busy(1),
+	.sd_busy(0),
 
-	.sd_d_tx_rdy(),
-	.sd_d_tx_en(),
+	.sd_d_tx_rdy(SD_D_TX_RDY),
+	.sd_d_tx_en(SD_D_TX_EN),
 	
-	.sd_d(),
-	.sd_d_rdy(),
-	.sd_d_sending(),
+	.sd_d(SD_D),
+	.sd_d_rdy(SD_D_RDY),
+	.sd_d_sending(SD_D_SENDING),
+	.sd_has_next_frame(SD_HAS_NEXT_FRAME),
+	
+
 	
 	.com1(COM1),
 	.com2(COM2),
@@ -374,6 +386,19 @@ hsi_slave  HSI_SLV (
 	.dat2(DAT2),
 	
 	.q()
+);
+
+wire [7:0] SD_D;
+sd_d_gen SD_D_GEN (
+	.clk(CLK_48),
+	.n_rst(N_RST),
+	.sd_d_accepted(SD_D_ACCEPTED),
+	.sd_d_tx_rdy(SD_D_TX_RDY),
+	.sd_d_tx_en(SD_D_TX_EN),
+	.sd_d(SD_D),
+	.sd_d_rdy(SD_D_RDY),
+	.sd_d_sending(SD_D_SENDING),
+	.sd_has_next_frame(SD_HAS_NEXT_FRAME)
 );
 
 endmodule

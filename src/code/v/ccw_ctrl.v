@@ -71,13 +71,11 @@ end
 wire [7:0] MASK_Q_MARKER = (SENDING_SERVICE_DATA & (byte_cntr == 0)) ? 8'hFF : 0,
 			  MASK_Q_FLAG   = (SENDING_SERVICE_DATA & (byte_cntr == 1)) ? 8'hFF : 0,	
 			  MASK_Q_N1     = (SENDING_SERVICE_DATA & (byte_cntr == 2)) ? 8'hFF : 0,
-			  MASK_Q_N2     = (SENDING_SERVICE_DATA & (byte_cntr == 3)) ? 8'hFF : 0,
 			  MASK_Q_PL     = SENDING_PAYLOAD ? 8'hFF : 0;
 			
 assign q = MASK_Q_MARKER & `MARKER_MASTER  |
 			  MASK_Q_FLAG   & `FLAG_CONTROL_COMMAND_WORD |
 			  MASK_Q_N1	& 0 |
-			  MASK_Q_N2 & ccw_d |
 			  MASK_Q_PL & ccw_d;
 			  
 assign q_rdy = SENDING_SERVICE_DATA ? ~cd_busy & ~SERVICE_DATA_IS_SENT : ccw_d_rdy;

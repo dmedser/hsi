@@ -34,3 +34,5 @@
 
 `define S_RX_FREQ (`M_TX_FREQ)
 `define S_RX_DIV_FACTOR ((`M_TX_FREQ == `Mbps_1) ? (6 - 1) : (48 - 1))
+
+`define S_DP_LEN_IN_WORDS 8

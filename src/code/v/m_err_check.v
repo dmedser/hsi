@@ -1,9 +1,12 @@
-module err_check (
+module m_err_check (
 	input clk,
 	input n_rst,
 	input [7:0] d,
 	input d_rdy,
-	output reg [7:0] rx_flag,
+
+	output reg rx_service_req,
+	output reg rx_sd_busy,
+
 	input pb_err,
 	input [15:0] crc,
 	output crc_update_disable,
@@ -16,10 +19,14 @@ module err_check (
 
 `define err_ok  rx_errs[0]
 `define err_mrk rx_errs[1]
-`define err_flg rx_errs[2]
+`define err_sts rx_errs[2]
 `define err_n   rx_errs[3]
 `define err_pb  rx_errs[4]
 `define err_crc rx_errs[5]
+
+`define ERR_IN_MSG  d[0]
+`define SERVICE_REQ d[1]
+`define SD_BUSY     d[2]
 
 reg tmp;
 always@(posedge clk or negedge n_rst)
@@ -43,6 +50,42 @@ begin
 		b_cntr = b_cntr + 1;
 end
 
+reg received_mrk_right;
+always@(posedge clk or negedge N_RST_BY_TICK_AFTER_MSG_END)
+begin
+	if(N_RST_BY_TICK_AFTER_MSG_END == 0)
+		received_mrk_right = 0;
+	else if((b_cntr == 1) & d_rdy & (d == `MARKER_SLAVE))
+		received_mrk_right = 1;
+end
+
+
+reg err_in_msg;
+always@(posedge clk or negedge N_RST_BY_TICK_AFTER_MSG_END)
+begin
+	if(N_RST_BY_TICK_AFTER_MSG_END == 0)
+		err_in_msg = 0;
+	else if((b_cntr == 2) & d_rdy & `ERR_IN_MSG)
+		err_in_msg = 1;
+end
+
+
+always@(posedge clk or negedge N_RST_BY_TICK_AFTER_MSG_END)
+begin
+	if(N_RST_BY_TICK_AFTER_MSG_END == 0)
+		rx_service_req = 0;
+	else if((b_cntr == 2) & d_rdy & `SERVICE_REQ)
+		rx_service_req = 1;
+end
+
+always@(posedge clk or negedge n_rst)
+begin
+	if(n_rst == 0)
+		rx_sd_busy = 0;
+	else if((b_cntr == 2) & d_rdy)
+		rx_sd_busy = `SD_BUSY;
+end
+
 reg[7:0] received_n;
 always@(posedge clk or negedge n_rst)
 begin
@@ -52,14 +95,6 @@ begin
 		received_n = d;
 end
 
-always@(posedge clk or negedge n_rst)
-begin
-	if(n_rst == 0)
-		rx_flag = 0;	
-	else if((b_cntr == 2) & d_rdy)
-		rx_flag = d;
-end
-
 reg received_crc_h_right;
 always@(posedge clk or negedge N_RST_BY_TICK_AFTER_MSG_END)
 begin
@@ -67,24 +102,6 @@ begin
 		received_crc_h_right = 0;	
 	else if((b_cntr == (received_n + 5)) & d_rdy)
 		received_crc_h_right = 1;
-end
-
-reg received_mrk_right;
-always@(posedge clk or negedge N_RST_BY_TICK_AFTER_MSG_END)
-begin
-	if(N_RST_BY_TICK_AFTER_MSG_END == 0)
-		received_mrk_right = 0;
-	else if((b_cntr == 1) & d_rdy & (d == `MARKER_MASTER))
-		received_mrk_right = 1;
-end
-
-reg received_flg_right;
-always@(posedge clk or negedge N_RST_BY_TICK_AFTER_MSG_END)
-begin
-	if(N_RST_BY_TICK_AFTER_MSG_END == 0)
-		received_flg_right = 0;
-	else if((b_cntr == 2) & d_rdy & (`FLAG_BOARD_TIME_CODE <= d) & (d <= `FLAG_TIME_MARK))
-		received_flg_right = 1;
 end
 
 reg pb_err_reg;
@@ -99,9 +116,9 @@ end
 assign crc_update_disable = (b_cntr > (received_n + 4)); 
 assign crc_rst = tick_after_msg_end;
 
-assign `err_ok  = rx_frame_end & ~(`err_mrk | `err_flg | `err_n | `err_pb | `err_crc);
+assign `err_ok  = rx_frame_end & ~(`err_mrk | `err_sts | `err_n | `err_pb | `err_crc);
 assign `err_mrk = rx_frame_end & ~received_mrk_right;
-assign `err_flg = rx_frame_end & ~received_flg_right;
+assign `err_sts = rx_frame_end & err_in_msg;
 assign `err_n   = rx_frame_end & ~(received_n == (b_cntr - 6));
 assign `err_pb  = rx_frame_end & pb_err_reg;
 assign `err_crc = rx_frame_end & ~(received_crc_h_right & (d == crc[7:0]));  

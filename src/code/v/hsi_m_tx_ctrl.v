@@ -14,6 +14,7 @@ module hsi_m_tx_ctrl (
 	
 	input btc_en,
 	input [39:0] btc,
+	
 	input [7:0] ccw_d,
 	input ccw_tx_rdy,
 	output ccw_tx_en,
@@ -22,7 +23,12 @@ module hsi_m_tx_ctrl (
 	
 	input com_src,
 	output com1,
-	output com2
+	output com2,
+	
+	input rx_frame_end,
+	input rx_err,
+	input rx_service_req,
+	input rx_sd_busy
 );
 
 `include "src/code/vh/hsi_config.vh"
@@ -66,7 +72,8 @@ wire MSG_END_TM,
 wire TM_TX_RDY_MASKED  = tm_tx_en & tm_tx_rdy,
 	  BTC_TX_RDY_MASKED = btc_en & BTC_TX_RDY,
 	  SR_TX_RDY_MASKED  = sdreq_en & sr_tx_rdy,
-	  CCW_RX_RDY        = ~pre_tm & ccw_tx_rdy & ~DELAY_100_US; // ccw_tx_rdy чтобы УКС передавалась во время pre_tm
+	  DPR_TX_RDY_MASKED = sdreq_en & DPR_TX_RDY,
+	  CCW_RX_RDY        = ~pre_tm & ccw_tx_rdy & ~DELAY_100_US & ~rx_sd_busy; // ccw_tx_rdy чтобы УКС передавалась во время pre_tm
 	  
 
 wire SENDING_TM  = (tx_state == TX_STATE_SENDING_TM),
@@ -95,6 +102,18 @@ tm_sr_dpr_ctrl TM_SR_DPR_CTRL (
 	.q_rdy(D_RDY_TM_SR_DPR),
 	.msg_end(MSG_END_TM_SR_DPR)
 );
+
+service_req_ctrl SERVICE_REQ_CTRL (
+	.clk(clk),
+	.n_rst(n_rst), 
+	.rx_frame_end(rx_frame_end),
+	.rx_err(rx_err),
+	.rx_sd_busy(rx_sd_busy),
+	.rx_service_req(rx_service_req),
+	.dpr_tx_rdy(DPR_TX_RDY),
+	.dpr_tx_ack(SENDING_DPR)
+);
+
 
 wire[7:0] D_TM_SR_DPR;
 
@@ -228,6 +247,8 @@ begin
 						tx_state = TX_STATE_SENDING_BTC;
 					else if(SR_TX_RDY_MASKED)
 						tx_state = TX_STATE_SENDING_SR;
+					else if(DPR_TX_RDY_MASKED)
+						tx_state = TX_STATE_SENDING_DPR;
 					else if(CCW_RX_RDY)
 						tx_state = TX_STATE_SENDING_CCW;
 				end
@@ -288,7 +309,6 @@ begin
 		end
 end
 endmodule
-
 
 module signal_trimmer (
 	input clk,
@@ -355,3 +375,24 @@ begin
 		btc_tx_rdy = 0;
 end
 endmodule 
+
+module service_req_ctrl (
+	input clk,
+	input n_rst, 
+	input rx_frame_end,
+	input rx_err,
+	input rx_sd_busy,
+	input rx_service_req,
+	output reg dpr_tx_rdy,
+	input dpr_tx_ack
+);
+always@(posedge clk or negedge n_rst)
+begin
+	if(n_rst == 0)
+		dpr_tx_rdy = 0;
+	else if (rx_frame_end & ~rx_err & ~rx_sd_busy & rx_service_req)
+		dpr_tx_rdy = 1;
+	else if (dpr_tx_ack)
+		dpr_tx_rdy = 0;
+end
+endmodule

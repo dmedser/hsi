@@ -25,6 +25,8 @@ module hsi_master (
 	
 	output [7:0] q,
 	output q_rdy,
+	output [5:0] rx_errs,
+	output rx_frame_end,
 
 	output com1,
 	output com2,
@@ -63,8 +65,17 @@ hsi_m_tx_ctrl HSI_M_TX_CTRL(
 	
 	.com_src(com_src),
 	.com1(com1),
-	.com2(com2)
+	.com2(com2),
+	
+	.rx_frame_end(RX_FRAME_END),
+	.rx_err(RX_FRAME_END & ~RX_ERRS[0]),
+	.rx_service_req(RX_SERVICE_REQ),
+	.rx_sd_busy(RX_SD_BUSY)
 );
+
+wire[5:0] RX_ERRS;
+assign rx_frame_end = RX_FRAME_END;
+assign rx_errs = RX_ERRS;
 
 hsi_m_rx_ctrl HSI_M_RX_CTRL (
 	.clk(clk),
@@ -77,7 +88,12 @@ hsi_m_rx_ctrl HSI_M_RX_CTRL (
 	.q_rdy(q_rdy), 
 	
 	.dat1(dat1),
-	.dat2(dat2)
+	.dat2(dat2),
+	
+	.rx_frame_end(RX_FRAME_END),
+	.rx_service_req(RX_SERVICE_REQ),
+	.rx_sd_busy(RX_SD_BUSY),
+	.rx_errs(RX_ERRS)
 );
 
 
