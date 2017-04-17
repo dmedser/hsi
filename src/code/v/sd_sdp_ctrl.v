@@ -13,7 +13,7 @@ module sd_sdp_ctrl (
 	input  [7:0] sd_d,
 	input  sd_d_rdy,
 	
-	input  sd_has_next_frame,
+	input  sd_has_next_dp,
 	input  sd_busy,
 	
 	input  cd_busy,
@@ -105,36 +105,37 @@ end
 
 wire[7:0] STATUS;
 assign STATUS[0] = rx_err_reg;
-assign STATUS[1] = sd_s_req_reg ? sd_d_tx_rdy : sd_has_next_frame;
+assign STATUS[1] = sd_s_req_reg ? sd_d_tx_rdy : sd_has_next_dp;
 assign STATUS[2] = sd_busy;
 assign STATUS[4] = sd_d_req_reg;
 
 wire SERVICE_DATA_IS_SENT = sd_d_req_reg ? (byte_cntr == 4) : (~cd_busy & (byte_cntr == 4));
-reg[2:0] byte_cntr;
-always@(posedge cd_busy or negedge SENDING_SERVICE_DATA)
+reg[10:0] byte_cntr;
+
+wire N_RST_BYTE_CNTR = ~CONTROL;
+always@(posedge cd_busy or negedge N_RST_BYTE_CNTR)
 begin
-	if(SENDING_SERVICE_DATA == 0)
+	if(N_RST_BYTE_CNTR == 0)
 		byte_cntr = 0;
 	else 
-		byte_cntr =  byte_cntr + 1;
+		byte_cntr = byte_cntr + 1;
 end
+
 
 wire [7:0] MASK_Q_MARKER = (SENDING_SERVICE_DATA & (byte_cntr == 0)) ? 8'hFF : 0,
 			  MASK_Q_STATUS = (SENDING_SERVICE_DATA & (byte_cntr == 1)) ? 8'hFF : 0,	
 			  MASK_Q_N1     = (SENDING_SERVICE_DATA & (byte_cntr == 2)) ? 8'hFF : 0,
 			  MASK_Q_N2     = (SENDING_SERVICE_DATA & (byte_cntr == 3)) ? 8'hFF : 0,
 			  MASK_Q_PL     = SENDING_PAYLOAD ? 8'hFF : 0;
-
-parameter S_DP_LEN_IN_BYTES = `S_DP_LEN_IN_WORDS * 2;
 			  
 assign q = MASK_Q_MARKER & `MARKER_SLAVE  |
 			  MASK_Q_STATUS & STATUS |
-			  MASK_Q_N1	& (sd_d_req_reg ? (S_DP_LEN_IN_BYTES >> 8): 0) |
-			  MASK_Q_N2 & (sd_d_req_reg ? S_DP_LEN_IN_BYTES : 0) |
+			  MASK_Q_N1	& (sd_d_req_reg ? (`S_DP_LEN >> 8): 0) |
+			  MASK_Q_N2 & (sd_d_req_reg ? `S_DP_LEN : 0) |
 			  MASK_Q_PL & sd_d;
 
-assign q_rdy = SENDING_SERVICE_DATA ? ~cd_busy & ~SERVICE_DATA_IS_SENT : sd_d_rdy;
-assign msg_end = sd_d_req_reg ? (~sd_d_tx_rdy & SENDING_PAYLOAD) : SERVICE_DATA_IS_SENT;
+assign q_rdy = SENDING_SERVICE_DATA ? (~cd_busy & ~SERVICE_DATA_IS_SENT) : sd_d_rdy;
+assign msg_end = sd_d_req_reg ? ((byte_cntr == (`S_DP_LEN + 4)) & ~cd_busy & SENDING_PAYLOAD) : SERVICE_DATA_IS_SENT;
 
 
 endmodule

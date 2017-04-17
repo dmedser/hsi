@@ -41,7 +41,7 @@ end
 
 wire tick_after_msg_end = ~rx_frame_end & tmp;
 wire N_RST_BY_TICK_AFTER_MSG_END = n_rst & ~tick_after_msg_end;
-reg[6:0] b_cntr;
+reg[10:0] b_cntr;
 always@(posedge d_rdy or negedge N_RST_BY_TICK_AFTER_MSG_END)
 begin
 	if(N_RST_BY_TICK_AFTER_MSG_END == 0)
@@ -86,13 +86,21 @@ begin
 		rx_sd_busy = `SD_BUSY;
 end
 
-reg[7:0] received_n;
+reg[15:0] received_n;
 always@(posedge clk or negedge n_rst)
 begin
 	if(n_rst == 0)
-		received_n = 0;	
+		received_n[15:8] = 0;	
+	else if((b_cntr == 3) & d_rdy)
+		received_n[15:8] = d;
+end
+
+always@(posedge clk or negedge n_rst)
+begin
+	if(n_rst == 0)
+		received_n[7:0] = 0;	
 	else if((b_cntr == 4) & d_rdy)
-		received_n = d;
+		received_n[7:0] = d;
 end
 
 reg received_crc_h_right;

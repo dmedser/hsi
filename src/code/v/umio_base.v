@@ -375,7 +375,7 @@ hsi_slave HSI_SLV (
 	.sd_d(SD_D),
 	.sd_d_rdy(SD_D_RDY),
 	.sd_d_sending(SD_D_SENDING),
-	.sd_has_next_frame(SD_HAS_NEXT_FRAME),
+	.sd_has_next_dp(SD_HAS_NEXT_DP),
 	
 
 	
@@ -398,7 +398,7 @@ sd_d_gen SD_D_GEN (
 	.sd_d(SD_D),
 	.sd_d_rdy(SD_D_RDY),
 	.sd_d_sending(SD_D_SENDING),
-	.sd_has_next_frame(SD_HAS_NEXT_FRAME)
+	.sd_has_next_dp(SD_HAS_NEXT_DP)
 );
 
 endmodule

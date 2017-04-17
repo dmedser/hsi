@@ -11,7 +11,7 @@ module hsi_s_tx_ctrl (
 	input [7:0] sd_d,
 	input sd_d_rdy,
 	output sd_d_sending,
-	input sd_has_next_frame,
+	input sd_has_next_dp,
 	
 	output dat1,
 	output dat2,
@@ -62,7 +62,7 @@ sd_sdp_ctrl SD_SDP_CTRL (
 	.sd_d(sd_d),
 	.sd_d_rdy(sd_d_rdy),
 	
-	.sd_has_next_frame(sd_has_next_frame),
+	.sd_has_next_dp(sd_has_next_dp),
 	.sd_busy(sd_busy),
 	
 	.cd_busy(CD_BUSY),

@@ -10,7 +10,7 @@ module hsi_slave (
 	input  [7:0] sd_d,
 	input  sd_d_rdy,
 	output sd_d_sending,
-	input  sd_has_next_frame,
+	input  sd_has_next_dp,
 	
 	input  com1,
 	input  com2,
@@ -66,7 +66,7 @@ hsi_s_tx_ctrl HSI_S_TX_CTRL (
 	.sd_d(sd_d),
 	.sd_d_rdy(sd_d_rdy),
 	.sd_d_sending(sd_d_sending),
-	.sd_has_next_frame(sd_has_next_frame),
+	.sd_has_next_dp(sd_has_next_dp),
 	
 	.dat1(dat1),
 	.dat2(dat2),

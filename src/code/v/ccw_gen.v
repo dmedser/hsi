@@ -9,11 +9,9 @@ module ccw_gen (
 	input ccw_d_sending
 );
 
+`include "src/code/vh/hsi_config.vh"
 
-parameter N = 10;
-
-
-assign ccw_d = SENDING_N ? N : ccw_d_sync;
+assign ccw_d = SENDING_N ? `CCW_LEN : ccw_d_sync;
 assign ccw_d_rdy = ~ccw_d_sending & (SENDING_N|SENDING_DATA);
 
 reg ccwg_has_data;
@@ -23,7 +21,7 @@ begin
 		ccwg_has_data = 0;
 	else if(ccw_accepted)
 		ccwg_has_data = 1;
-	else if(SENDING_DATA & (ccw_d == N))
+	else if(SENDING_DATA & (ccw_d == `CCW_LEN))
 		ccwg_has_data = 0;
 end
 
