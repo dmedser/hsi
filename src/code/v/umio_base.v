@@ -311,6 +311,7 @@ hsi_master HSI_MSTR(
 	.ccw_d(CCW_D),
 	.ccw_d_rdy(CCW_D_RDY),
 	.ccw_d_sending(CCW_D_SENDING),
+	.ccw_repeat_req(CCW_REPEAT_REQ),
 	
 	
 	.com_src(1),
@@ -343,6 +344,7 @@ ftdi_ctrl FTDI_CTRL (
 	.rd(FRD),
 	.ccw_accepted(CCW_ACCEPTED),
 	.sd_d_accepted(SD_D_ACCEPTED),
+	.sd_busy(SD_BUSY),
 	.txe(FTXE),
 	.wr(FWR),
 	.dq(FU_D),
@@ -355,6 +357,7 @@ ccw_gen CCW_GEN (
 	.clk(CLK_48),
 	.n_rst(N_RST),
 	.ccw_accepted(CCW_ACCEPTED),
+	.ccw_repeat_req(CCW_REPEAT_REQ),
 	.ccw_tx_rdy(CCW_TX_RDY),
 	.ccw_tx_en(CCW_TX_EN),
 	.ccw_d(CCW_D),
@@ -367,7 +370,7 @@ hsi_slave HSI_SLV (
 	.clk(CLK_48),
 	.n_rst(N_RST),
 	
-	.sd_busy(0),
+	.sd_busy(SD_BUSY),
 
 	.sd_d_tx_rdy(SD_D_TX_RDY),
 	.sd_d_tx_en(SD_D_TX_EN),

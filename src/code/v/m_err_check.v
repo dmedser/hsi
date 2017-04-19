@@ -4,8 +4,8 @@ module m_err_check (
 	input [7:0] d,
 	input d_rdy,
 
-	output reg rx_service_req,
-	output reg rx_sd_busy,
+	output rx_service_req,
+	output rx_sd_busy,
 
 	input pb_err,
 	input [15:0] crc,
@@ -39,21 +39,21 @@ begin
 		tmp = 0;
 end
 
-wire tick_after_msg_end = ~rx_frame_end & tmp;
-wire N_RST_BY_TICK_AFTER_MSG_END = n_rst & ~tick_after_msg_end;
+wire tick_after_frame_end = ~rx_frame_end & tmp;
+wire N_RST_BY_TICK_AFTER_FRAME_END = n_rst & ~tick_after_frame_end;
 reg[10:0] b_cntr;
-always@(posedge d_rdy or negedge N_RST_BY_TICK_AFTER_MSG_END)
+always@(posedge d_rdy or negedge N_RST_BY_TICK_AFTER_FRAME_END)
 begin
-	if(N_RST_BY_TICK_AFTER_MSG_END == 0)
+	if(N_RST_BY_TICK_AFTER_FRAME_END == 0)
 		b_cntr = 0;
 	else 
 		b_cntr = b_cntr + 1;
 end
 
 reg received_mrk_right;
-always@(posedge clk or negedge N_RST_BY_TICK_AFTER_MSG_END)
+always@(posedge clk or negedge N_RST_BY_TICK_AFTER_FRAME_END)
 begin
-	if(N_RST_BY_TICK_AFTER_MSG_END == 0)
+	if(N_RST_BY_TICK_AFTER_FRAME_END == 0)
 		received_mrk_right = 0;
 	else if((b_cntr == 1) & d_rdy & (d == `MARKER_SLAVE))
 		received_mrk_right = 1;
@@ -61,29 +61,30 @@ end
 
 
 reg err_in_msg;
-always@(posedge clk or negedge N_RST_BY_TICK_AFTER_MSG_END)
+always@(posedge clk or negedge N_RST_BY_TICK_AFTER_FRAME_END)
 begin
-	if(N_RST_BY_TICK_AFTER_MSG_END == 0)
+	if(N_RST_BY_TICK_AFTER_FRAME_END == 0)
 		err_in_msg = 0;
-	else if((b_cntr == 2) & d_rdy & `ERR_IN_MSG)
-		err_in_msg = 1;
-end
-
-
-always@(posedge clk or negedge N_RST_BY_TICK_AFTER_MSG_END)
-begin
-	if(N_RST_BY_TICK_AFTER_MSG_END == 0)
-		rx_service_req = 0;
-	else if((b_cntr == 2) & d_rdy & `SERVICE_REQ)
-		rx_service_req = 1;
-end
-
-always@(posedge clk or negedge n_rst)
-begin
-	if(n_rst == 0)
-		rx_sd_busy = 0;
 	else if((b_cntr == 2) & d_rdy)
-		rx_sd_busy = `SD_BUSY;
+		err_in_msg = `ERR_IN_MSG;
+end
+
+reg rx_service_req_reg;
+always@(posedge clk or negedge N_RST_BY_TICK_AFTER_FRAME_END)
+begin
+	if(N_RST_BY_TICK_AFTER_FRAME_END == 0)
+		rx_service_req_reg = 0;
+	else if((b_cntr == 2) & d_rdy)
+		rx_service_req_reg = `SERVICE_REQ;
+end
+
+reg rx_sd_busy_reg;
+always@(posedge clk or negedge N_RST_BY_TICK_AFTER_FRAME_END)
+begin
+	if(N_RST_BY_TICK_AFTER_FRAME_END == 0)
+		rx_sd_busy_reg = 0;
+	else if((b_cntr == 2) & d_rdy)
+		rx_sd_busy_reg = `SD_BUSY;
 end
 
 reg[15:0] received_n;
@@ -104,25 +105,25 @@ begin
 end
 
 reg received_crc_h_right;
-always@(posedge clk or negedge N_RST_BY_TICK_AFTER_MSG_END)
+always@(posedge clk or negedge N_RST_BY_TICK_AFTER_FRAME_END)
 begin
-	if(N_RST_BY_TICK_AFTER_MSG_END == 0)
+	if(N_RST_BY_TICK_AFTER_FRAME_END == 0)
 		received_crc_h_right = 0;	
 	else if((b_cntr == (received_n + 5)) & d_rdy)
 		received_crc_h_right = 1;
 end
 
 reg pb_err_reg;
-always@(posedge clk or negedge N_RST_BY_TICK_AFTER_MSG_END)
+always@(posedge clk or negedge N_RST_BY_TICK_AFTER_FRAME_END)
 begin
-	if(N_RST_BY_TICK_AFTER_MSG_END == 0)
+	if(N_RST_BY_TICK_AFTER_FRAME_END == 0)
 		pb_err_reg = 0;
 	else if(pb_err)
 		pb_err_reg = 1;
 end
 
 assign crc_update_disable = (b_cntr > (received_n + 4)); 
-assign crc_rst = tick_after_msg_end;
+assign crc_rst = tick_after_frame_end;
 
 assign `err_ok  = rx_frame_end & ~(`err_mrk | `err_sts | `err_n | `err_pb | `err_crc);
 assign `err_mrk = rx_frame_end & ~received_mrk_right;
@@ -130,4 +131,8 @@ assign `err_sts = rx_frame_end & err_in_msg;
 assign `err_n   = rx_frame_end & ~(received_n == (b_cntr - 6));
 assign `err_pb  = rx_frame_end & pb_err_reg;
 assign `err_crc = rx_frame_end & ~(received_crc_h_right & (d == crc[7:0]));  
+
+assign rx_sd_busy     = rx_frame_end & rx_sd_busy_reg;
+assign rx_service_req = rx_frame_end & rx_service_req_reg;
+
 endmodule 

@@ -2,6 +2,7 @@ module ccw_gen (
 	input clk,
 	input n_rst,
 	input ccw_accepted,
+	input ccw_repeat_req,
 	output ccw_tx_rdy,
 	input ccw_tx_en,
 	output [7:0] ccw_d,
@@ -19,7 +20,7 @@ always@(posedge clk or negedge n_rst)
 begin
 	if(n_rst == 0)
 		ccwg_has_data = 0;
-	else if(ccw_accepted)
+	else if(ccw_accepted | ccw_repeat_req)
 		ccwg_has_data = 1;
 	else if(SENDING_DATA & (ccw_d == `CCW_LEN))
 		ccwg_has_data = 0;

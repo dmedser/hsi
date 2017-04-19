@@ -6,10 +6,13 @@ module decoder (
 	output  [7:0] q,
 	output  q_rdy,
 	output  pb_err,
-	output frame_end
+	output frame_end,
+	output start_bit_accepted
 );
 
 `include "src/code/vh/hsi_config.vh"	
+	
+assign start_bit_accepted = (dc_state == DC_STATE_CTRL) & (d == START_BIT);	
 	
 parameter OFF = 0,
 			 ON  = 1,

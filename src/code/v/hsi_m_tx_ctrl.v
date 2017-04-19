@@ -20,11 +20,13 @@ module hsi_m_tx_ctrl (
 	output ccw_tx_en,
 	output ccw_d_sending,
 	input ccw_d_rdy,
+	output ccw_repeat_req,
 	
 	input com_src,
 	output com1,
 	output com2,
 	
+	input rx_start_bit_accepted,
 	input rx_frame_end,
 	input rx_err,
 	input rx_service_req,
@@ -73,7 +75,7 @@ wire TM_TX_RDY_MASKED  = tm_tx_en & tm_tx_rdy,
 	  BTC_TX_RDY_MASKED = btc_en & BTC_TX_RDY,
 	  SR_TX_RDY_MASKED  = sdreq_en & sr_tx_rdy,
 	  DPR_TX_RDY_MASKED = sdreq_en & DPR_TX_RDY,
-	  CCW_RX_RDY        = ~pre_tm & ccw_tx_rdy & ~DELAY_100_US & ~rx_sd_busy; // ccw_tx_rdy чтобы УКС передавалась во время pre_tm
+	  CCW_RX_RDY        = ~pre_tm & ccw_tx_rdy & ~DELAY_100_US /*& ~rx_sd_busy*/; // ccw_tx_rdy чтобы УКС передавалась во время pre_tm
 	  
 
 wire SENDING_TM  = (tx_state == TX_STATE_SENDING_TM),
@@ -219,6 +221,52 @@ assign D_SRC[7:0]   = D_TM_SR_DPR;
 assign D_SRC[15:8]  = D_BTC;
 assign D_SRC[23:16] = D_CCW;  
 assign D_SRC[31:24] = D_CRC;
+ 
+ 
+last_cmd_reg LAST_CMD_REG (
+	.cmds_for_reply(CMDS_FOR_REPLY),
+	.last_cmd(LAST_CMD)
+);
+
+wire[2:0] CMDS_FOR_REPLY;
+assign CMDS_FOR_REPLY[0] = SENDING_SR;
+assign CMDS_FOR_REPLY[1] = SENDING_DPR;
+assign CMDS_FOR_REPLY[2] = SENDING_CCW;
+
+wire[2:0] LAST_CMD;
+wire LAST_CMD_IS_SR  = (LAST_CMD == (1 << 0)),
+	  LAST_CMD_IS_DPR = (LAST_CMD == (1 << 1)),
+     LAST_CMD_IS_CCW = (LAST_CMD == (1 << 2));
+
+wire[2:0] DELAYS_AFTER_CMDS_FOR_REPLY;
+assign DELAYS_AFTER_CMDS_FOR_REPLY[0] = LAST_CMD_IS_SR  & DELAY_100_US;  
+assign DELAYS_AFTER_CMDS_FOR_REPLY[1] = LAST_CMD_IS_DPR  & DELAY_100_US;	  
+assign DELAYS_AFTER_CMDS_FOR_REPLY[2] = LAST_CMD_IS_CCW  & DELAY_100_US;  
+
+	  
+emergency_ctrl EMGC_CTRL (
+	.clk(clk),
+	.n_rst(n_rst),
+	.delays_after_cmds_for_reply(DELAYS_AFTER_CMDS_FOR_REPLY),
+	.rx_sd_busy(rx_sd_busy),
+	.rx_start_bit_accepted(rx_start_bit_accepted),
+	.rx_frame_end(rx_frame_end),
+	.rx_err(rx_err),
+	.repeat_reqs(REPEAT_REQUESTS),
+	.toggle_com_src_reqs(TOGGLE_COM_SRC_REQUESTS)
+);
+
+wire[2:0] REPEAT_REQUESTS;
+wire SR_REPEAT_REQ  = REPEAT_REQUESTS[0],
+     DPR_REPEAT_REQ = REPEAT_REQUESTS[1],
+     CCW_REPEAT_REQ = REPEAT_REQUESTS[2];
+
+wire[2:0] TOGGLE_COM_SRC_REQUESTS;
+wire SR_TOGGLE_COM_SRC_REQ  = TOGGLE_COM_SRC_REQUESTS[0], 
+	  DPR_TOGGLE_COM_SRC_REQ = TOGGLE_COM_SRC_REQUESTS[1],
+	  CCW_TOGGLE_COM_SRC_REQ = TOGGLE_COM_SRC_REQUESTS[2]; 
+
+assign ccw_repeat_req = CCW_REPEAT_REQ;
 
 reg[2:0] tx_state;
 parameter TX_STATE_CTRL = 0,
@@ -310,6 +358,7 @@ begin
 end
 endmodule
 
+
 module signal_trimmer (
 	input clk,
 	input s,
@@ -351,9 +400,7 @@ module tm_cntr (
 	output reg btc_tx_rdy,
 	input sending_btc
 );
-
 wire hz_mark = (`TM_FREQ == `Hz_1) ? tm_msg_end : l0th_tm_msg_end;
-
 wire l0th_tm_msg_end = (tm_me_cntr == 10);
 reg[3:0] tm_me_cntr;
 always@(posedge clk or negedge n_rst)
@@ -376,6 +423,7 @@ begin
 end
 endmodule 
 
+
 module service_req_ctrl (
 	input clk,
 	input n_rst, 
@@ -396,3 +444,19 @@ begin
 		dpr_tx_rdy = 0;
 end
 endmodule
+
+
+module last_cmd_reg (
+	input [2:0] cmds_for_reply,
+	output reg[2:0] last_cmd
+); 
+wire any_cmd = cmds_for_reply[0] | cmds_for_reply[1] | cmds_for_reply[2];
+always@(posedge any_cmd)
+begin
+	last_cmd = cmds_for_reply;
+end
+endmodule 
+
+
+
+

@@ -19,6 +19,7 @@ module hsi_master (
 	output ccw_tx_en,
 	output ccw_d_sending,
 	input ccw_d_rdy,
+	output ccw_repeat_req,
 	
 	input com_src,
 	input dat_src,
@@ -62,12 +63,14 @@ hsi_m_tx_ctrl HSI_M_TX_CTRL(
 	.ccw_tx_en(ccw_tx_en),
 	.ccw_d_sending(ccw_d_sending),
 	.ccw_d_rdy(ccw_d_rdy),
+	.ccw_repeat_req(ccw_repeat_req),
 	
 	.com_src(com_src),
 	.com1(com1),
 	.com2(com2),
 	
 	.rx_frame_end(RX_FRAME_END),
+	.rx_start_bit_accepted(RX_START_BIT_ACCEPTED),
 	.rx_err(RX_FRAME_END & ~RX_ERRS[0]),
 	.rx_service_req(RX_SERVICE_REQ),
 	.rx_sd_busy(RX_SD_BUSY)
@@ -91,6 +94,7 @@ hsi_m_rx_ctrl HSI_M_RX_CTRL (
 	.dat2(dat2),
 	
 	.rx_frame_end(RX_FRAME_END),
+	.rx_start_bit_accepted(RX_START_BIT_ACCEPTED),
 	.rx_service_req(RX_SERVICE_REQ),
 	.rx_sd_busy(RX_SD_BUSY),
 	.rx_errs(RX_ERRS)

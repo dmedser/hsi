@@ -12,6 +12,7 @@ module hsi_m_rx_ctrl (
 	input dat2,
 	
 	output rx_frame_end,
+	output rx_start_bit_accepted,
 	
 	output rx_service_req,
 	output rx_sd_busy,
@@ -29,7 +30,8 @@ decoder DC (
 	.q(DC_Q),
 	.q_rdy(DC_Q_RDY),
 	.pb_err(PB_ERR),
-	.frame_end(DC_FRAME_END)
+	.frame_end(DC_FRAME_END),
+	.start_bit_accepted(rx_start_bit_accepted)
 );
 
 wire[7:0] DC_Q;
@@ -68,3 +70,7 @@ signal_trimmer SIGNAL_TRIMMER (
 );
 
 endmodule
+
+
+
+

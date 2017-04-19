@@ -7,6 +7,7 @@ module ftdi_ctrl (
 	
 	output  ccw_accepted,
 	output  sd_d_accepted,
+	output  reg sd_busy,
 
 	input   txe,
 	output  wr,
@@ -61,9 +62,23 @@ assign oe = ~(READ_PREPARE | READ_BYTE);
 assign rd = ~READ_BYTE;
 
 parameter ID_CCW = 1,
-			 ID_SD_D  = 2;
-
+			 ID_SD_D  = 2,
+			 SET_SD_BUSY = 8'h13,
+			 CLR_SD_BUSY = 8'h03;
+			 
 assign ccw_accepted = ~rd & (dq == ID_CCW);
 assign sd_d_accepted  = ~rd & (dq == ID_SD_D);
+
+
+wire set_sd_busy = ~rd & (dq == SET_SD_BUSY),
+	  clr_sd_busy = ~rd & (dq == CLR_SD_BUSY);
+	  
+always@(posedge clk or negedge n_rst)
+begin
+	if(n_rst == 0)
+		sd_busy = 0;
+	else if(set_sd_busy | clr_sd_busy)
+		sd_busy = dq[4];
+end
 
 endmodule 
