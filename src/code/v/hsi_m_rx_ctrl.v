@@ -11,13 +11,13 @@ module hsi_m_rx_ctrl (
 	input dat1,
 	input dat2,
 	
-	output rx_frame_end,
 	output rx_start_bit_accepted,
+	output rx_frame_end,
+	output [5:0] rx_errs,	
 	
-	output rx_service_req,
 	output rx_sd_busy,
-	
-	output [5:0] rx_errs
+	output dpr_tx_rdy,
+	input  dpr_tx_ack
 );
 
 wire DC_D = dat_src ? dat1 : dat2;	
@@ -44,7 +44,7 @@ m_err_check ERR_CHECK (
 	.n_rst(n_rst),
 	.d(DC_Q),
 	.d_rdy(DC_Q_RDY),
-	.rx_service_req(rx_service_req),
+	.rx_service_req(RX_SERVICE_REQ),
 	.rx_sd_busy(rx_sd_busy),
 	.pb_err(PB_ERR),
 	.crc(CRC16),
@@ -69,6 +69,33 @@ signal_trimmer SIGNAL_TRIMMER (
 	.trim_s(DC_Q_RDY_TRIMMED)
 );
 
+service_req_ctrl SERVICE_REQ_CTRL (
+	.clk(clk),
+	.n_rst(n_rst), 
+	.rx_service_req(RX_SERVICE_REQ),
+	.dpr_tx_rdy(dpr_tx_rdy),
+	.dpr_tx_ack(dpr_tx_ack)
+);
+
+endmodule
+
+
+module service_req_ctrl (
+	input clk,
+	input n_rst, 
+	input rx_service_req,
+	output reg dpr_tx_rdy,
+	input dpr_tx_ack
+);
+always@(posedge clk or negedge n_rst)
+begin
+	if(n_rst == 0)
+		dpr_tx_rdy = 0;
+	else if(rx_service_req)
+		dpr_tx_rdy = 1;
+	else if(dpr_tx_ack)
+		dpr_tx_rdy = 0;
+end
 endmodule
 
 

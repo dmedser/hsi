@@ -82,3 +82,4 @@ assign q_rdy = SENDING_SERVICE_DATA ? ~cd_busy & ~SERVICE_DATA_IS_SENT : ccw_d_r
 assign msg_end = ~tx_rdy & SENDING_PAYLOAD;
 
 endmodule 
+

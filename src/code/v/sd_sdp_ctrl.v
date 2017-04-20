@@ -104,10 +104,15 @@ begin
 end
 
 wire[7:0] STATUS;
-assign STATUS[0] = rx_err_reg;
-assign STATUS[1] = sd_s_req_reg ? sd_d_tx_rdy : sd_has_next_dp;
-assign STATUS[2] = sd_busy;
-assign STATUS[4] = sd_d_req_reg;
+assign STATUS[0] = ERROR_IN_MSG;
+assign STATUS[1] = SERVICE_REQ;
+assign STATUS[2] = SD_BUSY;
+assign STATUS[4] = DP_SENDING;	  
+
+wire ERROR_IN_MSG = rx_err_reg,
+     SERVICE_REQ  = ~rx_err_reg & ~sd_busy & (sd_s_req_reg ? sd_d_tx_rdy : sd_has_next_dp),
+     SD_BUSY      = sd_busy,
+     DP_SENDING   = ~rx_err_reg & sd_d_req_reg;
 
 wire SERVICE_DATA_IS_SENT = sd_d_req_reg ? (byte_cntr == 4) : (~cd_busy & (byte_cntr == 4));
 reg[10:0] byte_cntr;

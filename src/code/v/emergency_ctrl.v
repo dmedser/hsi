@@ -1,6 +1,7 @@
 module emergency_ctrl (
 	input clk,
 	input n_rst,
+	input ccw_accepted,
 	input [2:0] delays_after_cmds_for_reply,
 	input rx_sd_busy,
 	input rx_start_bit_accepted,
@@ -10,7 +11,7 @@ module emergency_ctrl (
 	output [2:0] toggle_com_src_reqs
 );
 
-no_reply_check NO_REPLY_CHECK (
+no_reply_ctrl NO_REPLY_CTRL (
 	.clk(clk),
 	.n_rst(n_rst),
 	.rx_start_bit_accepted(rx_start_bit_accepted),
@@ -31,14 +32,18 @@ wire SR_REPLY_RECEPTION  = REPLIES_RECEPTION[0],
      CCW_REPLY_RECEPTION = REPLIES_RECEPTION[2];
 
 
-assign repeat_reqs = REPEAT_REQUESTS;
+assign repeat_reqs[2] = CCW_REPEAT_REQ;//REPEAT_REQUESTS;
+
 assign toggle_com_src_reqs = TOGGLE_COM_SRC_REQUESTS;
 
+/*
 wire[2:0] REPEAT_REQUESTS;
 
 wire SR_REPEAT_REQ  = REPEAT_REQUESTS[0],
      DPR_REPEAT_REQ = REPEAT_REQUESTS[1],
      CCW_REPEAT_REQ = REPEAT_REQUESTS[2];
+*/
+
 
 wire[2:0] TOGGLE_COM_SRC_REQUESTS;
 wire SR_TOGGLE_COM_SRC_REQ  = TOGGLE_COM_SRC_REQUESTS[0], 
@@ -49,19 +54,40 @@ wire SR_TOGGLE_COM_SRC_REQ  = TOGGLE_COM_SRC_REQUESTS[0],
 ccw_emgc_ctrl CCW_EMGC_CTRL (
 	.clk(clk),
 	.n_rst(n_rst), 
-	.ccw_reply_reception(CCW_REPLY_RECEPTION),
-	.rx_frame_end(rx_frame_end),
-	.rx_sd_busy(rx_sd_busy),
-	.rx_err(rx_err),
-	.ccw_no_reply(CCW_NO_REPLY),
+	.ccw_accepted(ccw_accepted),
+	.sd_busy(CCW_REPLY_RECEPTION & rx_frame_end & rx_sd_busy & ~rx_err),
+	.no_reply_or_err(CCW_DELAY_100_US_IS_OVER),
 	.ccw_repeat_req(CCW_REPEAT_REQ),
 	.ccw_toggle_com_src_req(CCW_TOGGLE_COM_SRC_REQ)
 );
 
+
+delay_100_us DELAY_100_US (
+	.clk(clk),
+	.n_rst(n_rst),
+	.start_src(DELAY_100_US_START_SRC),
+	.delay_is_over_dst(DELAY_100_US_IS_OVER_DST)
+);
+
+wire[2:0] DELAY_100_US_START_SRC;
+wire SR_DELAY_100_US_START  = (SR_REPLY_RECEPTION & rx_frame_end & rx_err) | SR_NO_REPLY,
+	  DPR_DELAY_100_US_START = (DPR_REPLY_RECEPTION & rx_frame_end & rx_err) | DPR_NO_REPLY,
+	  CCW_DELAY_100_US_START = (CCW_REPLY_RECEPTION & rx_frame_end & rx_err) | CCW_NO_REPLY;
+
+assign DELAY_100_US_START_SRC[0] = SR_DELAY_100_US_START;
+assign DELAY_100_US_START_SRC[1] = DPR_DELAY_100_US_START;
+assign DELAY_100_US_START_SRC[2] = CCW_DELAY_100_US_START;	  
+	  
+
+wire[2:0] DELAY_100_US_IS_OVER_DST;
+wire SR_DELAY_100_US_IS_OVER  = DELAY_100_US_IS_OVER_DST[0],
+	  DPR_DELAY_100_US_IS_OVER = DELAY_100_US_IS_OVER_DST[1],
+     CCW_DELAY_100_US_IS_OVER = DELAY_100_US_IS_OVER_DST[2];
+
 endmodule 
 
 
-module no_reply_check (
+module no_reply_ctrl (
 	input clk,
 	input n_rst,
 	input [2:0] delays_after_cmds_for_reply,
@@ -132,6 +158,72 @@ begin
 		end
 end
 endmodule
+
+
+module delay_100_us (
+	input clk,
+	input n_rst,
+	input  [2:0] start_src,
+	output [2:0] delay_is_over_dst
+);
+
+wire START = start_src[0] | start_src[1] | start_src[2];
+
+wire SR_DELAY_START  = start_src[0],
+     DPR_DELAY_START = start_src[1],
+     CCW_DELAY_START = start_src[2];
+
+reg sr_delay;
+always@(posedge clk or negedge n_rst)
+begin
+	if(n_rst == 0) sr_delay = 0;
+	else if(SR_DELAY_START) sr_delay = 1;
+	else if(delay_en == 0) sr_delay = 0;
+end
+
+reg dpr_delay;
+always@(posedge clk or negedge n_rst)
+begin
+	if(n_rst == 0) dpr_delay = 0;
+	else if(DPR_DELAY_START) dpr_delay = 1;
+	else if(delay_en == 0) dpr_delay = 0;
+end
+
+reg ccw_delay;
+always@(posedge clk or negedge n_rst)
+begin
+	if(n_rst == 0) ccw_delay = 0;
+	else if(CCW_DELAY_START) ccw_delay = 1;
+	else if(delay_en == 0) ccw_delay = 0;
+end
+
+assign delay_is_over_dst[0] = delay_is_over & sr_delay;
+assign delay_is_over_dst[1] = delay_is_over & dpr_delay;
+assign delay_is_over_dst[2] = delay_is_over & ccw_delay;
+
+reg delay_en;
+always@(posedge clk or negedge n_rst)
+begin
+	if(n_rst == 0)
+		delay_en = 0;
+	else if(START)
+		delay_en = 1;
+	else if(delay_is_over)
+		delay_en = 0;
+end
+
+parameter TICKS_IN_100_US = (((`CLK_FREQ) / 10000) - 1);
+wire delay_is_over = (ticks == TICKS_IN_100_US);
+
+reg[12:0] ticks;
+always@(posedge clk or negedge delay_en)
+begin
+	if(delay_en == 0)
+		ticks = 0;
+	else 
+		ticks = ticks + 1;
+end
+endmodule  
 
 
 

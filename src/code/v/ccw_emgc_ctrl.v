@@ -1,18 +1,16 @@
 module ccw_emgc_ctrl (
 	input clk,
 	input n_rst, 
-	input ccw_reply_reception,
-	input rx_frame_end,
-	input rx_sd_busy,
-	input rx_err,
-	input ccw_no_reply,
+	input ccw_accepted,
+	input sd_busy,
+	input no_reply_or_err,
 	output ccw_repeat_req,
 	output ccw_toggle_com_src_req
 );
 
 `include "src/code/vh/hsi_config.vh"
 
-wire CCW_REPEAT_DELAY_START = ccw_reply_reception & rx_frame_end & rx_sd_busy & ~rx_err & (CCW_REPEAT_REQ_CNTR < 3);
+wire CCW_REPEAT_DELAY_START = sd_busy & (CCW_REPEAT_REQ_CNTR < 3);
 
 ccw_repeat_delay_100_ms CCW_REPEAT_DELAY_100_MS (
 	.clk(clk),
@@ -23,7 +21,7 @@ ccw_repeat_delay_100_ms CCW_REPEAT_DELAY_100_MS (
 
 ccw_repeat_req_counter CCW_REPEAT_REQ_COUNTER (
 	.ccw_repeat_delay_start(CCW_REPEAT_DELAY_START),
-	.rst(rx_frame_end & ~rx_sd_busy & ~rx_err),
+	.rst(ccw_accepted),
 	.ccw_repeat_req_cntr(CCW_REPEAT_REQ_CNTR)
 );
 wire[1:0] CCW_REPEAT_REQ_CNTR; 
@@ -71,4 +69,4 @@ begin
 	else 
 		ccw_repeat_req_cntr = ccw_repeat_req_cntr + 1;
 end
-endmodule  
+endmodule

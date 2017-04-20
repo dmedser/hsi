@@ -306,6 +306,7 @@ hsi_master HSI_MSTR(
 	.btc_en(1),
 	.btc(40'hABCDEF1122),
 	
+	.ccw_accepted(CCW_ACCEPTED),
 	.ccw_tx_rdy(CCW_TX_RDY),
 	.ccw_tx_en(CCW_TX_EN),
 	.ccw_d(CCW_D),
