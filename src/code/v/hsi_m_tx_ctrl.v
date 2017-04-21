@@ -3,32 +3,31 @@ module hsi_m_tx_ctrl (
 	input clk_en,
 	input n_rst,
 	
-	input sdreq_en,
-	input sr_tx_rdy,
+	input  sdreq_en,
+	input  sr_tx_rdy,
 	output sr_tx_ack,
 	
-	input tm_tx_en,
-	input tm_tx_rdy,
+	input  tm_tx_en,
+	input  tm_tx_rdy,
 	output tm_tx_ack,
-	input pre_tm,
+	input  pre_tm,
 	
 	input btc_en,
 	input [39:0] btc,
 	
-	input [7:0] ccw_d,
-	input ccw_tx_rdy,
+	input  [7:0] ccw_d,
+	input  ccw_tx_rdy,
 	output ccw_tx_en,
 	output ccw_d_sending,
-	input ccw_d_rdy,
+	input  ccw_d_rdy,
 	
-	input com_src,
-	output com1,
-	output com2,
-	
-	input dpr_tx_rdy,
+	input  dpr_tx_rdy,
 	output dpr_tx_ack,
 	
-	output [2:0] delays_after_cmds_for_reply 
+	output cd_q,
+	
+	output [2:0] delays_after_cmds_for_reply,
+	output frame_to_reply_end
 );
 
 `include "src/code/vh/hsi_config.vh"
@@ -37,8 +36,7 @@ assign tm_tx_ack  = SENDING_TM;
 assign sr_tx_ack  = SENDING_SR;
 assign dpr_tx_ack = SENDING_DPR;
 
-assign com1 = CD_Q & com_src;
-assign com2 = CD_Q & (~com_src);
+assign cd_q = CD_Q;
 
 assign ccw_d_sending = CD_BUSY & ccw_tx_en & ccw_tx_rdy;
 
@@ -211,9 +209,10 @@ assign D_SRC[23:16] = D_CCW;
 assign D_SRC[31:24] = D_CRC;
  
  
-last_cmd_reg LAST_CMD_REG (
+cmd_for_reply_cycle_reg CMD_FOR_REPLY_CYCLE_REG (
 	.cmds_for_reply(CMDS_FOR_REPLY),
-	.last_cmd(LAST_CMD)
+	.cmd_for_reply_cycle(CMD_FOR_REPLY_CYCLE),
+	.delay_100_us_is_over(l00_US_IS_LEFT)
 );
 
 wire[2:0] CMDS_FOR_REPLY;
@@ -221,16 +220,25 @@ assign CMDS_FOR_REPLY[0] = SENDING_SR;
 assign CMDS_FOR_REPLY[1] = SENDING_DPR;
 assign CMDS_FOR_REPLY[2] = SENDING_CCW;
 
-wire[2:0] LAST_CMD;
-wire LAST_CMD_IS_SR  = (LAST_CMD == (1 << 0)),
-	  LAST_CMD_IS_DPR = (LAST_CMD == (1 << 1)),
-     LAST_CMD_IS_CCW = (LAST_CMD == (1 << 2));
+wire[2:0] CMD_FOR_REPLY_CYCLE;
+wire SR_CYC  = (CMD_FOR_REPLY_CYCLE == (1 << 0)),
+	  DPR_CYC = (CMD_FOR_REPLY_CYCLE == (1 << 1)),
+     CCW_CYC = (CMD_FOR_REPLY_CYCLE == (1 << 2));
 
-assign delays_after_cmds_for_reply[0] = LAST_CMD_IS_SR  & DELAY_100_US;  
-assign delays_after_cmds_for_reply[1] = LAST_CMD_IS_DPR & DELAY_100_US;	  
-assign delays_after_cmds_for_reply[2] = LAST_CMD_IS_CCW & DELAY_100_US;  
+assign delays_after_cmds_for_reply[0] = SR_CYC  & DELAY_100_US;  
+assign delays_after_cmds_for_reply[1] = DPR_CYC & DELAY_100_US;	  
+assign delays_after_cmds_for_reply[2] = CCW_CYC & DELAY_100_US;  
 
-	  
+wire CRC_AFTER_SR  = SR_CYC  & SENDING_CRC,
+	  CRC_AFTER_DPR = DPR_CYC & SENDING_CRC,
+	  CRC_AFTER_CCW = CCW_CYC & SENDING_CRC;
+
+assign frame_to_reply_end = (CRC_AFTER_SR | CRC_AFTER_DPR | CRC_AFTER_CCW) & MSG_END_CRC;
+
+
+
+
+
 reg[2:0] tx_state;
 parameter TX_STATE_CTRL = 0,
 			 TX_STATE_SENDING_TM  = 1,
@@ -387,16 +395,23 @@ end
 endmodule 
 
 
-module last_cmd_reg (
+module cmd_for_reply_cycle_reg (
 	input [2:0] cmds_for_reply,
-	output reg[2:0] last_cmd
+	input delay_100_us_is_over,
+	output reg[2:0] cmd_for_reply_cycle
 ); 
 wire any_cmd = cmds_for_reply[0] | cmds_for_reply[1] | cmds_for_reply[2];
-always@(posedge any_cmd)
+always@(posedge any_cmd or posedge delay_100_us_is_over)
 begin
-	last_cmd = cmds_for_reply;
+	if(delay_100_us_is_over)
+		cmd_for_reply_cycle = 0;
+	else 
+		cmd_for_reply_cycle = cmds_for_reply;
 end
 endmodule 
+
+
+
 
 
 

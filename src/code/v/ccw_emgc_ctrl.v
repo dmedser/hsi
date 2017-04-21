@@ -4,69 +4,71 @@ module ccw_emgc_ctrl (
 	input ccw_accepted,
 	input sd_busy,
 	input no_reply_or_err,
-	output ccw_repeat_req,
-	output ccw_toggle_com_src_req
+	output repeat_req,
+	output switch_com_src_req
 );
 
 `include "src/code/vh/hsi_config.vh"
 
-wire CCW_REPEAT_DELAY_START = sd_busy & (CCW_REPEAT_REQ_CNTR < 3);
+wire REPEAT_DELAY_START = sd_busy & (RPT_CNTR < 3);
+wire REPEAT_DELAY_IS_OVER;
 
-ccw_repeat_delay_100_ms CCW_REPEAT_DELAY_100_MS (
+assign repeat_req = REPEAT_DELAY_IS_OVER | no_reply_or_err;
+assign switch_com_src_req = no_reply_or_err;
+
+rpt_delay_100_ms REPEAT_DELAY_100_MS (
 	.clk(clk),
 	.n_rst(n_rst),
-	.start(CCW_REPEAT_DELAY_START),
-	.delay_is_over(ccw_repeat_req)
+	.start(REPEAT_DELAY_START),
+	.stop(REPEAT_DELAY_IS_OVER)
 );
 
-ccw_repeat_req_counter CCW_REPEAT_REQ_COUNTER (
-	.ccw_repeat_delay_start(CCW_REPEAT_DELAY_START),
+rpt_by_sd_busy_cntr REPEAT_CONUTER (
+	.incr(REPEAT_DELAY_START),
 	.rst(ccw_accepted),
-	.ccw_repeat_req_cntr(CCW_REPEAT_REQ_CNTR)
+	.cntr(RPT_CNTR)
 );
-wire[1:0] CCW_REPEAT_REQ_CNTR; 
+wire[1:0] RPT_CNTR; 
 
 endmodule
 
-module ccw_repeat_delay_100_ms(
+
+
+module rpt_delay_100_ms(
 	input clk,
 	input n_rst,
 	input start,
-	output delay_is_over
+	output stop
 );
-reg delay_en;
+reg en;
 always@(posedge clk or negedge n_rst)
 begin
-	if(n_rst == 0)
-		delay_en = 0;
-	else if(start)
-		delay_en = 1;
-	else if(delay_is_over)
-		delay_en = 0;
+	if(n_rst == 0) en = 0;
+	else if(start) en = 1;
+	else if(stop)  en = 0;
 end
+
 parameter TICKS_IN_100_MS = (((`CLK_FREQ) / 10) - 1);
-assign delay_is_over = (ticks == TICKS_IN_100_MS);
+
+assign stop = (ticks == TICKS_IN_100_MS);
+
 reg[22:0] ticks;
-always@(posedge clk or negedge delay_en)
+always@(posedge clk or negedge en)
 begin
-	if(delay_en == 0)
-		ticks = 0;
-	else 
-		ticks = ticks + 1;
+	if(en == 0) ticks = 0;
+	else        ticks = ticks + 1;
 end
 endmodule 
 
 
-module ccw_repeat_req_counter (
-	input ccw_repeat_delay_start,
+module rpt_by_sd_busy_cntr (
+	input incr,
 	input rst,
-	output reg[1:0] ccw_repeat_req_cntr
+	output reg[1:0] cntr
 );
-always@(posedge ccw_repeat_delay_start or posedge rst)
+always@(posedge incr or posedge rst)
 begin
-	if(rst)
-		ccw_repeat_req_cntr = 0;
-	else 
-		ccw_repeat_req_cntr = ccw_repeat_req_cntr + 1;
+	if(rst) cntr = 0;
+	else    cntr = cntr + 1;
 end
 endmodule

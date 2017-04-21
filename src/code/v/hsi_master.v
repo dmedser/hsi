@@ -22,7 +22,7 @@ module hsi_master (
 	input ccw_d_rdy,
 	output ccw_repeat_req,
 	
-	input com_src,
+	input base_com,
 	input dat_src,
 	
 	output [7:0] q,
@@ -66,11 +66,11 @@ hsi_m_tx_ctrl HSI_M_TX_CTRL(
 	.ccw_d_sending(ccw_d_sending),
 	.ccw_d_rdy(ccw_d_rdy),
 	
-	.com_src(com_src),
-	.com1(com1),
-	.com2(com2),
+	.cd_q(CD_Q),
+	
 	
 	.delays_after_cmds_for_reply(DELAYS_AFTER_CMDS_FOR_REPLY),
+	.frame_to_reply_end(FRAME_TO_REPLY_END),
 	
 	.dpr_tx_rdy(DPR_TX_RDY),
 	.dpr_tx_ack(DPR_TX_ACK)
@@ -116,7 +116,7 @@ emergency_ctrl EMGC_CTRL (
 	.rx_frame_end(RX_FRAME_END),
 	.rx_err(RX_ERR),
 	.repeat_reqs(REPEAT_REQUESTS),
-	.toggle_com_src_reqs(TOGGLE_COM_SRC_REQUESTS)
+	.switch_com_src_req(SWITCH_COM_SRC_REQUEST)
 );
 
 wire[2:0] REPEAT_REQUESTS;
@@ -124,12 +124,58 @@ wire SR_REPEAT_REQ  = REPEAT_REQUESTS[0],
      DPR_REPEAT_REQ = REPEAT_REQUESTS[1],
      CCW_REPEAT_REQ = REPEAT_REQUESTS[2];
 
-wire[2:0] TOGGLE_COM_SRC_REQUESTS;
-wire SR_TOGGLE_COM_SRC_REQ  = TOGGLE_COM_SRC_REQUESTS[0], 
-	  DPR_TOGGLE_COM_SRC_REQ = TOGGLE_COM_SRC_REQUESTS[1],
-	  CCW_TOGGLE_COM_SRC_REQ = TOGGLE_COM_SRC_REQUESTS[2]; 
+wire SWITCH_COM_SRC_REQUEST;
 
 assign ccw_repeat_req = CCW_REPEAT_REQ;
+
+
+com_src_ctrl COM_SRC_CTRL (
+	.clk(clk),
+	.n_rst(n_rst & ~ccw_accepted),
+	.switch_com_src_req(SWITCH_COM_SRC_REQUEST),
+	.frame_to_reply_end(FRAME_TO_REPLY_END),
+   .base_com(base_com),
+	.cd_q(CD_Q),
+	.com1(com1),
+	.com2(com2)
+);
+
+endmodule
+
+
+module com_src_ctrl (
+	input clk,
+	input n_rst,
+	input switch_com_src_req,
+	input frame_to_reply_end,
+   input base_com,
+	input cd_q,
+	output com1,
+	output com2
+);
+
+assign com1 = (base_com ^ (switch_com_src_en & flip)) ? 1 : cd_q;
+assign com2 = (base_com ^ (switch_com_src_en & flip)) ? cd_q : 1;
+
+reg switch_com_src_en;
+always@(posedge clk or negedge n_rst)
+begin
+	if(n_rst == 0)
+		switch_com_src_en = 0;
+	else if(switch_com_src_req)
+		switch_com_src_en = 1;
+	else if(frame_to_reply_end)
+		switch_com_src_en = 0;
+end
+
+reg flip;
+always@(posedge switch_com_src_en or negedge n_rst)
+begin
+	if(n_rst == 0)
+		flip = 0;
+	else
+		flip = ~flip;
+end
 
 endmodule
 

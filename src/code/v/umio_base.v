@@ -315,7 +315,7 @@ hsi_master HSI_MSTR(
 	.ccw_repeat_req(CCW_REPEAT_REQ),
 	
 	
-	.com_src(1),
+	.base_com(0),
 	.dat_src(1),
 	
 	.q(),
