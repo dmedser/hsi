@@ -297,6 +297,7 @@ hsi_master HSI_MSTR(
 	.sdreq_en(1),
 	.sr_tx_rdy(SR_TX_RDY),
 	.sr_tx_ack(SR_TX_ACK),
+	.sr_repeat_req(SR_REPEAT_REQ),
 	
 	.tm_tx_en(1),
 	.tm_tx_rdy(TM_TX_RDY),
@@ -327,13 +328,14 @@ hsi_master HSI_MSTR(
 );
 
 
-tm_gen TM_GEN(
+tm_sr_gen TM_SR_GEN(
 	.clk(CLK_48),
 	.n_rst(N_RST),
 	.tm_tx_rdy(TM_TX_RDY),
 	.tm_tx_ack(TM_TX_ACK),
 	.sr_tx_rdy(SR_TX_RDY),
 	.sr_tx_ack(SR_TX_ACK),
+	.sr_repeat_req(SR_REPEAT_REQ),
 	.pre_tm(PRE_TM)
 );
 

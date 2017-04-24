@@ -17,7 +17,7 @@ decoder DC (
 	.clk(clk),
 	.n_rst(n_rst),
 	.clk_en(clk_en),
-	.d(com1|com2),
+	.d(com1 & com2),
 	.q(DC_Q),
 	.q_rdy(DC_Q_RDY),
 	.pb_err(PB_ERR),

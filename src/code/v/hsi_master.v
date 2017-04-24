@@ -5,6 +5,7 @@ module hsi_master (
 	input sdreq_en,
 	input sr_tx_rdy,
 	output sr_tx_ack,
+	output sr_repeat_req,
 	
 	input tm_tx_en,
 	input tm_tx_rdy,
@@ -86,7 +87,6 @@ hsi_m_rx_ctrl HSI_M_RX_CTRL (
 	.clk(clk),
 	.clk_en(DC_CLK_EN),
 	.n_rst(n_rst),
-	.sdreq_en(sdreq_en),
 	.dat_src(dat_src),
 	
 	.q(q),
@@ -127,7 +127,7 @@ wire SR_REPEAT_REQ  = REPEAT_REQUESTS[0],
 wire SWITCH_COM_SRC_REQUEST;
 
 assign ccw_repeat_req = CCW_REPEAT_REQ;
-
+assign sr_repeat_req = SR_REPEAT_REQ;
 
 com_src_ctrl COM_SRC_CTRL (
 	.clk(clk),

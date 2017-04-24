@@ -2,7 +2,6 @@ module hsi_m_rx_ctrl (
 	input clk,
 	input clk_en,
 	input n_rst,
-	input sdreq_en,
 	input dat_src,
 	
 	output [7:0] q,

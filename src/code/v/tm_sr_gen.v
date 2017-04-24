@@ -1,10 +1,11 @@
-module tm_gen (
+module tm_sr_gen (
 	input clk,
 	input n_rst,
 	output reg tm_tx_rdy,
-	input tm_tx_ack,
+	input      tm_tx_ack,
 	output reg sr_tx_rdy,
-	input sr_tx_ack,
+	input      sr_tx_ack,
+	input      sr_repeat_req,
 	output pre_tm
 );
 
@@ -65,7 +66,7 @@ always@(posedge clk or negedge n_rst)
 begin
 	if(n_rst == 0)
 		sr_tx_rdy = 0;
-	else if(l00_MS_IS_LEFT)
+	else if(l00_MS_IS_LEFT | sr_repeat_req)
 		sr_tx_rdy = 1;
 	else if(sr_tx_ack)
 		sr_tx_rdy = 0;

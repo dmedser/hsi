@@ -120,7 +120,7 @@ assign D_SRC[15:8] = D_CRC;
 wire SENDING_SDP = (tx_state == TX_STATE_SENDING_SDP);
 wire SENDING_CRC = (tx_state == TX_STATE_SENDING_CRC);
 
-wire SD_S_REQ = (rx_frame_end & ((rx_flag == `FLAG_CONTROL_COMMAND_WORD) | (rx_flag == `FLAG_STATUS_REQUEST))) ;
+wire SD_S_REQ = (rx_frame_end & ((rx_flag == `FLAG_CONTROL_COMMAND_WORD) /*| (rx_flag == `FLAG_STATUS_REQUEST)*/)) ;
 wire SD_D_REQ = (rx_frame_end & (rx_flag == `FLAG_DATA_PACKET_REQUEST));
 
 wire SDP_TX_START = SD_S_REQ | SD_D_REQ;

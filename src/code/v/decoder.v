@@ -37,8 +37,8 @@ wire PARITY_BIT_VAL = (`ML_FST == `LSB) ? ~(FRAME_REG[7]^FRAME_REG[6]^FRAME_REG[
 												      ~(FRAME_REG[8]^FRAME_REG[7]^FRAME_REG[6]^FRAME_REG[5]^FRAME_REG[4]^FRAME_REG[3]^FRAME_REG[2]^FRAME_REG[1]);
 
 wire PARITY_BIT_CORRECT = (PARITY_BIT_SRC == PARITY_BIT_VAL);														
-assign q_rdy = (SIPO_CONVERSION_IS_OVER & PARITY_BIT_CORRECT) ? ON : OFF; 
-assign pb_err = (SIPO_CONVERSION_IS_OVER & ~PARITY_BIT_CORRECT) ? ON : OFF; 										
+assign q_rdy = SIPO_CONVERSION_IS_OVER & PARITY_BIT_CORRECT; 
+assign pb_err = SIPO_CONVERSION_IS_OVER & ~PARITY_BIT_CORRECT; 										
 									
 sipo_timer SIPO_TIM (
 	.clk(clk),

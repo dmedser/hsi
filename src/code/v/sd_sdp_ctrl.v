@@ -27,28 +27,30 @@ module sd_sdp_ctrl (
 
 assign sd_d_tx_en = SENDING_PAYLOAD;
 
+wire N_RST_REGS = n_rst & ~msg_end;
+
 reg rx_err_reg;
-always@(posedge clk or negedge n_rst)
+always@(posedge clk or negedge N_RST_REGS)
 begin
-	if(n_rst == 0)
+	if(N_RST_REGS == 0)
 		rx_err_reg = 0;
 	else if(SDP_TX_START)
 		rx_err_reg = rx_err;
 end
 
 reg sd_d_req_reg;
-always@(posedge clk or negedge n_rst)
+always@(posedge clk or negedge N_RST_REGS)
 begin
-	if(n_rst == 0)
+	if(N_RST_REGS == 0)
 		sd_d_req_reg = 0;
 	else if(SDP_TX_START)
 		sd_d_req_reg = sd_d_req;
 end
 
 reg sd_s_req_reg;
-always@(posedge clk or negedge n_rst)
+always@(posedge clk or negedge N_RST_REGS)
 begin
-	if(n_rst == 0)
+	if(N_RST_REGS == 0)
 		sd_s_req_reg = 0;
 	else if(SDP_TX_START)
 		sd_s_req_reg = sd_s_req;
