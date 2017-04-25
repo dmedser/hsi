@@ -254,59 +254,10 @@ set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SDRAM_nCAS
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SDRAM_nCS
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SDRAM_nRAS
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SDRAM_nWE
-set_global_assignment -name ENABLE_SIGNALTAP ON
-set_global_assignment -name USE_SIGNALTAP_FILE src/code/stp/c3_48x8_240.stp
-set_global_assignment -name SLD_NODE_CREATOR_ID 110 -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_ENTITY_NAME sld_signaltap -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_RAM_BLOCK_TYPE=AUTO" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_INFO=805334528" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_POWER_UP_TRIGGER=0" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_STORAGE_QUALIFIER_INVERSION_MASK_LENGTH=0" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_ATTRIBUTE_MEM_MODE=OFF" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_STATE_FLOW_USE_GENERATED=0" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_STATE_BITS=11" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_BUFFER_FULL_STOP=1" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_CURRENT_RESOURCE_WIDTH=1" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_LEVEL=1" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_IN_ENABLED=0" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_ADVANCED_TRIGGER_ENTITY=basic,1," -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_LEVEL_PIPELINE=1" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_ENABLE_ADVANCED_TRIGGER=0" -section_id auto_signaltap_0
+set_global_assignment -name ENABLE_SIGNALTAP OFF
+set_global_assignment -name USE_SIGNALTAP_FILE src/code/stp/c1_1x8_8.stp
 set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
 set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[12] -to "hsi_master:HSI_MSTR|emergency_ctrl:EMGC_CTRL|no_reply_or_err_cntr:NO_REPLY_OR_ERR_COUNTER|cntr[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[13] -to "hsi_master:HSI_MSTR|emergency_ctrl:EMGC_CTRL|no_reply_or_err_cntr:NO_REPLY_OR_ERR_COUNTER|cntr[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[14] -to "hsi_master:HSI_MSTR|emergency_ctrl:EMGC_CTRL|no_reply_or_err_cntr:NO_REPLY_OR_ERR_COUNTER|cntr[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[12] -to "hsi_master:HSI_MSTR|emergency_ctrl:EMGC_CTRL|no_reply_or_err_cntr:NO_REPLY_OR_ERR_COUNTER|cntr[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[13] -to "hsi_master:HSI_MSTR|emergency_ctrl:EMGC_CTRL|no_reply_or_err_cntr:NO_REPLY_OR_ERR_COUNTER|cntr[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[14] -to "hsi_master:HSI_MSTR|emergency_ctrl:EMGC_CTRL|no_reply_or_err_cntr:NO_REPLY_OR_ERR_COUNTER|cntr[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_clk -to "pll:PLL|c3" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[0] -to "hsi_master:HSI_MSTR|emergency_ctrl:EMGC_CTRL|no_reply_ctrl:NO_REPLY_CTRL|delays_after_cmds_for_reply[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[1] -to "hsi_master:HSI_MSTR|emergency_ctrl:EMGC_CTRL|no_reply_ctrl:NO_REPLY_CTRL|delays_after_cmds_for_reply[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[2] -to "hsi_master:HSI_MSTR|emergency_ctrl:EMGC_CTRL|no_reply_ctrl:NO_REPLY_CTRL|delays_after_cmds_for_reply[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[3] -to "hsi_master:HSI_MSTR|emergency_ctrl:EMGC_CTRL|no_reply_ctrl:NO_REPLY_CTRL|no_reply[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[4] -to "hsi_master:HSI_MSTR|emergency_ctrl:EMGC_CTRL|no_reply_ctrl:NO_REPLY_CTRL|no_reply[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[5] -to "hsi_master:HSI_MSTR|emergency_ctrl:EMGC_CTRL|no_reply_ctrl:NO_REPLY_CTRL|no_reply[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[6] -to "hsi_master:HSI_MSTR|emergency_ctrl:EMGC_CTRL|no_reply_ctrl:NO_REPLY_CTRL|replies_reception[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[7] -to "hsi_master:HSI_MSTR|emergency_ctrl:EMGC_CTRL|no_reply_ctrl:NO_REPLY_CTRL|replies_reception[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[8] -to "hsi_master:HSI_MSTR|emergency_ctrl:EMGC_CTRL|no_reply_ctrl:NO_REPLY_CTRL|replies_reception[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[9] -to "hsi_master:HSI_MSTR|emergency_ctrl:EMGC_CTRL|no_reply_ctrl:NO_REPLY_CTRL|rx_frame_end" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[10] -to "hsi_master:HSI_MSTR|emergency_ctrl:EMGC_CTRL|no_reply_ctrl:NO_REPLY_CTRL|tick_after_ccw_delay" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[0] -to "hsi_master:HSI_MSTR|emergency_ctrl:EMGC_CTRL|no_reply_ctrl:NO_REPLY_CTRL|delays_after_cmds_for_reply[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[1] -to "hsi_master:HSI_MSTR|emergency_ctrl:EMGC_CTRL|no_reply_ctrl:NO_REPLY_CTRL|delays_after_cmds_for_reply[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[2] -to "hsi_master:HSI_MSTR|emergency_ctrl:EMGC_CTRL|no_reply_ctrl:NO_REPLY_CTRL|delays_after_cmds_for_reply[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[3] -to "hsi_master:HSI_MSTR|emergency_ctrl:EMGC_CTRL|no_reply_ctrl:NO_REPLY_CTRL|no_reply[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[4] -to "hsi_master:HSI_MSTR|emergency_ctrl:EMGC_CTRL|no_reply_ctrl:NO_REPLY_CTRL|no_reply[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[5] -to "hsi_master:HSI_MSTR|emergency_ctrl:EMGC_CTRL|no_reply_ctrl:NO_REPLY_CTRL|no_reply[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[6] -to "hsi_master:HSI_MSTR|emergency_ctrl:EMGC_CTRL|no_reply_ctrl:NO_REPLY_CTRL|replies_reception[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[7] -to "hsi_master:HSI_MSTR|emergency_ctrl:EMGC_CTRL|no_reply_ctrl:NO_REPLY_CTRL|replies_reception[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[8] -to "hsi_master:HSI_MSTR|emergency_ctrl:EMGC_CTRL|no_reply_ctrl:NO_REPLY_CTRL|replies_reception[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[9] -to "hsi_master:HSI_MSTR|emergency_ctrl:EMGC_CTRL|no_reply_ctrl:NO_REPLY_CTRL|rx_frame_end" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[10] -to "hsi_master:HSI_MSTR|emergency_ctrl:EMGC_CTRL|no_reply_ctrl:NO_REPLY_CTRL|tick_after_ccw_delay" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_SEGMENT_SIZE=2048" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_SAMPLE_DEPTH=2048" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[11] -to "hsi_master:HSI_MSTR|emergency_ctrl:EMGC_CTRL|no_reply_ctrl:NO_REPLY_CTRL|tick_after_sr_delay" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[11] -to "hsi_master:HSI_MSTR|emergency_ctrl:EMGC_CTRL|no_reply_ctrl:NO_REPLY_CTRL|tick_after_sr_delay" -section_id auto_signaltap_0
 set_global_assignment -name VERILOG_FILE src/code/v/tm_sr_gen.v
 set_global_assignment -name VERILOG_FILE src/code/v/s_err_check.v
 set_global_assignment -name VERILOG_FILE src/code/v/sd_sdp_ctrl.v
@@ -337,16 +288,4 @@ set_global_assignment -name VERILOG_FILE src/code/v/ccw_gen.v
 set_global_assignment -name VERILOG_FILE src/code/v/sd_d_gen.v
 set_global_assignment -name VERILOG_FILE src/code/v/emergency_ctrl.v
 set_global_assignment -name VERILOG_FILE src/code/v/ccw_emgc_ctrl.v
-set_global_assignment -name SIGNALTAP_FILE src/code/stp/c3_48x8_240.stp
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[15] -to "hsi_master:HSI_MSTR|emergency_ctrl:EMGC_CTRL|no_reply_or_err_cntr:NO_REPLY_OR_ERR_COUNTER|n_rst" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[16] -to "hsi_master:HSI_MSTR|emergency_ctrl:EMGC_CTRL|no_reply_or_err_cntr:NO_REPLY_OR_ERR_COUNTER|no_reply_or_err" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[15] -to "hsi_master:HSI_MSTR|emergency_ctrl:EMGC_CTRL|no_reply_or_err_cntr:NO_REPLY_OR_ERR_COUNTER|n_rst" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[16] -to "hsi_master:HSI_MSTR|emergency_ctrl:EMGC_CTRL|no_reply_or_err_cntr:NO_REPLY_OR_ERR_COUNTER|no_reply_or_err" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_DATA_BITS=17" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_BITS=17" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK=0000000000000000000000000000000000000000000000000000000000000000000000000000" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK_LENGTH=76" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_LOWORD=52594" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_HIWORD=32064" -section_id auto_signaltap_0
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
-set_global_assignment -name SLD_FILE db/c3_48x8_240_auto_stripped.stp

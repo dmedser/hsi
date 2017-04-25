@@ -8,7 +8,9 @@ module emergency_ctrl (
 	input rx_frame_end,
 	input rx_err,
 	output [2:0] repeat_reqs,
-	output switch_com_src_req
+	output switch_com_src_req,
+	output rst_com_src_ctrl,
+	output rst_service_req_ctrl
 );
 
 no_reply_ctrl NO_REPLY_CTRL (
@@ -31,24 +33,16 @@ wire SR_REPLY_RECEPTION  = REPLIES_RECEPTION[0],
 	  DPR_REPLY_RECEPTION = REPLIES_RECEPTION[1],
      CCW_REPLY_RECEPTION = REPLIES_RECEPTION[2];
 
-//assign repeat_reqs[0] = SR_REPEAT_REQ;
-assign repeat_reqs[2] = CCW_REPEAT_REQ;//REPEAT_REQUESTS;
+assign repeat_reqs[0] = SR_REPEAT_REQ;
+assign repeat_reqs[1] = DPR_REPEAT_REQ;
+assign repeat_reqs[2] = CCW_REPEAT_REQ;
 
-
-
-/*
-wire[2:0] REPEAT_REQUESTS;
-
-wire SR_REPEAT_REQ  = REPEAT_REQUESTS[0],
-     DPR_REPEAT_REQ = REPEAT_REQUESTS[1],
-     CCW_REPEAT_REQ = REPEAT_REQUESTS[2];
-*/
-
+assign rst_com_src_ctrl = SR_RST_COM_SRC_CTRL | DPR_RST_COM_SRC_CTRL | CCW_RST_COM_SRC_CTRL;
 assign switch_com_src_req = SR_SWITCH_COM_SRC_REQ | DPR_SWITCH_COM_SRC_REQ | CCW_SWITCH_COM_SRC_REQ;
 
 
 
-wire SR_SWITCH_COM_SRC_REQ,// = SR_REPEAT_REQ, 
+wire SR_SWITCH_COM_SRC_REQ, 
 	  DPR_SWITCH_COM_SRC_REQ,
 	  CCW_SWITCH_COM_SRC_REQ; 
 
@@ -59,7 +53,8 @@ ccw_emgc_ctrl CCW_EMGC_CTRL (
 	.sd_busy(CCW_REPLY_RECEPTION & rx_frame_end & rx_sd_busy & ~rx_err),
 	.no_reply_or_err(CCW_NO_REPLY_OR_ERR),
 	.repeat_req(CCW_REPEAT_REQ),
-	.switch_com_src_req(CCW_SWITCH_COM_SRC_REQ)
+	.switch_com_src_req(CCW_SWITCH_COM_SRC_REQ),
+	.rst_com_src_ctrl(CCW_RST_COM_SRC_CTRL)
 );
 
 
@@ -92,13 +87,38 @@ ccw_no_reply_or_err_cntr CCW_NO_REPLY_OR_ERR_COUNTER (
 	.no_reply_or_err(CCW_NO_REPLY_OR_ERR),
 	.cntr(CCW_NRE_CNTR)
 );
-
-
-
-//wire CCW_SWITCH_COM_SRC_EN = CCW_NO_REPLY_OR_ERR & ((RPT_CNTR == 0) | (RPT_CNTR == 2));
-
-
 wire[2:0] CCW_NRE_CNTR;	  
+
+sr_emgc_ctrl SR_EMGC_CTRL (
+	.clk(clk),
+	.n_rst(n_rst),
+	.no_reply(SR_NO_REPLY),
+	.no_reply_or_err(SR_NO_REPLY_OR_ERR),
+	.reply_reception(SR_REPLY_RECEPTION),
+	.repeat_req(SR_REPEAT_REQ),
+	.switch_com_src_req(SR_SWITCH_COM_SRC_REQ),
+	.rst_com_src_ctrl(SR_RST_COM_SRC_CTRL)
+);
+
+wire SR_REPEAT_REQ,
+	  SR_RST_COM_SRC_CTRL;
+
+
+dpr_emgc_ctrl DPR_EMGC_CTRL (
+	.clk(clk),
+	.n_rst(n_rst),
+	.rx_sd_busy(rx_sd_busy),
+	.no_reply(DPR_NO_REPLY),
+	.no_reply_or_err(DPR_NO_REPLY_OR_ERR),
+	.reply_reception(DPR_REPLY_RECEPTION),
+	.repeat_req(DPR_REPEAT_REQ),
+	.switch_com_src_req(DPR_SWITCH_COM_SRC_REQ),
+	.rst_com_src_ctrl(DPR_RST_COM_SRC_CTRL),
+	.rst_service_req_ctrl(rst_service_req_ctrl)
+);
+	  
+wire DPR_REPEAT_REQ,	  
+	  DPR_RST_COM_SRC_CTRL;
 	  
 endmodule 
 
@@ -242,4 +262,75 @@ begin
 end
 endmodule 
 
+
+module sr_emgc_ctrl (
+	input  clk,
+	input  n_rst,
+	input  no_reply,
+	input  no_reply_or_err,
+	input  reply_reception,
+	output repeat_req,
+	output switch_com_src_req,
+	output rst_com_src_ctrl
+);
+
+assign switch_com_src_req = repeat_req;
+assign repeat_req = ~rpt_disable & no_reply_or_err;
+assign rst_com_src_ctrl = (rpt_disable & no_reply) | RST_BY_REPLY_RECEPTION;
+
+wire RST_BY_REPLY_RECEPTION = rpt_disable & reply_reception,
+	  RST_BY_2ND_NO_REPLY_OR_ERR = rpt_disable & no_reply_or_err;
+	  
+reg rpt_disable;
+	  
+always@(posedge clk or negedge n_rst)
+begin
+	if(n_rst == 0)  
+		rpt_disable = 0;
+	else if(RST_BY_REPLY_RECEPTION)
+		rpt_disable = 0;
+	else if(RST_BY_2ND_NO_REPLY_OR_ERR)
+		rpt_disable = 0;
+	else if(no_reply_or_err)
+		rpt_disable = 1;
+end
+
+endmodule
+
+
+
+module dpr_emgc_ctrl (
+	input  clk,
+	input  n_rst,
+	input  rx_sd_busy,
+	input  no_reply,
+	input  no_reply_or_err,
+	input  reply_reception,
+	output repeat_req,
+	output switch_com_src_req,
+	output rst_com_src_ctrl,
+	output rst_service_req_ctrl 
+);
+
+assign switch_com_src_req = repeat_req;
+assign repeat_req = ~rpt_disable & no_reply_or_err;
+assign rst_com_src_ctrl = (rpt_disable & no_reply) | RST_BY_REPLY_RECEPTION;
+assign rst_service_req_ctrl = rst_com_src_ctrl | (reply_reception & rx_sd_busy);
+
+wire RST_BY_REPLY_RECEPTION = rpt_disable & reply_reception,
+	  RST_BY_2ND_NO_REPLY_OR_ERR = rpt_disable & no_reply_or_err;
+reg rpt_disable;
+always@(posedge clk or negedge n_rst)
+begin
+	if(n_rst == 0)  
+		rpt_disable = 0;
+	else if(RST_BY_REPLY_RECEPTION)
+		rpt_disable = 0;
+	else if(RST_BY_2ND_NO_REPLY_OR_ERR)
+		rpt_disable = 0;
+	else if(no_reply_or_err)
+		rpt_disable = 1;
+end
+
+endmodule
 

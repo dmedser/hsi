@@ -82,7 +82,7 @@ begin
 				begin
 					if(SERVICE_DATA_IS_SENT)
 						begin
-							if(sd_d_req_reg)
+							if(sd_d_req_reg & ~sd_busy)
 								sdc_state = SDC_STATE_SENDING_PAYLOAD;
 							else 
 								sdc_state = SDC_STATE_CTRL;
@@ -112,11 +112,11 @@ assign STATUS[2] = SD_BUSY;
 assign STATUS[4] = DP_SENDING;	  
 
 wire ERROR_IN_MSG = rx_err_reg,
-     SERVICE_REQ  = ~rx_err_reg & ~sd_busy & (sd_s_req_reg ? sd_d_tx_rdy : sd_has_next_dp),
+     SERVICE_REQ  = ~rx_err_reg /*& ~sd_busy*/ & (sd_s_req_reg ? sd_d_tx_rdy : sd_has_next_dp),
      SD_BUSY      = sd_busy,
      DP_SENDING   = ~rx_err_reg & sd_d_req_reg;
 
-wire SERVICE_DATA_IS_SENT = sd_d_req_reg ? (byte_cntr == 4) : (~cd_busy & (byte_cntr == 4));
+wire SERVICE_DATA_IS_SENT = (sd_d_req_reg & ~sd_busy) ? (byte_cntr == 4) : (~cd_busy & (byte_cntr == 4));
 reg[10:0] byte_cntr;
 
 wire N_RST_BYTE_CNTR = ~CONTROL;
@@ -137,12 +137,12 @@ wire [7:0] MASK_Q_MARKER = (SENDING_SERVICE_DATA & (byte_cntr == 0)) ? 8'hFF : 0
 			  
 assign q = MASK_Q_MARKER & `MARKER_SLAVE  |
 			  MASK_Q_STATUS & STATUS |
-			  MASK_Q_N1	& (sd_d_req_reg ? (`S_DP_LEN >> 8): 0) |
-			  MASK_Q_N2 & (sd_d_req_reg ? `S_DP_LEN : 0) |
+			  MASK_Q_N1	& ((sd_d_req_reg & ~sd_busy) ? (`S_DP_LEN >> 8): 0) |
+			  MASK_Q_N2 & ((sd_d_req_reg & ~sd_busy) ? `S_DP_LEN : 0) |
 			  MASK_Q_PL & sd_d;
 
 assign q_rdy = SENDING_SERVICE_DATA ? (~cd_busy & ~SERVICE_DATA_IS_SENT) : sd_d_rdy;
-assign msg_end = sd_d_req_reg ? ((byte_cntr == (`S_DP_LEN + 4)) & ~cd_busy & SENDING_PAYLOAD) : SERVICE_DATA_IS_SENT;
+assign msg_end = (sd_d_req_reg & ~sd_busy) ? ((byte_cntr == (`S_DP_LEN + 4)) & ~cd_busy & SENDING_PAYLOAD) : SERVICE_DATA_IS_SENT;
 
 
 endmodule

@@ -5,7 +5,8 @@ module ccw_emgc_ctrl (
 	input sd_busy,
 	input no_reply_or_err,
 	output repeat_req,
-	output switch_com_src_req
+	output switch_com_src_req,
+	output rst_com_src_ctrl
 );
 
 `include "src/code/vh/hsi_config.vh"
@@ -15,6 +16,7 @@ wire REPEAT_DELAY_IS_OVER;
 
 assign repeat_req = REPEAT_DELAY_IS_OVER | no_reply_or_err;
 assign switch_com_src_req = no_reply_or_err;
+assign rst_com_src_ctrl = ccw_accepted;
 
 rpt_delay_100_ms REPEAT_DELAY_100_MS (
 	.clk(clk),

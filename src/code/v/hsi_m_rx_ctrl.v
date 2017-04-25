@@ -15,6 +15,10 @@ module hsi_m_rx_ctrl (
 	output [5:0] rx_errs,	
 	
 	output rx_sd_busy,
+	
+	input dpr_repeat_req,
+	input rst_service_req_ctrl,
+	
 	output dpr_tx_rdy,
 	input  dpr_tx_ack
 );
@@ -70,7 +74,8 @@ signal_trimmer SIGNAL_TRIMMER (
 
 service_req_ctrl SERVICE_REQ_CTRL (
 	.clk(clk),
-	.n_rst(n_rst), 
+	.n_rst(n_rst & ~rst_service_req_ctrl), 
+	.dpr_repeat_req(dpr_repeat_req),
 	.rx_service_req(RX_SERVICE_REQ),
 	.dpr_tx_rdy(dpr_tx_rdy),
 	.dpr_tx_ack(dpr_tx_ack)
@@ -83,6 +88,7 @@ module service_req_ctrl (
 	input clk,
 	input n_rst, 
 	input rx_service_req,
+	input dpr_repeat_req, 
 	output reg dpr_tx_rdy,
 	input dpr_tx_ack
 );
@@ -90,7 +96,7 @@ always@(posedge clk or negedge n_rst)
 begin
 	if(n_rst == 0)
 		dpr_tx_rdy = 0;
-	else if(rx_service_req)
+	else if(rx_service_req | dpr_repeat_req)
 		dpr_tx_rdy = 1;
 	else if(dpr_tx_ack)
 		dpr_tx_rdy = 0;
