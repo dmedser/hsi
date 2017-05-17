@@ -228,9 +228,9 @@ assign FL1_D1_D	= 0;
 assign FL1_D1_nRE	= 1;
 assign FL1_D1_DE	= 0;	
 		
-assign FH1_D2_D	= 0;
+assign FH1_D2_D	= DAT2;
 assign FH1_D2_nRE	= 1;
-assign FH1_D2_DE	= 0;
+assign FH1_D2_DE	= 1;
 
 assign FH2_D2_D	= 0;
 assign FH2_D2_nRE	= 1;
@@ -252,9 +252,9 @@ assign FH2_C2_D	= 0;
 assign FH2_C2_nRE	= 1;
 assign FH2_C2_DE	= 0;
 
-assign FH4_D1_D	= DAT2;
+assign FH4_D1_D	= 0;
 assign FH4_D1_nRE	= 1;
-assign FH4_D1_DE	= 1;
+assign FH4_D1_DE	= 0;
 
 assign FH4_C1_D	= 0;
 assign FH4_C1_nRE	= 1;

@@ -101,7 +101,6 @@ hsi_m_rx_ctrl HSI_M_RX_CTRL (
 	.rx_errs(RX_ERRS),
 	
 	.dpr_repeat_req(DPR_REPEAT_REQ),
-	.rst_service_req_ctrl(RST_SERVICE_REQ_CTRL),
 	
 	.dpr_tx_rdy(DPR_TX_RDY),
 	.dpr_tx_ack(DPR_TX_ACK)
@@ -120,8 +119,7 @@ emergency_ctrl EMGC_CTRL (
 	.rx_err(RX_ERR),
 	.repeat_reqs(REPEAT_REQUESTS),
 	.switch_com_src_req(SWITCH_COM_SRC_REQUEST),
-	.rst_com_src_ctrl(RST_COM_SRC_CTRL),
-	.rst_service_req_ctrl(RST_SERVICE_REQ_CTRL)
+	.rst_com_src_ctrl(RST_COM_SRC_CTRL)
 );
 
 wire[2:0] REPEAT_REQUESTS;

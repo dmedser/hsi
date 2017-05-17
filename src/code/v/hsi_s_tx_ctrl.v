@@ -5,13 +5,13 @@ module hsi_s_tx_ctrl (
 	
 	input sd_busy,
 	
-	input sd_d_tx_rdy,
+	input  sd_d_tx_rdy,
 	output sd_d_tx_en,
 	
-	input [7:0] sd_d,
-	input sd_d_rdy,
+	input  [7:0] sd_d,
+	input  sd_d_rdy,
 	output sd_d_sending,
-	input sd_has_next_dp,
+	input  sd_has_next_dp,
 	
 	output dat1,
 	output dat2,
@@ -80,13 +80,17 @@ signal_trimmer SIGNAL_TRIMMER (
 crc_sender CRC_SENDER  (
 	.clk(clk),
 	.crc_tx_en(SENDING_CRC),
-	.crc(CRC16),
+	.crc(WRONG_CRC),
 	.crc_rdy(MSG_END_SDP),
 	.cd_busy(CD_BUSY),
 	.q_rdy(D_RDY_CRC),
 	.q(D_CRC),
 	.msg_end(MSG_END_CRC)
 );
+
+/////////////////////////////////////
+wire[15:0] WRONG_CRC = sd_d_req_reg ? (CRC16 & 16'h0F) : CRC16; 
+////////////////////////////////////
 
 crc16_citt_calc CRC16_CITT_CALC (
 	.clk(clk),
@@ -122,6 +126,17 @@ wire SENDING_CRC = (tx_state == TX_STATE_SENDING_CRC);
 
 wire SD_S_REQ = (rx_frame_end & ((rx_flag == `FLAG_CONTROL_COMMAND_WORD) | (rx_flag == `FLAG_STATUS_REQUEST))) ;
 wire SD_D_REQ = (rx_frame_end & (rx_flag == `FLAG_DATA_PACKET_REQUEST));
+
+/////////////////////////////////////////////
+reg sd_d_req_reg;
+always@(posedge clk or negedge n_rst)
+begin
+	if(n_rst == 0)
+		sd_d_req_reg = 0;
+	else if(rx_frame_end)
+		sd_d_req_reg = (rx_flag == `FLAG_DATA_PACKET_REQUEST) ? 1 : 0;
+end
+///////////////////////////////////////////////////
 
 wire SDP_TX_START = SD_S_REQ | SD_D_REQ;
 

@@ -9,24 +9,23 @@ module emergency_ctrl (
 	input rx_err,
 	output [2:0] repeat_reqs,
 	output switch_com_src_req,
-	output rst_com_src_ctrl,
-	output rst_service_req_ctrl
+	output rst_com_src_ctrl
 );
 
-no_reply_ctrl NO_REPLY_CTRL (
+reply_timeout_ctrl REPLY_TIMEOUT_CTRL (
 	.clk(clk),
 	.n_rst(n_rst),
 	.rx_start_bit_accepted(rx_start_bit_accepted),
 	.rx_frame_end(rx_frame_end),
 	.delays_after_cmds_for_reply(delays_after_cmds_for_reply),
-	.no_reply(NO_REPLY),
+	.reply_timeout(REPLY_TIMEOUT),
 	.replies_reception(REPLIES_RECEPTION)
 );
 
-wire[2:0] NO_REPLY;
-wire SR_NO_REPLY  = NO_REPLY[0],
-	  DPR_NO_REPLY = NO_REPLY[1],
-	  CCW_NO_REPLY = NO_REPLY[2];
+wire[2:0] REPLY_TIMEOUT;
+wire SR_REPLY_TIMEOUT  = REPLY_TIMEOUT[0],
+	  DPR_REPLY_TIMEOUT = REPLY_TIMEOUT[1],
+	  CCW_REPLY_TIMEOUT = REPLY_TIMEOUT[2];
 
 wire[2:0] REPLIES_RECEPTION;
 wire SR_REPLY_RECEPTION  = REPLIES_RECEPTION[0],
@@ -66,9 +65,9 @@ delay_100_us DELAY_100_US (
 );
 
 wire[2:0] DELAY_100_US_START_SRC;
-wire SR_DELAY_100_US_START  = (SR_REPLY_RECEPTION  & rx_frame_end & rx_err) | SR_NO_REPLY,
-	  DPR_DELAY_100_US_START = (DPR_REPLY_RECEPTION & rx_frame_end & rx_err) | DPR_NO_REPLY,
-	  CCW_DELAY_100_US_START = (CCW_REPLY_RECEPTION & rx_frame_end & rx_err) | CCW_NO_REPLY;
+wire SR_DELAY_100_US_START  = (SR_REPLY_RECEPTION  & rx_frame_end & rx_err) | SR_REPLY_TIMEOUT,
+	  DPR_DELAY_100_US_START = (DPR_REPLY_RECEPTION & rx_frame_end & rx_err) | DPR_REPLY_TIMEOUT,
+	  CCW_DELAY_100_US_START = (CCW_REPLY_RECEPTION & rx_frame_end & rx_err) | CCW_REPLY_TIMEOUT;
 
 assign DELAY_100_US_START_SRC[0] = SR_DELAY_100_US_START;
 assign DELAY_100_US_START_SRC[1] = DPR_DELAY_100_US_START;
@@ -92,9 +91,7 @@ wire[2:0] CCW_NRE_CNTR;
 sr_emgc_ctrl SR_EMGC_CTRL (
 	.clk(clk),
 	.n_rst(n_rst),
-	.no_reply(SR_NO_REPLY),
 	.no_reply_or_err(SR_NO_REPLY_OR_ERR),
-	.reply_reception(SR_REPLY_RECEPTION),
 	.repeat_req(SR_REPEAT_REQ),
 	.switch_com_src_req(SR_SWITCH_COM_SRC_REQ),
 	.rst_com_src_ctrl(SR_RST_COM_SRC_CTRL)
@@ -107,14 +104,10 @@ wire SR_REPEAT_REQ,
 dpr_emgc_ctrl DPR_EMGC_CTRL (
 	.clk(clk),
 	.n_rst(n_rst),
-	.rx_sd_busy(rx_sd_busy),
-	.no_reply(DPR_NO_REPLY),
 	.no_reply_or_err(DPR_NO_REPLY_OR_ERR),
-	.reply_reception(DPR_REPLY_RECEPTION),
 	.repeat_req(DPR_REPEAT_REQ),
 	.switch_com_src_req(DPR_SWITCH_COM_SRC_REQ),
-	.rst_com_src_ctrl(DPR_RST_COM_SRC_CTRL),
-	.rst_service_req_ctrl(rst_service_req_ctrl)
+	.rst_com_src_ctrl(DPR_RST_COM_SRC_CTRL)
 );
 	  
 wire DPR_REPEAT_REQ,	  
@@ -123,21 +116,70 @@ wire DPR_REPEAT_REQ,
 endmodule 
 
 
-module no_reply_ctrl (
+module reply_timeout_ctrl (
 	input clk,
 	input n_rst,
 	input [2:0] delays_after_cmds_for_reply,
 	input rx_start_bit_accepted,
 	input rx_frame_end,
-	output [2:0] no_reply,
+	output [2:0] reply_timeout,
 	output reg[2:0] replies_reception
 );
 
-assign no_reply[0] = tick_after_sr_delay  & ~replies_reception[0];
-assign no_reply[1] = tick_after_dpr_delay & ~replies_reception[1];
-assign no_reply[2] = tick_after_ccw_delay & ~replies_reception[2];
+assign reply_timeout[0] = tick_after_sr_delay  & ~reply_sr_reg;
+assign reply_timeout[1] = tick_after_dpr_delay & ~reply_dpr_reg;
+assign reply_timeout[2] = tick_after_ccw_delay & ~reply_ccw_reg;
 
 wire TICK_AFTER_ANY_DELAY = tick_after_sr_delay | tick_after_dpr_delay | tick_after_ccw_delay;
+
+reg reply_sr_reg;
+always@(posedge clk or negedge n_rst)
+begin
+	if(n_rst == 0)
+		reply_sr_reg = 0;
+	else if (replies_reception[0])
+		reply_sr_reg = 1;
+	else if(TICK_AFTER_ANY_DELAY)
+		reply_sr_reg = 0;
+end
+
+
+
+reg reply_dpr_reg;
+always@(posedge clk or negedge n_rst)
+begin
+	if(n_rst == 0)
+		reply_dpr_reg = 0;
+	else if (replies_reception[1])
+		reply_dpr_reg = 1;
+	else if(TICK_AFTER_ANY_DELAY)
+		reply_dpr_reg = 0;
+end
+
+
+
+reg reply_ccw_reg;
+always@(posedge clk or negedge n_rst)
+begin
+	if(n_rst == 0)
+		reply_ccw_reg = 0;
+	else if (replies_reception[2])
+		reply_ccw_reg = 1;
+	else if(TICK_AFTER_ANY_DELAY)
+		reply_ccw_reg = 0;
+end
+
+
+reg tick_after_frame_end;
+always@(posedge clk or negedge n_rst)
+begin
+	if(n_rst == 0)
+		tick_after_frame_end = 0;
+	else if(rx_frame_end)
+		tick_after_frame_end = 1;
+	else 
+		tick_after_frame_end = 0;
+end
 
 wire DELAY_SR  = delays_after_cmds_for_reply[0],
 	  DELAY_DPR = delays_after_cmds_for_reply[1],
@@ -176,7 +218,7 @@ always@(posedge clk or negedge n_rst)
 begin
 	if(n_rst == 0)
 		replies_reception = 0;
-	else if(TICK_AFTER_ANY_DELAY)
+	else if(tick_after_frame_end)
 		replies_reception = 0;
 	else if(DELAY_AFTER_CMD_FOR_REPLY)
 		begin
@@ -266,35 +308,32 @@ endmodule
 module sr_emgc_ctrl (
 	input  clk,
 	input  n_rst,
-	input  no_reply,
 	input  no_reply_or_err,
-	input  reply_reception,
 	output repeat_req,
 	output switch_com_src_req,
 	output rst_com_src_ctrl
 );
 
-assign switch_com_src_req = repeat_req;
-assign repeat_req = ~rpt_disable & no_reply_or_err;
-assign rst_com_src_ctrl = (rpt_disable & no_reply) | RST_BY_REPLY_RECEPTION;
-
-wire RST_BY_REPLY_RECEPTION = rpt_disable & reply_reception,
-	  RST_BY_2ND_NO_REPLY_OR_ERR = rpt_disable & no_reply_or_err;
-	  
+assign repeat_req = no_reply_or_err & ~rpt_disable;
 reg rpt_disable;
-	  
 always@(posedge clk or negedge n_rst)
 begin
-	if(n_rst == 0)  
-		rpt_disable = 0;
-	else if(RST_BY_REPLY_RECEPTION)
-		rpt_disable = 0;
-	else if(RST_BY_2ND_NO_REPLY_OR_ERR)
-		rpt_disable = 0;
+	if(n_rst == 0) rpt_disable = 0;
 	else if(no_reply_or_err)
-		rpt_disable = 1;
+		rpt_disable = ~rpt_disable;
 end
 
+reg tmp;
+always@(posedge clk or negedge n_rst)
+begin
+	if(n_rst == 0) tmp = 0;
+	else if(rpt_disable) tmp = 1;
+	else tmp = 0;
+end
+
+wire tick_after_rpt_disable_off = tmp & ~rpt_disable;
+assign switch_com_src_req = repeat_req;
+assign rst_com_src_ctrl = tick_after_rpt_disable_off;
 endmodule
 
 
@@ -302,35 +341,32 @@ endmodule
 module dpr_emgc_ctrl (
 	input  clk,
 	input  n_rst,
-	input  rx_sd_busy,
-	input  no_reply,
 	input  no_reply_or_err,
-	input  reply_reception,
 	output repeat_req,
 	output switch_com_src_req,
-	output rst_com_src_ctrl,
-	output rst_service_req_ctrl 
+	output rst_com_src_ctrl 
 );
 
-assign switch_com_src_req = repeat_req;
-assign repeat_req = ~rpt_disable & no_reply_or_err;
-assign rst_com_src_ctrl = (rpt_disable & no_reply) | RST_BY_REPLY_RECEPTION;
-assign rst_service_req_ctrl = rst_com_src_ctrl | (reply_reception & rx_sd_busy);
 
-wire RST_BY_REPLY_RECEPTION = rpt_disable & reply_reception,
-	  RST_BY_2ND_NO_REPLY_OR_ERR = rpt_disable & no_reply_or_err;
+assign repeat_req = no_reply_or_err & ~rpt_disable;
 reg rpt_disable;
 always@(posedge clk or negedge n_rst)
 begin
-	if(n_rst == 0)  
-		rpt_disable = 0;
-	else if(RST_BY_REPLY_RECEPTION)
-		rpt_disable = 0;
-	else if(RST_BY_2ND_NO_REPLY_OR_ERR)
-		rpt_disable = 0;
+	if(n_rst == 0) rpt_disable = 0;
 	else if(no_reply_or_err)
-		rpt_disable = 1;
+		rpt_disable = ~rpt_disable;
 end
 
+reg tmp;
+always@(posedge clk or negedge n_rst)
+begin
+	if(n_rst == 0) tmp = 0;
+	else if(rpt_disable) tmp = 1;
+	else tmp = 0;
+end
+
+wire tick_after_rpt_disable_off = tmp & ~rpt_disable;
+assign switch_com_src_req = repeat_req;
+assign rst_com_src_ctrl = tick_after_rpt_disable_off;
 endmodule
 

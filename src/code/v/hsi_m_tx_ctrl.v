@@ -87,7 +87,7 @@ coder CD (
 	.clk(clk),
 	.n_rst(n_rst),
 	.clk_en(clk_en),
-	.d(TX_D),
+	.d(WRONG_CRC),
 	.d_rdy(TX_D_RDY),
 	.busy(CD_BUSY),
 	.q(CD_Q)
@@ -236,7 +236,13 @@ wire CRC_AFTER_SR  = SR_CYC  & SENDING_CRC,
 assign frame_to_reply_end = (CRC_AFTER_SR | CRC_AFTER_DPR | CRC_AFTER_CCW) & MSG_END_CRC;
 
 
+crc_crasher CRC_CRASHER (
+	.sending_crc_to_crash(CRC_AFTER_CCW),
+	.d(TX_D),
+	.q(WRONG_CRC)
+);
 
+wire [7:0] WRONG_CRC;
 
 
 reg[2:0] tx_state;
@@ -328,6 +334,15 @@ begin
 		end
 end
 endmodule
+
+
+module crc_crasher (
+	input sending_crc_to_crash,
+	input [7:0] d,
+	output [7:0] q
+);
+assign q = d;//sending_crc_to_crash ? (d & 8'hFE) : d;	
+endmodule 
 
 
 module signal_trimmer (

@@ -17,7 +17,6 @@ module hsi_m_rx_ctrl (
 	output rx_sd_busy,
 	
 	input dpr_repeat_req,
-	input rst_service_req_ctrl,
 	
 	output dpr_tx_rdy,
 	input  dpr_tx_ack
@@ -74,7 +73,7 @@ signal_trimmer SIGNAL_TRIMMER (
 
 service_req_ctrl SERVICE_REQ_CTRL (
 	.clk(clk),
-	.n_rst(n_rst & ~rst_service_req_ctrl), 
+	.n_rst(n_rst), 
 	.dpr_repeat_req(dpr_repeat_req),
 	.rx_service_req(RX_SERVICE_REQ),
 	.dpr_tx_rdy(dpr_tx_rdy),
