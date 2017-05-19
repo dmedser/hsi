@@ -46,7 +46,10 @@ begin
 					end
 				FC_STATE_READ_BYTE:
 					begin
-						fc_state = FC_STATE_CTRL;
+						if(rxf)
+							fc_state = FC_STATE_CTRL;
+						else 
+							fc_state = FC_STATE_READ_BYTE;
 					end
 				FC_STATE_WRITE:
 					begin					

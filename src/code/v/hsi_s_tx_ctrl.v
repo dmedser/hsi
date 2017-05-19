@@ -80,7 +80,7 @@ signal_trimmer SIGNAL_TRIMMER (
 crc_sender CRC_SENDER  (
 	.clk(clk),
 	.crc_tx_en(SENDING_CRC),
-	.crc(WRONG_CRC),
+	.crc(CRC16),
 	.crc_rdy(MSG_END_SDP),
 	.cd_busy(CD_BUSY),
 	.q_rdy(D_RDY_CRC),
@@ -89,7 +89,7 @@ crc_sender CRC_SENDER  (
 );
 
 /////////////////////////////////////
-wire[15:0] WRONG_CRC = sd_d_req_reg ? (CRC16 & 16'h0F) : CRC16; 
+//wire[15:0] WRONG_CRC = sd_d_req_reg ? (CRC16 & 16'h0F) : CRC16; 
 ////////////////////////////////////
 
 crc16_citt_calc CRC16_CITT_CALC (
@@ -128,6 +128,7 @@ wire SD_S_REQ = (rx_frame_end & ((rx_flag == `FLAG_CONTROL_COMMAND_WORD) | (rx_f
 wire SD_D_REQ = (rx_frame_end & (rx_flag == `FLAG_DATA_PACKET_REQUEST));
 
 /////////////////////////////////////////////
+/*
 reg sd_d_req_reg;
 always@(posedge clk or negedge n_rst)
 begin
@@ -135,7 +136,7 @@ begin
 		sd_d_req_reg = 0;
 	else if(rx_frame_end)
 		sd_d_req_reg = (rx_flag == `FLAG_DATA_PACKET_REQUEST) ? 1 : 0;
-end
+end */
 ///////////////////////////////////////////////////
 
 wire SDP_TX_START = SD_S_REQ | SD_D_REQ;

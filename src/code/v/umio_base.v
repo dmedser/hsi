@@ -355,6 +355,14 @@ ftdi_ctrl FTDI_CTRL (
 	.q()
 );
 
+decoder_usb DC_USB (
+	.clk(FCLK_OUT),
+	.n_rst(N_RST),
+	.d(FU_D),
+	.d_accepted(~(FOE | FRXF)),
+	.q()
+);
+
 wire [7:0] CCW_D;
 ccw_gen CCW_GEN (
 	.clk(CLK_48),
