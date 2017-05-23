@@ -7,7 +7,7 @@ module hsi_master (
 	output sr_tx_ack,
 	output sr_repeat_req,
 	
-	input tm_tx_en,
+	input tm_en,
 	input tm_tx_rdy,
 	output tm_tx_ack,
 	input pre_tm,
@@ -53,7 +53,7 @@ hsi_m_tx_ctrl HSI_M_TX_CTRL(
 	.sr_tx_rdy(sr_tx_rdy),
 	.sr_tx_ack(sr_tx_ack),
 	
-	.tm_tx_en(tm_tx_en),
+	.tm_en(tm_en),
 	.tm_tx_rdy(tm_tx_rdy),
 	.tm_tx_ack(tm_tx_ack),
 	.pre_tm(pre_tm),

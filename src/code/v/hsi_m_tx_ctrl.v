@@ -7,7 +7,7 @@ module hsi_m_tx_ctrl (
 	input  sr_tx_rdy,
 	output sr_tx_ack,
 	
-	input  tm_tx_en,
+	input  tm_en,
 	input  tm_tx_rdy,
 	output tm_tx_ack,
 	input  pre_tm,
@@ -68,7 +68,7 @@ wire MSG_END_TM,
 	  MSG_END_CCW;
 	  
 	  
-wire TM_TX_RDY_MASKED  = tm_tx_en & tm_tx_rdy,
+wire TM_TX_RDY_MASKED  = tm_en & tm_tx_rdy,
 	  BTC_TX_RDY_MASKED = btc_en & BTC_TX_RDY,
 	  SR_TX_RDY_MASKED  = sdreq_en & sr_tx_rdy,
 	  DPR_TX_RDY_MASKED = sdreq_en & dpr_tx_rdy,

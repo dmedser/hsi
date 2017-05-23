@@ -299,12 +299,12 @@ hsi_master HSI_MSTR(
 	.sr_tx_ack(SR_TX_ACK),
 	.sr_repeat_req(SR_REPEAT_REQ),
 	
-	.tm_tx_en(1),
+	.tm_en(TM_EN),
 	.tm_tx_rdy(TM_TX_RDY),
 	.tm_tx_ack(TM_TX_ACK),
 	.pre_tm(PRE_TM),
 	
-	.btc_en(1),
+	.btc_en(BTC_EN),
 	.btc(40'hABCDEF1122),
 	
 	.ccw_accepted(CCW_ACCEPTED),
@@ -345,23 +345,59 @@ ftdi_ctrl FTDI_CTRL (
 	.oe(FOE),
 	.rxf(FRXF),
 	.rd(FRD),
-	.ccw_accepted(CCW_ACCEPTED),
-	.sd_d_accepted(SD_D_ACCEPTED),
-	.sd_busy(SD_BUSY),
 	.txe(FTXE),
 	.wr(FWR),
 	.dq(FU_D),
 	.d(),
-	.q()
+	.q(FTDI_Q)
 );
+wire[7:0] FTDI_Q;
 
-decoder_usb DC_USB (
+usb_decoder USB_DC (
 	.clk(FCLK_OUT),
 	.n_rst(N_RST),
-	.d(FU_D),
+	.d(FTDI_Q),
 	.d_accepted(~(FOE | FRXF)),
-	.q()
+	.q(USB_DC_Q),
+	.q_accepted(USB_DC_Q_ACCEPTED)
 );
+
+usb_ctrl_regs USB_CTRL_REGS (
+	.clk(FCLK_OUT),
+	.n_rst(N_RST),
+	.d(USB_DC_Q),
+	.d_accepted(USB_DC_Q_ACCEPTED),
+	
+	.sdi_flags(SDI_FLAGS),
+	.sdi_on(SDI_ON),
+	.sdi_dat_src(SDI_DAT_SRC),
+	.sdi_com_src(SDI_COM_SRC),
+	
+	.csi_btc_en(BTC_EN),
+	.csi_tm_en(TM_EN),
+	.csi_on(CSI_ON),
+	.csi_dat_src(CSI_DAT_SRC),
+	.csi_com_src(CSI_COM_SRC),
+	.csi_ccw_len(CSI_CCW_LEN)
+);
+
+wire SD_BUSY = SDI_FLAGS[0];
+
+wire[2:0] SDI_FLAGS;
+wire SDI_ON;
+wire[1:0] SDI_DAT_SRC,
+			 SDI_COM_SRC;
+	
+wire CSI_BTC_EN,
+	  CSI_TM_EN,
+	  CSI_ON;
+wire[1:0] CSI_DAT_SRC,
+			 CSI_COM_SRC;
+wire [5:0] CSI_CCW_LEN;
+
+
+wire[7:0] USB_DC_Q;
+wire USB_DC_Q_ACCEPTED;
 
 wire [7:0] CCW_D;
 ccw_gen CCW_GEN (
