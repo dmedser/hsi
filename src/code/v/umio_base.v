@@ -362,11 +362,27 @@ usb_decoder USB_DC (
 	.q_accepted(USB_DC_Q_ACCEPTED)
 );
 
+
+//usb_ccw_ctrl USB_CCW_CTRL (
+//	.clk(FCLK_OUT),
+//	.n_rst(N_RST),
+//	.d(USB_DC_Q),
+//	.d_accepted(USB_DC_Q_ACCEPTED),
+//	.d_accept_en(USB_DC_Q_ACCEPT_EN),
+//	.cd_busy(),
+//	.ccw_tx_rdy(),
+//	.ccw_d(),
+//	.ccw_d_rdy()
+//);
+
 usb_ctrl_regs USB_CTRL_REGS (
-	.clk(FCLK_OUT),
+	.clk_ftdi(FCLK_OUT),
+	.clk_prj(CLK_48),
 	.n_rst(N_RST),
 	.d(USB_DC_Q),
 	.d_accepted(USB_DC_Q_ACCEPTED),
+	
+	.sys_time(SYS_TIME),
 	
 	.sdi_flags(SDI_FLAGS),
 	.sdi_on(SDI_ON),
@@ -377,9 +393,10 @@ usb_ctrl_regs USB_CTRL_REGS (
 	.csi_tm_en(TM_EN),
 	.csi_on(CSI_ON),
 	.csi_dat_src(CSI_DAT_SRC),
-	.csi_com_src(CSI_COM_SRC),
-	.csi_ccw_len(CSI_CCW_LEN)
+	.csi_com_src(CSI_COM_SRC)
 );
+
+wire[63:0] SYS_TIME;
 
 wire SD_BUSY = SDI_FLAGS[0];
 
@@ -400,17 +417,18 @@ wire[7:0] USB_DC_Q;
 wire USB_DC_Q_ACCEPTED;
 
 wire [7:0] CCW_D;
-ccw_gen CCW_GEN (
-	.clk(CLK_48),
-	.n_rst(N_RST),
-	.ccw_accepted(CCW_ACCEPTED),
-	.ccw_repeat_req(CCW_REPEAT_REQ),
-	.ccw_tx_rdy(CCW_TX_RDY),
-	.ccw_tx_en(CCW_TX_EN),
-	.ccw_d(CCW_D),
-	.ccw_d_rdy(CCW_D_RDY),
-	.ccw_d_sending(CCW_D_SENDING)
-);
+//ccw_gen CCW_GEN (
+//	.clk(CLK_48),
+//	.n_rst(N_RST),
+//	.ccw_len(CSI_CCW_LEN),
+//	.ccw_accepted(CCW_ACCEPTED),
+//	.ccw_repeat_req(CCW_REPEAT_REQ),
+//	.ccw_tx_rdy(CCW_TX_RDY),
+//	.ccw_tx_en(CCW_TX_EN),
+//	.ccw_d(CCW_D),
+//	.ccw_d_rdy(CCW_D_RDY),
+//	.ccw_d_sending(CCW_D_SENDING)
+//);
 
 
 hsi_slave HSI_SLV (

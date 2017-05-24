@@ -1,18 +1,18 @@
 module ccw_gen (
-	input clk,
-	input n_rst,
-	input ccw_accepted,
-	input ccw_repeat_req,
+	input  clk,
+	input  n_rst,
+	input  [5:0] ccw_len,
+	input  ccw_accepted,
+	input  ccw_repeat_req,
 	output ccw_tx_rdy,
-	input ccw_tx_en,
+	input  ccw_tx_en,
 	output [7:0] ccw_d,
 	output ccw_d_rdy,
-	input ccw_d_sending
+	input  ccw_d_sending
 );
 
-`include "src/code/vh/hsi_config.vh"
 
-assign ccw_d = SENDING_N ? `CCW_LEN : ccw_d_sync;
+assign ccw_d = SENDING_N ? ccw_len : ccw_d_sync;
 assign ccw_d_rdy = ~ccw_d_sending & (SENDING_N|SENDING_DATA);
 
 reg ccwg_has_data;
@@ -22,7 +22,7 @@ begin
 		ccwg_has_data = 0;
 	else if(ccw_accepted | ccw_repeat_req)
 		ccwg_has_data = 1;
-	else if(SENDING_DATA & (ccw_d == `CCW_LEN))
+	else if(SENDING_DATA & (ccw_d == ccw_len))
 		ccwg_has_data = 0;
 end
 

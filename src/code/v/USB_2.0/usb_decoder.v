@@ -7,6 +7,7 @@ module usb_decoder (
 	output reg q_accepted
 ); 
 
+`include "src/code/vh/usb_ctrl_regs_addrs.vh"
 
 reg[1:0] dc_state;
 parameter CTRL = 0,
@@ -58,9 +59,9 @@ begin
 end	  
 
 
-reg[5:0] byte_cntr;			 
-reg[5:0] wr_ptr;
-reg[5:0] rd_ptr;
+reg[6:0] byte_cntr;			 
+reg[6:0] wr_ptr;
+reg[6:0] rd_ptr;
 
 always@(posedge clk or negedge N_RST_DECODER)
 begin
@@ -70,7 +71,22 @@ begin
 		byte_cntr = byte_cntr + 1;
 end
 
-wire WR_PTR_INCR_EN = DC_STATE_WR & ((byte_cntr == 2) | (byte_cntr > 5)); 
+wire ADDR_BYTE   = (byte_cntr == 2);
+wire NH_NL_BYTES = ((byte_cntr > 2) & (byte_cntr < 5));
+wire DATA_BYTES  = (byte_cntr > 5);
+
+wire CURRENT_FRAME_IS_CCW = DC_STATE_WR & ADDR_BYTE & (d == `CCW_BUF_ADDR);
+
+reg N_WR_EN;
+always@(posedge clk or negedge N_RST_DECODER)
+begin
+	if(N_RST_DECODER == 0)
+		N_WR_EN = 0;
+	else if(CURRENT_FRAME_IS_CCW)
+		N_WR_EN = 1;
+end
+
+wire WR_PTR_INCR_EN = DC_STATE_WR & (N_WR_EN ? (ADDR_BYTE | NH_NL_BYTES | DATA_BYTES) : (ADDR_BYTE | DATA_BYTES)); 
 
 wire N_RST_DECODER = n_rst & ~DC_STATE_CTRL;
 
@@ -103,9 +119,9 @@ wire[7:0] CRC8;
 wire FRAME_END = DC_STATE_WR & ~d_accepted;
 wire FRAME_IS_CORRECT = (CRC8 == 0);
 
-wire[5:0] addr = d_accepted ? wr_ptr : rd_ptr; 
+wire[6:0] addr = d_accepted ? wr_ptr : rd_ptr; 
 
-ram RX_BUF_64B (
+ram_128B RX_BUF_128B (
 	.address(addr),
 	.clock(clk),
 	.data(d),
