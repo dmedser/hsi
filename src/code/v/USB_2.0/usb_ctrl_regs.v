@@ -18,10 +18,11 @@ module usb_ctrl_regs (
 	output [1:0] csi_dat_src,
 	output [1:0] csi_com_src,
 	
-	output [7:0] ccw_d,
+	output [7:0] ccw_byte,
 	output ccw_accepted,
-	output ccw_buf_empty,
-	input  ccw_rdreq
+	output ccw_buf_is_read,
+	input  ccw_buf_rdreq,
+	input  n_rst_ccw_buf_ptrs
 );
 
 `include "src/code/vh/usb_ctrl_regs_addrs.vh"
@@ -49,8 +50,8 @@ assign csi_on = CSI_ON;
 assign csi_dat_src = CSI_DAT_SRC;
 assign csi_com_src = CSI_COM_SRC;
 
-assign ccw_d = CCW_BUF_Q;
-assign ccw_buf_empty = CCW_BUF_EMPTY;
+assign ccw_byte = CCW_BUF_Q;
+assign ccw_buf_is_read = CCW_BUF_IS_READ;
 
 
 reg[1:0] packer_state;
@@ -104,12 +105,15 @@ end
 //5e4d000008f5a1a2a3a4a5a6a7a826 СИСТЕМНОЕ ВЕРМЯ
 
 
+// 5e4d0cAA0895a1a2a3a4a5a6a7a826 CCW TEST NH ненулевой
+
+
 reg_byte_en REG_BYTE_EN (
 	.clk(clk_ftdi),
 	.n_rst(n_rst),
 	.d(d),
-	.a_accepted(PKR_STATE_ADDR),
-	.d_accepted(PKR_STATE_DATA),
+	.a_asserted(PKR_STATE_ADDR),
+	.d_asserted(PKR_STATE_DATA),
 	.reg_en(REG_EN),
 	.byte_en(BYTE_EN)
 );
@@ -163,25 +167,15 @@ ccw_buf CCW_BUF (
 	.clk_ftdi(clk_ftdi),
 	.clk_prj(clk_prj),
 	.n_rst(n_rst),
-	.wren(CCW_BUF_EN),
-	.rden(ccw_rdreq),
+	.wrreq(CCW_BUF_EN),
+	.rdreq(ccw_buf_rdreq),
+	.ccw_accepted(ccw_accepted), 
 	.d(d),
 	.q(CCW_BUF_Q),
-	.empty(CCW_BUF_EMPTY)
+	.buf_is_read(CCW_BUF_IS_READ),
+	.n_rst_ptrs(n_rst_ccw_buf_ptrs)
 );
 
-reg ccw_buf_en_sync;
-always@(posedge clk_prj or negedge n_rst)
-begin
-	if(n_rst == 0)
-		ccw_buf_en_sync = 0;
-	else if(CCW_BUF_EN)
-		ccw_buf_en_sync = 1;
-	else 
-		ccw_buf_en_sync = 0;
-end
-
-assign ccw_accepted = ~CCW_BUF_EN & ccw_buf_en_sync;
 
 wire[7:0] CCW_BUF_Q;
 
@@ -220,8 +214,8 @@ module reg_byte_en (
 	input clk,
 	input n_rst,
 	input [7:0] d,
-	input a_accepted,
-	input d_accepted,
+	input a_asserted,
+	input d_asserted,
 	output [3:0] reg_en,
 	output reg[7:0] byte_en
 );
@@ -231,23 +225,23 @@ always@(posedge clk or negedge n_rst)
 begin
 	if(n_rst == 0)
 		addr_reg = 0;
-	else if(a_accepted)
+	else if(a_asserted)
 		addr_reg = d;
 end
 
-wire N_RST_BYTE_EN = n_rst & ~a_accepted;
+wire N_RST_BYTE_EN = n_rst & ~a_asserted;
 always@(posedge clk or negedge N_RST_BYTE_EN)
 begin
 	if(N_RST_BYTE_EN == 0)
 		byte_en = 1;
-	else if(d_accepted)
+	else if(d_asserted)
 		byte_en = (byte_en << 1);
 end
 
-assign reg_en[0] = d_accepted & (addr_reg == `SYS_TIME_REG_ADDR);
-assign reg_en[1] = d_accepted & (addr_reg == `SDI_CTRL_REG_ADDR);
-assign reg_en[2] = d_accepted & (addr_reg == `CSI_CTRL_REG_ADDR);
-assign reg_en[3] = d_accepted & (addr_reg == `CCW_BUF_ADDR);
+assign reg_en[0] = d_asserted & (addr_reg == `SYS_TIME_REG_ADDR);
+assign reg_en[1] = d_asserted & (addr_reg == `SDI_CTRL_REG_ADDR);
+assign reg_en[2] = d_asserted & (addr_reg == `CSI_CTRL_REG_ADDR);
+assign reg_en[3] = d_asserted & (addr_reg == `CCW_BUF_ADDR);
 endmodule  
 
 module sys_time_reg (
@@ -418,45 +412,73 @@ endmodule
 
 
 module ccw_buf (
-	input clk_ftdi,
-	input clk_prj,
-	input n_rst,
-	input wren,
-	input rden,
-	input [7:0] d,
+	input  clk_ftdi,
+	input  clk_prj,
+	input  n_rst,
+	input  wrreq,
+	input  rdreq,
+	input  n_rst_ptrs,
+	input  [7:0] d,
 	output [7:0] q,
-	output empty
+	output buf_is_read,
+	output ccw_accepted
 );
 
-assign empty = (wr_ptr == rd_ptr);
+assign buf_is_read = (rd_ptr == usedw);
 
-reg[5:0] wr_ptr,
-			rd_ptr;
-always@(posedge clk_ftdi or negedge n_rst)
-begin
-	if(n_rst == 0)
-		wr_ptr = 0;
-	else if(wren)
-		wr_ptr = wr_ptr + 1;
-end
-
+reg wrreq_sync;
 always@(posedge clk_prj or negedge n_rst)
 begin
 	if(n_rst == 0)
+		wrreq_sync = 0;
+	else
+		wrreq_sync = wrreq;
+end
+
+wire TICK_AFTER_WRREQ = ~wrreq & wrreq_sync;
+//wire WRREQ_TRIMMED = wrreq & ~wrreq_sync;
+assign ccw_accepted = TICK_AFTER_WRREQ;
+
+
+reg[5:0] wr_ptr,
+			rd_ptr;
+			
+wire N_RST_PTRS = n_rst & n_rst_ptrs;			
+always@(posedge clk_ftdi or negedge N_RST_PTRS)
+begin
+	if(N_RST_PTRS == 0)
+		wr_ptr = 0;
+	else if(wrreq)
+		wr_ptr = wr_ptr + 1;
+end
+
+//wire N_RST_USEDW = n_rst & ~WRREQ_TRIMMED;
+reg[5:0] usedw;
+always@(posedge clk_ftdi or negedge n_rst)
+begin
+	if(n_rst == 0)
+		usedw = 0;
+	else if(wr_ptr == 1)
+		usedw = d[5:0] + 2;
+end
+
+always@(posedge clk_prj or negedge N_RST_PTRS)
+begin
+	if(N_RST_PTRS == 0)
 		rd_ptr = 0;
-	else if(rden)
+	else if(rdreq)
 		rd_ptr = rd_ptr + 1;
 end
 
-wire[5:0] addr = wren ? wr_ptr : rd_ptr; 
+wire[5:0] addr = wrreq ? wr_ptr : rd_ptr; 
 			
 ram_64B RAM_64B (
 	.inclock(clk_ftdi),
 	.outclock(clk_prj),
 	.address(addr),
 	.data(d),
-	.wren(wren),
-	.rden(rden),
+	.wren(wrreq),
+	.rden(rdreq),
 	.q(q)
 );
 endmodule 

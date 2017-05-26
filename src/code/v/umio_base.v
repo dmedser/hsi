@@ -309,10 +309,8 @@ hsi_master HSI_MSTR(
 	
 	.ccw_accepted(CCW_ACCEPTED),
 	.ccw_tx_rdy(CCW_TX_RDY),
-	.ccw_tx_en(CCW_TX_EN),
-	.ccw_d(CCW_D),
-	.ccw_d_rdy(CCW_D_RDY),
-	.ccw_d_sending(CCW_D_SENDING),
+	.ccw_rx_rdy(CCW_RX_RDY),
+	.ccw_byte(CCW_BYTE),
 	.ccw_repeat_req(CCW_REPEAT_REQ),
 	
 	
@@ -362,19 +360,6 @@ usb_decoder USB_DC (
 	.q_accepted(USB_DC_Q_ACCEPTED)
 );
 
-
-//usb_ccw_ctrl USB_CCW_CTRL (
-//	.clk(FCLK_OUT),
-//	.n_rst(N_RST),
-//	.d(USB_DC_Q),
-//	.d_accepted(USB_DC_Q_ACCEPTED),
-//	.d_accept_en(USB_DC_Q_ACCEPT_EN),
-//	.cd_busy(),
-//	.ccw_tx_rdy(),
-//	.ccw_d(),
-//	.ccw_d_rdy()
-//);
-
 usb_ctrl_regs USB_CTRL_REGS (
 	.clk_ftdi(FCLK_OUT),
 	.clk_prj(CLK_48),
@@ -393,8 +378,27 @@ usb_ctrl_regs USB_CTRL_REGS (
 	.csi_tm_en(TM_EN),
 	.csi_on(CSI_ON),
 	.csi_dat_src(CSI_DAT_SRC),
-	.csi_com_src(CSI_COM_SRC)
+	.csi_com_src(CSI_COM_SRC),
+
+	.ccw_byte(CCW_BYTE),
+	.ccw_accepted(CCW_ACCEPTED),
+	.ccw_buf_is_read(CCW_BUF_IS_READ),
+	.ccw_buf_rdreq(CCW_BUF_RDREQ),
+	.n_rst_ccw_buf_ptrs(N_RST_CCW_BUF_PTRS)
 );
+
+usb_ccw_ctrl USB_CCW_CTRL (
+	.clk(CLK_48),
+	.n_rst(N_RST),
+	.ccw_accepted(CCW_ACCEPTED),
+	.ccw_tx_rdy(CCW_TX_RDY),
+	.ccw_rx_rdy(CCW_RX_RDY),
+	.ccw_buf_rdreq(CCW_BUF_RDREQ),
+	.ccw_buf_is_read(CCW_BUF_IS_READ),
+	.ccw_repeat_req(CCW_REPEAT_REQ),
+	.n_rst_ccw_buf_ptrs(N_RST_CCW_BUF_PTRS)
+);
+
 
 wire[63:0] SYS_TIME;
 
@@ -416,7 +420,11 @@ wire [5:0] CSI_CCW_LEN;
 wire[7:0] USB_DC_Q;
 wire USB_DC_Q_ACCEPTED;
 
-wire [7:0] CCW_D;
+wire [7:0] CCW_BYTE;
+wire CCW_ACCEPTED,
+	  CCW_BUF_IS_READ,
+	  CCW_BUF_RDREQ;
+
 //ccw_gen CCW_GEN (
 //	.clk(CLK_48),
 //	.n_rst(N_RST),

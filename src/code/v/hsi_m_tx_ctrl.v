@@ -15,11 +15,9 @@ module hsi_m_tx_ctrl (
 	input btc_en,
 	input [39:0] btc,
 	
-	input  [7:0] ccw_d,
+	input  [7:0] ccw_byte,
 	input  ccw_tx_rdy,
-	output ccw_tx_en,
-	output ccw_d_sending,
-	input  ccw_d_rdy,
+	output ccw_rx_rdy,
 	
 	input  dpr_tx_rdy,
 	output dpr_tx_ack,
@@ -32,13 +30,15 @@ module hsi_m_tx_ctrl (
 
 `include "src/code/vh/hsi_config.vh"
 
+assign ccw_rx_rdy = CCW_RX_RDY;
+
 assign tm_tx_ack  = SENDING_TM;
 assign sr_tx_ack  = SENDING_SR;
 assign dpr_tx_ack = SENDING_DPR;
 
 assign cd_q = CD_Q;
 
-assign ccw_d_sending = CD_BUSY & ccw_tx_en & ccw_tx_rdy;
+//assign ccw_d_sending = CD_BUSY & ccw_tx_en & ccw_tx_rdy;
 
 wire TX_D_RDY,
 	  TX_D_RDY_TRIMMED,
@@ -72,7 +72,7 @@ wire TM_TX_RDY_MASKED  = tm_en & tm_tx_rdy,
 	  BTC_TX_RDY_MASKED = btc_en & BTC_TX_RDY,
 	  SR_TX_RDY_MASKED  = sdreq_en & sr_tx_rdy,
 	  DPR_TX_RDY_MASKED = sdreq_en & dpr_tx_rdy,
-	  CCW_RX_RDY        = ~pre_tm & ccw_tx_rdy & ~DELAY_100_US /*& ~rx_sd_busy*/; // ccw_tx_rdy чтобы УКС передавалась во время pre_tm
+	  CCW_TX_RDY_MASKED = ~pre_tm & ccw_tx_rdy & ~DELAY_100_US; 
 	  
 
 wire SENDING_TM  = (tx_state == TX_STATE_SENDING_TM),
@@ -87,7 +87,7 @@ coder CD (
 	.clk(clk),
 	.n_rst(n_rst),
 	.clk_en(clk_en),
-	.d(WRONG_CRC),
+	.d(TX_D),
 	.d_rdy(TX_D_RDY),
 	.busy(CD_BUSY),
 	.q(CD_Q)
@@ -170,13 +170,12 @@ btc_ctrl BTC_CTRL (
 ccw_ctrl CCW_CTRL (
 	.clk(clk),
 	.n_rst(n_rst),
-	.ccw_d(ccw_d),
-	.tx_rdy(CCW_RX_RDY & SENDING_CCW),
-	.tx_en(ccw_tx_en),
-	.cd_busy(CD_BUSY),
-	.ccw_d_rdy(ccw_d_rdy),
+	.ccw_byte(ccw_byte),
+	.ccw_tx_rdy(ccw_tx_rdy & SENDING_CCW),
+	.ccw_rx_rdy(CCW_RX_RDY),
 	.q(D_CCW),
 	.q_rdy(D_RDY_CCW),
+	.cd_busy(CD_BUSY),
 	.msg_end(MSG_END_CCW)
 );
 
@@ -236,13 +235,13 @@ wire CRC_AFTER_SR  = SR_CYC  & SENDING_CRC,
 assign frame_to_reply_end = (CRC_AFTER_SR | CRC_AFTER_DPR | CRC_AFTER_CCW) & MSG_END_CRC;
 
 
-crc_crasher CRC_CRASHER (
-	.sending_crc_to_crash(CRC_AFTER_CCW),
-	.d(TX_D),
-	.q(WRONG_CRC)
-);
-
-wire [7:0] WRONG_CRC;
+//crc_crasher CRC_CRASHER (
+//	.sending_crc_to_crash(CRC_AFTER_CCW),
+//	.d(TX_D),
+//	.q(WRONG_CRC)
+//);
+//
+//wire [7:0] WRONG_CRC;
 
 
 reg[2:0] tx_state;
@@ -274,7 +273,7 @@ begin
 						tx_state = TX_STATE_SENDING_SR;
 					else if(DPR_TX_RDY_MASKED)
 						tx_state = TX_STATE_SENDING_DPR;
-					else if(CCW_RX_RDY)
+					else if(CCW_TX_RDY_MASKED)
 						tx_state = TX_STATE_SENDING_CCW;
 				end
 			TX_STATE_SENDING_TM:

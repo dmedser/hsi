@@ -255,7 +255,7 @@ set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SDRAM_nCS
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SDRAM_nRAS
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SDRAM_nWE
 set_global_assignment -name ENABLE_SIGNALTAP ON
-set_global_assignment -name USE_SIGNALTAP_FILE src/code/stp/c3_48x8_240.stp
+set_global_assignment -name USE_SIGNALTAP_FILE src/code/stp/c1_1x8_8.stp
 set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
 set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
 set_global_assignment -name SLD_NODE_CREATOR_ID 110 -section_id auto_signaltap_0
@@ -274,12 +274,9 @@ set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_IN_ENABLE
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_ADVANCED_TRIGGER_ENTITY=basic,1," -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_LEVEL_PIPELINE=1" -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_ENABLE_ADVANCED_TRIGGER=0" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_clk -to "pll:PLL|c3" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_SEGMENT_SIZE=2048" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_SAMPLE_DEPTH=2048" -section_id auto_signaltap_0
+set_global_assignment -name SIGNALTAP_FILE src/code/stp/c1_1x8_8.stp
 set_global_assignment -name VERILOG_INCLUDE_FILE src/code/vh/usb_ctrl_regs_addrs.vh
 set_global_assignment -name VERILOG_FILE src/code/v/USB_2.0/usb_decoder.v
-set_global_assignment -name SIGNALTAP_FILE src/code/stp/c3_48x8_240.stp
 set_global_assignment -name VERILOG_FILE src/code/v/tm_sr_gen.v
 set_global_assignment -name VERILOG_FILE src/code/v/s_err_check.v
 set_global_assignment -name VERILOG_FILE src/code/v/sd_sdp_ctrl.v
@@ -315,161 +312,114 @@ set_global_assignment -name VERILOG_FILE src/code/v/USB_2.0/usb_ctrl_regs.v
 set_global_assignment -name VERILOG_FILE src/code/v/USB_2.0/usb_ccw_ctrl.v
 set_global_assignment -name QIP_FILE src/ip/ram/ram128/ram_128B.qip
 set_global_assignment -name QIP_FILE src/ip/ram/ram64/ram_64B.qip
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[0] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|addr[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[1] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|addr[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[2] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|addr[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[3] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|addr[3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[4] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|addr[4]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[5] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|addr[5]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[6] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|d[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[7] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|d[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[8] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|d[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[9] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|d[3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[10] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|d[4]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[11] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|d[5]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[12] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|d[6]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[13] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|d[7]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[14] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|rd_ptr[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[15] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|rd_ptr[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[16] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|rd_ptr[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[17] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|rd_ptr[3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[18] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|rd_ptr[4]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[19] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|rd_ptr[5]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[20] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|wr_ptr[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[21] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|wr_ptr[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[22] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|wr_ptr[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[23] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|wr_ptr[3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[24] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|wr_ptr[4]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[25] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|wr_ptr[5]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[26] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|wren" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[27] -to "usb_decoder:USB_DC|DC_STATE_CTRL" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[28] -to "usb_decoder:USB_DC|DC_STATE_RD" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[29] -to "usb_decoder:USB_DC|DC_STATE_WR" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[30] -to "usb_decoder:USB_DC|N_WR_EN" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[31] -to "usb_decoder:USB_DC|addr[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[32] -to "usb_decoder:USB_DC|addr[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[33] -to "usb_decoder:USB_DC|addr[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[34] -to "usb_decoder:USB_DC|addr[3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[35] -to "usb_decoder:USB_DC|addr[4]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[36] -to "usb_decoder:USB_DC|addr[5]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[37] -to "usb_decoder:USB_DC|addr[6]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[38] -to "usb_decoder:USB_DC|byte_cntr[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[39] -to "usb_decoder:USB_DC|byte_cntr[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[40] -to "usb_decoder:USB_DC|byte_cntr[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[41] -to "usb_decoder:USB_DC|byte_cntr[3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[42] -to "usb_decoder:USB_DC|byte_cntr[4]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[43] -to "usb_decoder:USB_DC|byte_cntr[5]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[44] -to "usb_decoder:USB_DC|byte_cntr[6]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[45] -to "usb_decoder:USB_DC|d[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[46] -to "usb_decoder:USB_DC|d[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[47] -to "usb_decoder:USB_DC|d[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[48] -to "usb_decoder:USB_DC|d[3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[49] -to "usb_decoder:USB_DC|d[4]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[50] -to "usb_decoder:USB_DC|d[5]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[51] -to "usb_decoder:USB_DC|d[6]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[52] -to "usb_decoder:USB_DC|d[7]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[53] -to "usb_decoder:USB_DC|q[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[54] -to "usb_decoder:USB_DC|q[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[55] -to "usb_decoder:USB_DC|q[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[56] -to "usb_decoder:USB_DC|q[3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[57] -to "usb_decoder:USB_DC|q[4]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[58] -to "usb_decoder:USB_DC|q[5]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[59] -to "usb_decoder:USB_DC|q[6]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[60] -to "usb_decoder:USB_DC|q[7]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[61] -to "usb_decoder:USB_DC|rd_ptr[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[62] -to "usb_decoder:USB_DC|rd_ptr[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[63] -to "usb_decoder:USB_DC|rd_ptr[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[64] -to "usb_decoder:USB_DC|rd_ptr[3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[65] -to "usb_decoder:USB_DC|rd_ptr[4]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[66] -to "usb_decoder:USB_DC|rd_ptr[5]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[67] -to "usb_decoder:USB_DC|rd_ptr[6]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[68] -to "usb_decoder:USB_DC|wr_ptr[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[69] -to "usb_decoder:USB_DC|wr_ptr[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[70] -to "usb_decoder:USB_DC|wr_ptr[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[71] -to "usb_decoder:USB_DC|wr_ptr[3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[72] -to "usb_decoder:USB_DC|wr_ptr[4]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[73] -to "usb_decoder:USB_DC|wr_ptr[5]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[74] -to "usb_decoder:USB_DC|wr_ptr[6]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[0] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|addr[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[1] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|addr[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[2] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|addr[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[3] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|addr[3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[4] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|addr[4]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[5] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|addr[5]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[6] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|d[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[7] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|d[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[8] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|d[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[9] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|d[3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[10] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|d[4]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[11] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|d[5]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[12] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|d[6]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[13] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|d[7]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[14] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|rd_ptr[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[15] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|rd_ptr[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[16] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|rd_ptr[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[17] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|rd_ptr[3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[18] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|rd_ptr[4]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[19] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|rd_ptr[5]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[20] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|wr_ptr[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[21] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|wr_ptr[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[22] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|wr_ptr[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[23] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|wr_ptr[3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[24] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|wr_ptr[4]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[25] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|wr_ptr[5]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[26] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|wren" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[27] -to "usb_decoder:USB_DC|DC_STATE_CTRL" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[28] -to "usb_decoder:USB_DC|DC_STATE_RD" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[29] -to "usb_decoder:USB_DC|DC_STATE_WR" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[30] -to "usb_decoder:USB_DC|N_WR_EN" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[31] -to "usb_decoder:USB_DC|addr[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[32] -to "usb_decoder:USB_DC|addr[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[33] -to "usb_decoder:USB_DC|addr[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[34] -to "usb_decoder:USB_DC|addr[3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[35] -to "usb_decoder:USB_DC|addr[4]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[36] -to "usb_decoder:USB_DC|addr[5]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[37] -to "usb_decoder:USB_DC|addr[6]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[38] -to "usb_decoder:USB_DC|byte_cntr[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[39] -to "usb_decoder:USB_DC|byte_cntr[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[40] -to "usb_decoder:USB_DC|byte_cntr[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[41] -to "usb_decoder:USB_DC|byte_cntr[3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[42] -to "usb_decoder:USB_DC|byte_cntr[4]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[43] -to "usb_decoder:USB_DC|byte_cntr[5]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[44] -to "usb_decoder:USB_DC|byte_cntr[6]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[45] -to "usb_decoder:USB_DC|d[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[46] -to "usb_decoder:USB_DC|d[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[47] -to "usb_decoder:USB_DC|d[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[48] -to "usb_decoder:USB_DC|d[3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[49] -to "usb_decoder:USB_DC|d[4]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[50] -to "usb_decoder:USB_DC|d[5]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[51] -to "usb_decoder:USB_DC|d[6]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[52] -to "usb_decoder:USB_DC|d[7]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[53] -to "usb_decoder:USB_DC|q[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[54] -to "usb_decoder:USB_DC|q[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[55] -to "usb_decoder:USB_DC|q[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[56] -to "usb_decoder:USB_DC|q[3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[57] -to "usb_decoder:USB_DC|q[4]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[58] -to "usb_decoder:USB_DC|q[5]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[59] -to "usb_decoder:USB_DC|q[6]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[60] -to "usb_decoder:USB_DC|q[7]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[61] -to "usb_decoder:USB_DC|rd_ptr[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[62] -to "usb_decoder:USB_DC|rd_ptr[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[63] -to "usb_decoder:USB_DC|rd_ptr[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[64] -to "usb_decoder:USB_DC|rd_ptr[3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[65] -to "usb_decoder:USB_DC|rd_ptr[4]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[66] -to "usb_decoder:USB_DC|rd_ptr[5]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[67] -to "usb_decoder:USB_DC|rd_ptr[6]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[68] -to "usb_decoder:USB_DC|wr_ptr[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[69] -to "usb_decoder:USB_DC|wr_ptr[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[70] -to "usb_decoder:USB_DC|wr_ptr[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[71] -to "usb_decoder:USB_DC|wr_ptr[3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[72] -to "usb_decoder:USB_DC|wr_ptr[4]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[73] -to "usb_decoder:USB_DC|wr_ptr[5]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[74] -to "usb_decoder:USB_DC|wr_ptr[6]" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_DATA_BITS=75" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_BITS=75" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK=0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK_LENGTH=250" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_LOWORD=41077" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_HIWORD=4126" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_clk -to "pll:PLL|c1" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_SEGMENT_SIZE=4096" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_SAMPLE_DEPTH=4096" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[30] -to "usb_ccw_ctrl:USB_CCW_CTRL|ccw_buf_has_data" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[31] -to "usb_ccw_ctrl:USB_CCW_CTRL|ccw_buf_is_read" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[30] -to "usb_ccw_ctrl:USB_CCW_CTRL|ccw_buf_has_data" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[31] -to "usb_ccw_ctrl:USB_CCW_CTRL|ccw_buf_is_read" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[0] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|CRC_AFTER_CCW" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[1] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|ccw_ctrl:CCW_CTRL|byte_cntr[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[2] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|ccw_ctrl:CCW_CTRL|byte_cntr[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[3] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|ccw_ctrl:CCW_CTRL|ccw_rx_rdy" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[4] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|ccw_ctrl:CCW_CTRL|ccw_tx_rdy" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[5] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|coder:CD|busy" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[6] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|coder:CD|d[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[7] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|coder:CD|d[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[8] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|coder:CD|d[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[9] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|coder:CD|d[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[10] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|coder:CD|d[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[11] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|coder:CD|d[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[12] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|coder:CD|d[6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[13] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|coder:CD|d[7]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[14] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|coder:CD|d_rdy" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[15] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|coder:CD|q" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[16] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|tx_state.TX_STATE_CTRL" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[17] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|tx_state.TX_STATE_DELAY_100_US" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[18] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|tx_state.TX_STATE_SENDING_BTC" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[19] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|tx_state.TX_STATE_SENDING_CCW" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[20] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|tx_state.TX_STATE_SENDING_CRC" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[21] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|tx_state.TX_STATE_SENDING_DPR" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[22] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|tx_state.TX_STATE_SENDING_SR" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[23] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|tx_state.TX_STATE_SENDING_TM" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[24] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|rx_errs[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[25] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|rx_errs[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[26] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|rx_errs[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[27] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|rx_errs[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[28] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|rx_errs[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[29] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|rx_errs[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[32] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|rd_ptr[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[33] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|rd_ptr[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[34] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|rd_ptr[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[35] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|rd_ptr[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[36] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|rd_ptr[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[37] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|rd_ptr[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[38] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|usedw[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[39] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|usedw[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[40] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|usedw[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[41] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|usedw[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[42] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|usedw[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[43] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|usedw[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[44] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|wr_ptr[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[45] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|wr_ptr[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[46] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|wr_ptr[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[47] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|wr_ptr[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[48] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|wr_ptr[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[49] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|wr_ptr[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[0] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|CRC_AFTER_CCW" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[1] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|ccw_ctrl:CCW_CTRL|byte_cntr[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[2] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|ccw_ctrl:CCW_CTRL|byte_cntr[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[3] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|ccw_ctrl:CCW_CTRL|ccw_rx_rdy" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[4] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|ccw_ctrl:CCW_CTRL|ccw_tx_rdy" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[5] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|coder:CD|busy" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[6] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|coder:CD|d[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[7] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|coder:CD|d[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[8] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|coder:CD|d[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[9] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|coder:CD|d[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[10] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|coder:CD|d[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[11] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|coder:CD|d[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[12] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|coder:CD|d[6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[13] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|coder:CD|d[7]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[14] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|coder:CD|d_rdy" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[15] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|coder:CD|q" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[16] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|tx_state.TX_STATE_CTRL" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[17] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|tx_state.TX_STATE_DELAY_100_US" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[18] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|tx_state.TX_STATE_SENDING_BTC" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[19] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|tx_state.TX_STATE_SENDING_CCW" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[20] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|tx_state.TX_STATE_SENDING_CRC" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[21] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|tx_state.TX_STATE_SENDING_DPR" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[22] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|tx_state.TX_STATE_SENDING_SR" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[23] -to "hsi_master:HSI_MSTR|hsi_m_tx_ctrl:HSI_M_TX_CTRL|tx_state.TX_STATE_SENDING_TM" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[24] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|rx_errs[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[25] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|rx_errs[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[26] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|rx_errs[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[27] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|rx_errs[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[28] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|rx_errs[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[29] -to "hsi_slave:HSI_SLV|hsi_s_rx_ctrl:HSI_S_RX_CTRL|rx_errs[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[32] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|rd_ptr[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[33] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|rd_ptr[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[34] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|rd_ptr[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[35] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|rd_ptr[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[36] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|rd_ptr[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[37] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|rd_ptr[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[38] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|usedw[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[39] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|usedw[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[40] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|usedw[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[41] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|usedw[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[42] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|usedw[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[43] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|usedw[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[44] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|wr_ptr[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[45] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|wr_ptr[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[46] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|wr_ptr[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[47] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|wr_ptr[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[48] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|wr_ptr[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[49] -to "usb_ctrl_regs:USB_CTRL_REGS|ccw_buf:CCW_BUF|wr_ptr[5]" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_DATA_BITS=50" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_BITS=50" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK=00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK_LENGTH=176" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_LOWORD=57113" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_HIWORD=10232" -section_id auto_signaltap_0
+set_global_assignment -name SLD_FILE db/c1_1x8_8_auto_stripped.stp
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
-set_global_assignment -name SLD_FILE db/c3_48x8_240_auto_stripped.stp

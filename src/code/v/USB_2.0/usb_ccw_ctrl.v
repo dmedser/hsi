@@ -1,40 +1,52 @@
 module usb_ccw_ctrl (
 	input  clk,
 	input  n_rst,
-	input  [7:0] d,
-	input  d_accepted,
-	output reg d_accept_en,
-	input  cd_busy,
+	input  ccw_accepted,
 	output ccw_tx_rdy,
-	output [7:0] ccw_d,
-	output ccw_d_rdy
+	input  ccw_rx_rdy,
+	output ccw_buf_rdreq,
+	input  ccw_buf_is_read,
+	input  ccw_repeat_req,
+	output n_rst_ccw_buf_ptrs
 );
 
-`include "src/code/vh/usb_ctrl_regs_addrs.vh"
-
-reg ccw_accepted;
+reg ccw_buf_has_data;
 always@(posedge clk or negedge n_rst)
 begin
 	if(n_rst == 0)
-		ccw_accepted = 0;
-	else if(~d_accepted)
-		ccw_accepted = 0;
-	else if(d_accepted & (d == `CCW_BUF_ADDR))
-		ccw_accepted = 1;
+		ccw_buf_has_data = 0;
+	else if(ccw_accepted | ccw_repeat_req)
+		ccw_buf_has_data = 1;
+	else if(ccw_buf_is_read)
+		ccw_buf_has_data = 0;
 end
 
-wire N_RST_D_ACCEPT_EN = n_rst & ccw_accepted;
-always@(posedge clk or negedge N_RST_D_ACCEPT_EN)
+reg ccw_rx_rdy_sync;
+always@(posedge clk or negedge n_rst)
 begin
-	if(N_RST_D_ACCEPT_EN == 0)
-		d_accept_en = 1;
-	else 
-		d_accept_en = ~d_accept_en;
+	if(n_rst == 0)
+		ccw_rx_rdy_sync = 0;
+	else
+		ccw_rx_rdy_sync = ccw_rx_rdy;
 end
 
-assign ccw_d = d_accept_en ? d : 0;
+reg ccw_buf_has_data_sync;
+always@(posedge clk or negedge n_rst)
+begin
+	if(n_rst == 0)
+		ccw_buf_has_data_sync = 0;
+	else 
+		ccw_buf_has_data_sync = ccw_buf_has_data;
+end
 
+wire CCW_RX_RDY_TRIMMED = ccw_rx_rdy & ~ccw_rx_rdy_sync;
+wire TICK_AFTER_CCW_BUF_HAS_DATA = ~ccw_buf_has_data & ccw_buf_has_data_sync; 
 
+assign n_rst_ccw_buf_ptrs = ~TICK_AFTER_CCW_BUF_HAS_DATA;
+
+assign ccw_buf_rdreq = CCW_RX_RDY_TRIMMED;
+
+assign ccw_tx_rdy = ccw_buf_has_data | ccw_rx_rdy;
 
 
 endmodule 

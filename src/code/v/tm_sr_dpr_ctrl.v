@@ -7,13 +7,13 @@ module tm_sr_dpr_ctrl (
 	output msg_end
 );
 
-`define SENDING_TM  tx_state[0]
-`define SENDING_SR  tx_state[1]
-`define SENDING_DPR tx_state[2]
+wire SENDING_TM  = tx_state[0],
+	  SENDING_SR  = tx_state[1],
+	  SENDING_DPR = tx_state[2];
 
 `include "src/code/vh/msg_defs.vh"	
 
-wire tx_en = `SENDING_TM|`SENDING_SR|`SENDING_DPR;
+wire tx_en = SENDING_TM | SENDING_SR | SENDING_DPR;
 
 reg[2:0] byte_cntr;
 always@(posedge cd_busy or negedge tx_en)
@@ -27,9 +27,9 @@ end
 wire[7:0] MASK_Q_MARKER = (byte_cntr == 0) ? 8'hFF : 0,
 			 MASK_Q_FLAG   = (byte_cntr == 1) ? 8'hFF : 0;
 
-wire[7:0] MASK_SENDING_TM  = `SENDING_TM  ? 8'hFF : 0,
-			 MASK_SENDING_SR  = `SENDING_SR  ? 8'hFF : 0,
-			 MASK_SENDING_DPR = `SENDING_DPR ? 8'hFF : 0;
+wire[7:0] MASK_SENDING_TM  = SENDING_TM  ? 8'hFF : 0,
+			 MASK_SENDING_SR  = SENDING_SR  ? 8'hFF : 0,
+			 MASK_SENDING_DPR = SENDING_DPR ? 8'hFF : 0;
 			 
 wire[7:0] FLAG_SRC = MASK_SENDING_TM  & `FLAG_TIME_MARK |
 							MASK_SENDING_SR  & `FLAG_STATUS_REQUEST |

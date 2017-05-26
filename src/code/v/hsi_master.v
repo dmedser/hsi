@@ -2,25 +2,23 @@ module hsi_master (
 	input clk,
 	input n_rst,
 	
-	input sdreq_en,
-	input sr_tx_rdy,
+	input  sdreq_en,
+	input  sr_tx_rdy,
 	output sr_tx_ack,
 	output sr_repeat_req,
 	
-	input tm_en,
-	input tm_tx_rdy,
+	input  tm_en,
+	input  tm_tx_rdy,
 	output tm_tx_ack,
-	input pre_tm,
+	input  pre_tm,
 	
 	input btc_en,
 	input [39:0] btc,
 	
-	input ccw_accepted,
-	input [7:0] ccw_d,
-	input ccw_tx_rdy,
-	output ccw_tx_en,
-	output ccw_d_sending,
-	input ccw_d_rdy,
+	input  ccw_accepted,
+	input  ccw_tx_rdy,
+	output ccw_rx_rdy,
+	input  [7:0] ccw_byte,
 	output ccw_repeat_req,
 	
 	input base_com,
@@ -61,11 +59,9 @@ hsi_m_tx_ctrl HSI_M_TX_CTRL(
 	.btc_en(btc_en),
 	.btc(btc),
 	
-	.ccw_d(ccw_d),
+	.ccw_byte(ccw_byte),
 	.ccw_tx_rdy(ccw_tx_rdy),
-	.ccw_tx_en(ccw_tx_en),
-	.ccw_d_sending(ccw_d_sending),
-	.ccw_d_rdy(ccw_d_rdy),
+	.ccw_rx_rdy(ccw_rx_rdy),
 	
 	.cd_q(CD_Q),
 	
