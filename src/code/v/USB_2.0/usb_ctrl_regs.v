@@ -3,7 +3,7 @@ module usb_ctrl_regs (
 	input clk_prj,
 	input n_rst,
 	input [7:0] d,
-	input d_accepted,
+	input d_asserted,
 	
 	output [63:0] sys_time, 
 	
@@ -72,7 +72,7 @@ begin
 			case(packer_state)
 			CTRL:
 				begin
-					if(d_accepted)
+					if(d_asserted)
 						packer_state = ADDR;
 					else	
 						packer_state = CTRL;
@@ -83,7 +83,7 @@ begin
 				end
 			DATA:
 				begin
-					if(~d_accepted)
+					if(~d_asserted)
 						packer_state = CTRL;
 					else
 						packer_state = DATA;
@@ -97,7 +97,7 @@ end
 
 //5e4d0c00080fa1a2a3a4a5a6a7a826 CCW
 
-//5e4d080002920800a8 ВКЛ SD_BUSY
+
 
 //5e4d0a0003430600007d ВКЛ метки времени и КБВ
 //5e4d0a000343020000D6 ВЫКЛ КБВ 
@@ -106,6 +106,14 @@ end
 
 
 // 5e4d0cAA0895a1a2a3a4a5a6a7a826 CCW TEST NH ненулевой
+
+// 5e4d0800029202002a ВКЛ ФЛАГ ОШИБКИ В СООБЩЕНИИ
+
+// 5e4d08000292000000 ОЧИСТИТЬ ВСЕ ФЛАГИ СЛЕЙВА
+
+// 5e4d08000292040054 ВКЛ ФЛАГ ЗАПРОС НА ОБСЛУЖИВАНИЕ
+
+//5e4d080002920800a8 ВКЛ SD_BUSY
 
 
 reg_byte_en REG_BYTE_EN (
@@ -436,9 +444,7 @@ begin
 end
 
 wire TICK_AFTER_WRREQ = ~wrreq & wrreq_sync;
-//wire WRREQ_TRIMMED = wrreq & ~wrreq_sync;
 assign ccw_accepted = TICK_AFTER_WRREQ;
-
 
 reg[5:0] wr_ptr,
 			rd_ptr;
@@ -452,7 +458,6 @@ begin
 		wr_ptr = wr_ptr + 1;
 end
 
-//wire N_RST_USEDW = n_rst & ~WRREQ_TRIMMED;
 reg[5:0] usedw;
 always@(posedge clk_ftdi or negedge n_rst)
 begin

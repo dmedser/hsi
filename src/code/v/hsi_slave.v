@@ -3,6 +3,8 @@ module hsi_slave (
 	input  n_rst,
 	
 	input  sd_busy,
+	input  usb_err_in_msg,
+	
 	
 	input  sd_d_tx_rdy,
 	output sd_d_tx_en,
@@ -59,6 +61,8 @@ hsi_s_tx_ctrl HSI_S_TX_CTRL (
 	.n_rst(n_rst),
 	
 	.sd_busy(sd_busy),
+	.usb_err_in_msg(usb_err_in_msg),
+	
 
 	.sd_d_tx_rdy(sd_d_tx_rdy),
 	.sd_d_tx_en(sd_d_tx_en),

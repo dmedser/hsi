@@ -2,9 +2,9 @@ module usb_decoder (
 	input clk,
 	input n_rst,
 	input [7:0] d,
-	input d_accepted,
+	input d_asserted,
 	output [7:0] q,
-	output reg q_accepted
+	output reg q_asserted
 ); 
 
 `include "src/code/vh/usb_ctrl_regs_addrs.vh"
@@ -27,7 +27,7 @@ begin
 			case(dc_state)
 			CTRL:
 				begin
-					if(d_accepted)
+					if(d_asserted)
 						dc_state = WR;
 					else	
 						dc_state = CTRL;
@@ -109,40 +109,37 @@ end
 crc8_atm_calc CRC8_ATM_CALC (
 	.clk(clk),
 	.n_rst(N_RST_DECODER),
-	.en(d_accepted & DC_STATE_WR),
+	.en(d_asserted & DC_STATE_WR),
 	.d(d),
 	.crc(CRC8)
 );
 wire[7:0] CRC8;
 
 
-wire FRAME_END = DC_STATE_WR & ~d_accepted;
+wire FRAME_END = DC_STATE_WR & ~d_asserted;
 wire FRAME_IS_CORRECT = (CRC8 == 0);
 
-wire[6:0] addr = d_accepted ? wr_ptr : rd_ptr; 
+wire[6:0] addr = d_asserted ? wr_ptr : rd_ptr; 
 
 ram_128B RX_BUF_128B (
 	.address(addr),
 	.clock(clk),
 	.data(d),
 	.rden(DC_STATE_RD),
-	.wren(d_accepted & WR_PTR_INCR_EN),
-	.q(B_Q)
+	.wren(d_asserted & WR_PTR_INCR_EN),
+	.q(RX_BUF_Q)
 );
 
 always@(posedge clk or negedge n_rst)
 begin
 	if(n_rst == 0)
-		q_accepted = 0;
-	else if(DC_STATE_RD)
-		q_accepted = 1;
-	else
-		q_accepted = 0;
+		q_asserted = 0;
+	else 
+		q_asserted = DC_STATE_RD;
 end
 
-wire[7:0] B_Q;
-//5e4d010006b40102030405062f
-assign q = B_Q;
+wire[7:0] RX_BUF_Q;
+assign q = RX_BUF_Q;
 
 			 
 endmodule

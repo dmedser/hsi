@@ -4,6 +4,7 @@ module hsi_s_tx_ctrl (
 	input n_rst,
 	
 	input sd_busy,
+	input usb_err_in_msg,
 	
 	input  sd_d_tx_rdy,
 	output sd_d_tx_en,
@@ -54,7 +55,7 @@ sd_sdp_ctrl SD_SDP_CTRL (
 	
 	.sd_s_req(SD_S_REQ),
 	.sd_d_req(SD_D_REQ),
-	.rx_err(rx_err),
+	.rx_err(usb_err_in_msg | rx_err),
 	
 	.sd_d_tx_rdy(sd_d_tx_rdy),
 	.sd_d_tx_en(sd_d_tx_en),

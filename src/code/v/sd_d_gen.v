@@ -1,7 +1,9 @@
 module sd_d_gen (
 	input  clk,
 	input  n_rst,
-	input  sd_d_accepted,
+	
+	input  usb_service_req,
+	
 	output sd_d_tx_rdy,
 	input  sd_d_tx_en,
 	output [7:0] sd_d,
@@ -12,7 +14,7 @@ module sd_d_gen (
 
 `include "src/code/vh/hsi_config.vh"
 
-parameter INI_VAL     = 16'h0000,
+parameter INI_VAL     = 16'hABCD,
 			 LAST_VAL    = INI_VAL + (`S_DP_LEN / 2);
 
 assign sd_d_rdy = ~sd_d_sending & sd_d_tx_en;
@@ -23,10 +25,10 @@ assign sd_has_next_dp = (dp_cntr > 1);
 wire ITS_LAST_DP = (dp_cntr == 0);
 
 reg[7:0] dp_cntr;
-wire N_RST_BY_SD_D_ACCEPTED = n_rst & ~sd_d_accepted;
-always@(posedge sd_d_tx_en or negedge N_RST_BY_SD_D_ACCEPTED)
+wire N_RST_BY_USB_SERVICE_REQ = n_rst & ~usb_service_req;
+always@(posedge sd_d_tx_en or negedge N_RST_BY_USB_SERVICE_REQ)
 begin
-	if(N_RST_BY_SD_D_ACCEPTED == 0)
+	if(N_RST_BY_USB_SERVICE_REQ == 0)
 		dp_cntr = `S_DP_COUNT;
 	else if(dp_cntr > 0)
 		dp_cntr = dp_cntr - 1;
@@ -40,7 +42,7 @@ always@(posedge clk or negedge n_rst)
 begin
 	if(n_rst == 0)
 		sd_has_data = 0;
-	else if(sd_d_accepted)
+	else if(usb_service_req)
 		sd_has_data = 1;
 	else if(ITS_LAST_DP & (sd_d_16 == LAST_VAL))
 		sd_has_data = 0;
