@@ -2,6 +2,8 @@ module hsi_master (
 	input clk,
 	input n_rst,
 	
+	input en,
+	
 	input  sdreq_en,
 	input  sr_tx_rdy,
 	output sr_tx_ack,
@@ -22,7 +24,10 @@ module hsi_master (
 	output ccw_repeat_req,
 	
 	input base_com,
+	input [1:0] com_en,
+	
 	input dat_src,
+	input [1:0] dat_en,
 	
 	output [7:0] q,
 	output q_rdy,
@@ -35,6 +40,11 @@ module hsi_master (
 	input dat2
 );
 
+
+assign com1 = com_en[0] ? CSC_COM1 : 1;
+assign com2 = com_en[1] ? CSC_COM2 : 1;
+
+
 m_clk_en_ctrl M_CLK_EN_CTRL(
 	.clk(clk),
 	.n_rst(n_rst),
@@ -46,6 +56,8 @@ hsi_m_tx_ctrl HSI_M_TX_CTRL(
 	.clk(clk),
 	.clk_en(CD_CLK_EN),
 	.n_rst(n_rst),
+	
+	.en(en),
 	
 	.sdreq_en(sdreq_en),
 	.sr_tx_rdy(sr_tx_rdy),
@@ -88,8 +100,8 @@ hsi_m_rx_ctrl HSI_M_RX_CTRL (
 	.q(q),
 	.q_rdy(q_rdy), 
 	
-	.dat1(dat1),
-	.dat2(dat2),
+	.dat1(dat_en[0] ? dat1 : 1),
+	.dat2(dat_en[1] ? dat2 : 1),
 	
 	.rx_frame_end(RX_FRAME_END),
 	.rx_start_bit_accepted(RX_START_BIT_ACCEPTED),
@@ -135,9 +147,12 @@ com_src_ctrl COM_SRC_CTRL (
 	.frame_to_reply_end(FRAME_TO_REPLY_END),
    .base_com(base_com),
 	.cd_q(CD_Q),
-	.com1(com1),
-	.com2(com2)
+	.com1(CSC_COM1),
+	.com2(CSC_COM2)
 );
+
+wire CSC_COM1,
+	  CSC_COM2;
 
 endmodule
 

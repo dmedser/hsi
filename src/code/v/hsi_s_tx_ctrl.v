@@ -3,6 +3,8 @@ module hsi_s_tx_ctrl (
 	input clk_en,
 	input n_rst,
 	
+	input en,
+	
 	input sd_busy,
 	input usb_err_in_msg,
 	
@@ -151,7 +153,7 @@ always@(posedge clk or negedge n_rst)
 begin
 	if(n_rst == 0)
 		tx_state = TX_STATE_CTRL;
-	else
+	else if(en)
 		begin
 			case(tx_state)
 			TX_STATE_CTRL:

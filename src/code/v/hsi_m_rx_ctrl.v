@@ -2,11 +2,11 @@ module hsi_m_rx_ctrl (
 	input clk,
 	input clk_en,
 	input n_rst,
-	input dat_src,
-	
+
 	output [7:0] q,
 	output q_rdy,
 
+	input dat_src,
 	input dat1,
 	input dat2,
 	
@@ -22,7 +22,7 @@ module hsi_m_rx_ctrl (
 	input  dpr_tx_ack
 );
 
-wire DC_D = dat_src ? dat1 : dat2;	
+wire DC_D = dat_src ? dat2 : dat1;	
 
 decoder DC (
 	.clk(clk),

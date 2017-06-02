@@ -6,7 +6,8 @@ module tm_sr_gen (
 	output reg sr_tx_rdy,
 	input      sr_tx_ack,
 	input      sr_repeat_req,
-	output pre_tm
+	output pre_tm,
+	output l00_ms_is_left
 );
 
 `include "src/code/vh/hsi_config.vh"	 
@@ -32,8 +33,9 @@ module tm_sr_gen (
  * +-------------------+--------------------+
  *
  */
+assign l00_ms_is_left = l00_MS_IS_LEFT; 
  
-tim_100_ms TIM_100_MS (
+tim_100_ms_tm TIM_100_MS (
 	.clk(clk),
 	.n_rst(n_rst),
 	.l00_ms_is_left(l00_MS_IS_LEFT),
@@ -75,7 +77,7 @@ end
 endmodule
 
 
-module tim_100_ms (
+module tim_100_ms_tm (
 	input clk,
 	input n_rst,
 	output l00_ms_is_left,

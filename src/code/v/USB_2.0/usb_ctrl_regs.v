@@ -2,21 +2,21 @@ module usb_ctrl_regs (
 	input clk_ftdi,
 	input clk_prj,
 	input n_rst,
+	
 	input [7:0] d,
 	input d_asserted,
 	
-	output [63:0] sys_time, 
+	output [15:0] sdi_bytes,
+	output [23:0] csi_bytes,
 	
-	output [2:0] sdi_flags,
-	output sdi_on,
-	output [1:0] sdi_dat_src,
-	output [1:0] sdi_com_src,
+	inout [15:0] st_day,
+	inout [26:0] st_ms_of_day,
+	inout [9:0]  st_us_of_ms,
 	
-	output csi_btc_en,
-	output csi_tm_en,
-	output csi_on,
-	output [1:0] csi_dat_src,
-	output [1:0] csi_com_src,
+	output [63:0] st_bytes,
+	
+	input  st_tim_100ms_wrreq,
+	output st_preset,
 	
 	output [7:0] ccw_byte,
 	output ccw_accepted,
@@ -34,21 +34,13 @@ module usb_ctrl_regs (
 /* CCW - Control Command Word - УКС */
 /* TM  - Time Mark */
 
-assign sys_time = STR_Q;
+assign sdi_bytes[15:8] = SDI_CR_BYTE_1;
+assign sdi_bytes[7:0] = SDI_CR_BYTE_2;
 
-assign sdi_flags[0] = SDI_FLAG_SD_BUSY;
-assign sdi_flags[1] = SDI_FLAG_SERVICE_REQ;
-assign sdi_flags[2] = SDI_FLAG_ERR_IN_MSG;
-assign sdi_on = SDI_ON;
-assign sdi_dat_src = SDI_DAT_SRC;
-assign sdi_com_src = SDI_COM_SRC;
+assign csi_bytes[23:16] = CSI_CR_BYTE_1;
+assign csi_bytes[15:8] = CSI_CR_BYTE_2;
+assign csi_bytes[7:0] = CSI_CR_BYTE_3;
 
-
-assign csi_btc_en = CSI_BTC_EN;
-assign csi_tm_en = CSI_TM_EN; 
-assign csi_on = CSI_ON;
-assign csi_dat_src = CSI_DAT_SRC;
-assign csi_com_src = CSI_COM_SRC;
 
 assign ccw_byte = CCW_BUF_Q;
 assign ccw_buf_is_read = CCW_BUF_IS_READ;
@@ -104,6 +96,7 @@ end
 
 //5e4d000008f5a1a2a3a4a5a6a7a826 СИСТЕМНОЕ ВЕРМЯ
 
+// 5e4d000008f5000000000000000000 RESET_SYS_TIM 
 
 // 5e4d0cAA0895a1a2a3a4a5a6a7a826 CCW TEST NH ненулевой
 
@@ -113,9 +106,17 @@ end
 
 // 5e4d08000292040054 ВКЛ ФЛАГ ЗАПРОС НА ОБСЛУЖИВАНИЕ
 
-//5e4d080002920800a8 ВКЛ SD_BUSY
+// 5e4d080002920800a8 ВКЛ SD_BUSY
 
+// 5e4d08000292003399 ВКЛЮЧИТЬ ВСЕ ЛИННИ ДАННЫХ И ЛИНИИ КОМАНД ДЛЯ СЛЕЙВА
 
+// 5e4d0a000343063300bb ВКЛЮЧИТЬ КБВ МЕТКИ ВРЕМЕНИ И ВСЕ ЛИНИИ ДАННЫХ И КОМАНД ДЛЯ МАСТЕРА
+
+// 5e4d0a000343073300d0 НОРМАЛЬНАЯ РАБОТА МАСТЕРА
+ 
+// 5e4d0800029201338c НОРМАЛЬНАЯ РАБОТА СЛЕЙВА 
+
+ 
 reg_byte_en REG_BYTE_EN (
 	.clk(clk_ftdi),
 	.n_rst(n_rst),
@@ -146,10 +147,19 @@ wire[2:0] CSI_CR_BYTE_N = BYTE_N_3;
 sys_time_reg STR (
 	.clk(clk_ftdi),
 	.n_rst(n_rst),
+	
+	.usb_wrreq(STR_EN),
+	.tim_wrreq(st_tim_100ms_wrreq),
+	.st_preset(st_preset),
+	
+	.byte_en(BYTE_N_8),
 	.d(d),
-	.reg_en(STR_EN),
-	.byte_en(STR_BYTE_EN),
-	.q(STR_Q)
+	
+	.day(st_day),
+	.ms_of_day(st_ms_of_day),
+	.us_of_ms(st_us_of_ms),
+	
+	.q(st_bytes)
 );
 
 sdi_ctrl_reg SDI_CR (
@@ -186,35 +196,15 @@ ccw_buf CCW_BUF (
 
 
 wire[7:0] CCW_BUF_Q;
-
-wire[63:0] STR_Q; 
 	  
 wire[15:0] SDI_CR_Q;
 wire[7:0] SDI_CR_BYTE_1 = SDI_CR_Q[15:8],
 			 SDI_CR_BYTE_2 = SDI_CR_Q[7:0];
 
-wire SDI_FLAG_SD_BUSY     = SDI_CR_BYTE_1[3],
-	  SDI_FLAG_SERVICE_REQ = SDI_CR_BYTE_1[2],
-	  SDI_FLAG_ERR_IN_MSG  = SDI_CR_BYTE_1[1],
-	  SDI_ON = SDI_CR_BYTE_1[0];
-
-wire[1:0] SDI_DAT_SRC = SDI_CR_BYTE_2[5:4],
-			 SDI_COM_SRC = SDI_CR_BYTE_2[1:0]; 
-
-
 wire[23:0] CSI_CR_Q;
 wire[7:0] CSI_CR_BYTE_1 = CSI_CR_Q[23:16],
 			 CSI_CR_BYTE_2 = CSI_CR_Q[15:8],
 			 CSI_CR_BYTE_3 = CSI_CR_Q[7:0];
-
-wire CSI_BTC_EN = CSI_CR_BYTE_1[2],
-	  CSI_TM_EN  = CSI_CR_BYTE_1[1],
-	  CSI_ON     = CSI_CR_BYTE_1[0];
-	 
-wire[1:0] CSI_DAT_SRC = CSI_CR_BYTE_2[5:4],
-			 CSI_COM_SRC = CSI_CR_BYTE_2[1:0];
-			 
-assign q = CSI_CR_Q; 
 
 endmodule
 
@@ -252,96 +242,228 @@ assign reg_en[2] = d_asserted & (addr_reg == `CSI_CTRL_REG_ADDR);
 assign reg_en[3] = d_asserted & (addr_reg == `CCW_BUF_ADDR);
 endmodule  
 
+
 module sys_time_reg (
 	input clk,
 	input n_rst,
-	input reg_en,
-	input [7:0] d,
+	
+	input usb_wrreq,
+	input tim_wrreq,
+	
 	input [7:0] byte_en,
+	input [7:0] d,
+
+	output st_preset,
+	
+	inout [15:0] day,
+	inout [26:0] ms_of_day,
+	inout [9:0]  us_of_ms,
+	
 	output [63:0] q
 );
+
+wire ANY_WRREQ = usb_wrreq | tim_wrreq;
+
+reg usb_wrreq_sync;
+always@(posedge clk or negedge n_rst)
+begin
+	if(n_rst == 0)
+		usb_wrreq_sync = 0;
+	else 
+		usb_wrreq_sync = usb_wrreq;
+end
+
+wire TICK_AFTER_USB_WRREQ = ~usb_wrreq & usb_wrreq_sync;
+
+assign st_preset = TICK_AFTER_USB_WRREQ;
+
+byte_mx B_MX1 (
+	.select(tim_wrreq),
+	.b_in1(day[15:8]),
+	.b_in2(d),
+	.b_out(B_MX1_Q)
+);
+wire [7:0] B_MX1_Q;
 
 byte_reg STR_B1 (
 	.clk(clk),
 	.n_rst(n_rst),
-	.en(reg_en & byte_en[0]),
-	.d(d),
-	.q(STR_B1_Q)
+	.en((usb_wrreq & byte_en[0]) | tim_wrreq),
+	.d(B_MX1_Q),
+	.q(B1)
 );
+
+byte_mx B_MX2 (
+	.select(tim_wrreq),
+	.b_in1(day[7:0]),
+	.b_in2(d),
+	.b_out(B_MX2_Q)
+);
+wire [7:0] B_MX2_Q;
+
 
 byte_reg STR_B2 (
 	.clk(clk),
 	.n_rst(n_rst),
-	.en(reg_en & byte_en[1]),
-	.d(d),
-	.q(STR_B2_Q)
+	.en((usb_wrreq & byte_en[1]) | tim_wrreq),
+	.d(B_MX2_Q),
+	.q(B2)
 );
+
+
+byte_mx B_MX3 (
+	.select(tim_wrreq),
+	.b_in1(ms_of_day[26:24]),
+	.b_in2(d),
+	.b_out(B_MX3_Q)
+);
+wire [7:0] B_MX3_Q;
 
 byte_reg STR_B3 (
 	.clk(clk),
 	.n_rst(n_rst),
-	.en(reg_en & byte_en[2]),
-	.d(d),
-	.q(STR_B3_Q)
+	.en((usb_wrreq & byte_en[2]) | tim_wrreq),
+	.d(B_MX3_Q),
+	.q(B3)
 );
+
+
+byte_mx B_MX4 (
+	.select(tim_wrreq),
+	.b_in1(ms_of_day[23:16]),
+	.b_in2(d),
+	.b_out(B_MX4_Q)
+);
+wire [7:0] B_MX4_Q;
 
 byte_reg STR_B4 (
 	.clk(clk),
 	.n_rst(n_rst),
-	.en(reg_en & byte_en[3]),
-	.d(d),
-	.q(STR_B4_Q)
+	.en((usb_wrreq & byte_en[3]) | tim_wrreq),
+	.d(B_MX4_Q),
+	.q(B4)
 );
+
+
+byte_mx B_MX5 (
+	.select(tim_wrreq),
+	.b_in1(ms_of_day[15:8]),
+	.b_in2(d),
+	.b_out(B_MX5_Q)
+);
+wire [7:0] B_MX5_Q;
+
 
 byte_reg STR_B5 (
 	.clk(clk),
 	.n_rst(n_rst),
-	.en(reg_en & byte_en[4]),
-	.d(d),
-	.q(STR_B5_Q)
+	.en((usb_wrreq & byte_en[4]) | tim_wrreq),
+	.d(B_MX5_Q),
+	.q(B5)
 );
+
+
+byte_mx B_MX6 (
+	.select(tim_wrreq),
+	.b_in1(ms_of_day[7:0]),
+	.b_in2(d),
+	.b_out(B_MX6_Q)
+);
+wire [7:0] B_MX6_Q;
+
 
 byte_reg STR_B6 (
 	.clk(clk),
 	.n_rst(n_rst),
-	.en(reg_en & byte_en[5]),
-	.d(d),
-	.q(STR_B6_Q)
+	.en((usb_wrreq & byte_en[5]) | tim_wrreq),
+	.d(B_MX6_Q),
+	.q(B6)
 );
+
+
+byte_mx B_MX7 (
+	.select(tim_wrreq),
+	.b_in1(us_of_ms[9:8]),
+	.b_in2(d),
+	.b_out(B_MX7_Q)
+);
+wire [7:0] B_MX7_Q;
+
 
 byte_reg STR_B7 (
 	.clk(clk),
 	.n_rst(n_rst),
-	.en(reg_en & byte_en[6]),
-	.d(d),
-	.q(STR_B7_Q)
+	.en((usb_wrreq & byte_en[6]) | tim_wrreq),
+	.d(B_MX7_Q),
+	.q(B7)
 );
+
+
+byte_mx B_MX8 (
+	.select(tim_wrreq),
+	.b_in1(us_of_ms[7:0]),
+	.b_in2(d),
+	.b_out(B_MX8_Q)
+);
+wire [7:0] B_MX8_Q;
 
 byte_reg STR_B8 (
 	.clk(clk),
 	.n_rst(n_rst),
-	.en(reg_en & byte_en[7]),
-	.d(d),
-	.q(STR_B8_Q)
+	.en((usb_wrreq & byte_en[7]) | tim_wrreq),
+	.d(B_MX8_Q),
+	.q(B8)
 );
 
-wire[7:0] STR_B1_Q,
-			 STR_B2_Q,
-			 STR_B3_Q,
-			 STR_B4_Q,
-			 STR_B5_Q,
-			 STR_B6_Q,
-			 STR_B7_Q,
-			 STR_B8_Q;
+wire[7:0] B1,
+			 B2,
+			 B3,
+			 B4,
+			 B5,
+			 B6,
+			 B7,
+			 B8;	 
 
-assign q[63:56] = STR_B1_Q;			 
-assign q[55:48] =	STR_B2_Q;		 
-assign q[47:40] =	STR_B3_Q;		 
-assign q[39:32] =	STR_B4_Q;		 
-assign q[31:24] = STR_B5_Q;			 
-assign q[23:16] = STR_B6_Q; 
-assign q[15:8]  = STR_B7_Q;
-assign q[7:0]   = STR_B8_Q;
+assign b1 = B1;
+assign b2 = B2;
+assign b3 = B3;
+assign b4 = B4;
+
+assign b5 = B5;			 
+assign b6 = B6;
+assign b7 = B7;
+assign b8 = B8;
+
+assign day[15:8] = st_preset ? B1 : 8'hZZ;
+assign day[7:0]  = st_preset ? B2 : 8'hZZ;
+
+assign ms_of_day[26:24] = st_preset ? B3[2:0] : 3'hZZ;
+assign ms_of_day[23:16] = st_preset ? B4 : 8'hZZ;
+assign ms_of_day[15:8]  = st_preset ? B5 : 8'hZZ;
+assign ms_of_day[7:0]   = st_preset ? B6 : 8'hZZ;
+
+assign us_of_ms[9:8]  = st_preset? B7[1:0] : 2'hZZ;
+assign us_of_ms[7:0]	 = st_preset? B8 : 8'hZZ;	
+
+assign q[63:56] = B1;
+assign q[55:48] = B2;
+assign q[47:40] = B3;
+assign q[39:32] = B4;
+
+assign q[31:24] = B5;
+assign q[23:16] = B6;
+assign q[15:8] = B7;
+assign q[7:0] = B8;
+endmodule 
+
+
+module byte_mx (
+	input select,
+	input [7:0] b_in1,
+	input [7:0] b_in2,
+	output [7:0] b_out
+);
+assign b_out = select ? b_in1 : b_in2;
 endmodule 
 
 module csi_ctrl_reg (
@@ -501,5 +623,21 @@ begin
 	if(n_rst == 0) q = 0;
 	else if(en)    q = d;
 end
+endmodule
 
-endmodule 
+
+module byte_reg_al (
+	input clk,
+	input n_rst,
+	input aload,
+	input en,
+	input [7:0] d,
+	output reg[7:0] q
+);
+always@(posedge clk or negedge n_rst or posedge aload)
+begin
+	if(n_rst == 0) q = 0;
+	else if(aload) q = d;
+	else if(en)    q = d;
+end
+endmodule

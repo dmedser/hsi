@@ -2,6 +2,8 @@ module hsi_slave (
 	input  clk,
 	input  n_rst,
 	
+	input  en,
+	
 	input  sd_busy,
 	input  usb_err_in_msg,
 	
@@ -14,9 +16,11 @@ module hsi_slave (
 	output sd_d_sending,
 	input  sd_has_next_dp,
 	
+	input  [1:0] com_en,
 	input  com1,
 	input  com2,
 	
+	input  [1:0] dat_en,
 	output dat1,
 	output dat2,
 	
@@ -25,6 +29,9 @@ module hsi_slave (
 	output rx_frame_end,
 	output [5:0] rx_errs
 );
+
+assign dat1 = dat_en[0] ? S_TX_DAT1 : 1;
+assign dat2 = dat_en[1] ? S_TX_DAT2 : 1;
 
 s_clk_en_ctrl S_CLK_EN_CTRL (
 	.clk(clk),
@@ -38,8 +45,8 @@ hsi_s_rx_ctrl HSI_S_RX_CTRL (
 	.clk_en(DC_CLK_EN),
 	.n_rst(n_rst),
 	
-	.com1(com1),
-	.com2(com2),
+	.com1(com_en[0] ? com1 : 1),
+	.com2(com_en[1] ? com2 : 1),
 	
 	.q(q),
 	.q_rdy(q_rdy),
@@ -60,6 +67,8 @@ hsi_s_tx_ctrl HSI_S_TX_CTRL (
 	.clk_en(CD_CLK_EN),
 	.n_rst(n_rst),
 	
+	.en(en),
+	
 	.sd_busy(sd_busy),
 	.usb_err_in_msg(usb_err_in_msg),
 	
@@ -72,15 +81,15 @@ hsi_s_tx_ctrl HSI_S_TX_CTRL (
 	.sd_d_sending(sd_d_sending),
 	.sd_has_next_dp(sd_has_next_dp),
 	
-	.dat1(dat1),
-	.dat2(dat2),
+	.dat1(S_TX_DAT1),
+	.dat2(S_TX_DAT2),
 	
 	.rx_frame_end(RX_FRAME_END),
 	.rx_err(RX_FRAME_END & ~RX_ERRS[0]),
 	.rx_flag(RX_FLAG)
 );
 
-
-	
+wire S_TX_DAT1,
+	  S_TX_DAT2;	
 
 endmodule 

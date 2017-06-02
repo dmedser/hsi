@@ -282,7 +282,8 @@ pll PLL(
 	.inclk0(CLK_24),
 	.c0(CLK_48),
 	.c1(STP_CLK_1x8_8),
-	.c2(STP_CLK_8x8_64)
+	.c2(STP_CLK_48x4_192),
+	.c3(STP_CLK_60x4_240)
 );
 
 reset_controller RST_CTRL (
@@ -294,17 +295,19 @@ hsi_master HSI_MSTR(
 	.clk(CLK_48),
 	.n_rst(N_RST),
 	
+	.en(USB_CSI_ON),
+	
 	.sdreq_en(1),
 	.sr_tx_rdy(SR_TX_RDY),
 	.sr_tx_ack(SR_TX_ACK),
 	.sr_repeat_req(SR_REPEAT_REQ),
 	
-	.tm_en(TM_EN),
+	.tm_en(USB_CSI_TM_EN),
 	.tm_tx_rdy(TM_TX_RDY),
 	.tm_tx_ack(TM_TX_ACK),
 	.pre_tm(PRE_TM),
 	
-	.btc_en(BTC_EN),
+	.btc_en(USB_CSI_BTC_EN),
 	.btc(40'hABCDEF1122),
 	
 	.ccw_accepted(CCW_ACCEPTED),
@@ -315,7 +318,10 @@ hsi_master HSI_MSTR(
 	
 	
 	.base_com(0),
-	.dat_src(1),
+	.com_en(USB_CSI_COM_EN),
+	
+	.dat_src(0),
+	.dat_en(USB_CSI_DAT_EN),
 	
 	.q(),
 
@@ -334,7 +340,8 @@ tm_sr_gen TM_SR_GEN(
 	.sr_tx_rdy(SR_TX_RDY),
 	.sr_tx_ack(SR_TX_ACK),
 	.sr_repeat_req(SR_REPEAT_REQ),
-	.pre_tm(PRE_TM)
+	.pre_tm(PRE_TM),
+	.l00_ms_is_left(l00_MS_IS_LEFT)
 );
 
 ftdi_ctrl FTDI_CTRL (
@@ -367,19 +374,20 @@ usb_ctrl_regs USB_CTRL_REGS (
 	.d(USB_DC_Q),
 	.d_asserted(USB_DC_Q_ASSERTED),
 	
-	.sys_time(SYS_TIME),
 	
-	.sdi_flags(SDI_FLAGS),
-	.sdi_on(SDI_ON),
-	.sdi_dat_src(SDI_DAT_SRC),
-	.sdi_com_src(SDI_COM_SRC),
+	.st_day(ST_DAY),
+	.st_ms_of_day(ST_MS_OF_DAY),
+	.st_us_of_ms(ST_US_OF_MS),
 	
-	.csi_btc_en(BTC_EN),
-	.csi_tm_en(TM_EN),
-	.csi_on(CSI_ON),
-	.csi_dat_src(CSI_DAT_SRC),
-	.csi_com_src(CSI_COM_SRC),
-
+	.st_bytes(ST_BYTES),
+	
+	.st_tim_100ms_wrreq(l00_MS_IS_LEFT),
+	.st_preset(ST_PRESET),
+	
+	.sdi_bytes(SDI_BYTES),
+	
+	.csi_bytes(CSI_BYTES),
+	
 	.ccw_byte(CCW_BYTE),
 	.ccw_accepted(CCW_ACCEPTED),
 	.ccw_buf_is_read(CCW_BUF_IS_READ),
@@ -387,6 +395,70 @@ usb_ctrl_regs USB_CTRL_REGS (
 	.n_rst_ccw_buf_ptrs(N_RST_CCW_BUF_PTRS)
 );
 
+
+system_timer SYS_TIM (
+	.clk(FCLK_OUT),
+	.n_rst(N_RST),
+	.preset(ST_PRESET),
+	
+	.day(ST_DAY),
+	.ms_of_day(ST_MS_OF_DAY),
+	.us_of_ms(ST_US_OF_MS)	
+);
+
+wire[63:0] ST_BYTES; 
+wire[15:0] SDI_BYTES;
+wire[23:0] CSI_BYTES;
+
+wire[7:0] ST_B1 = ST_BYTES[63:56],
+			 ST_B2 = ST_BYTES[55:48],
+			 ST_B3 = ST_BYTES[47:40],
+			 ST_B4 = ST_BYTES[39:32],
+			 ST_B5 = ST_BYTES[31:24],
+			 ST_B6 = ST_BYTES[23:16],
+			 ST_B7 = ST_BYTES[15:8],
+			 ST_B8 = ST_BYTES[7:0];
+
+wire[15:0] ST_DAY;
+wire[26:0] ST_MS_OF_DAY;
+wire[9:0]  ST_US_OF_MS;
+
+wire ST_PRESET;
+
+wire[7:0] SDI_B1 = SDI_BYTES[15:8],
+			 SDI_B2 = SDI_BYTES[7:0];
+
+wire USB_SDI_FLAG_SD_BUSY     = SDI_B1[3],
+	  USB_SDI_FLAG_SERVICE_REQ = SDI_B1[2],
+	  USB_SDI_FLAG_ERR_IN_MSG  = SDI_B1[1],
+	  USB_SDI_ON = SDI_B1[0];
+
+wire[1:0] USB_SDI_DAT_EN = SDI_B2[5:4],
+			 USB_SDI_COM_EN = SDI_B2[1:0]; 
+			 
+			 
+wire[7:0] CSI_B1 = CSI_BYTES[23:16],
+			 CSI_B2 = CSI_BYTES[15:8],
+			 CSI_B3 = CSI_BYTES[7:0];
+
+wire USB_CSI_BTC_EN = CSI_B1[2],
+	  USB_CSI_TM_EN  = CSI_B1[1],
+	  USB_CSI_ON     = CSI_B1[0];
+	 
+wire[1:0] USB_CSI_DAT_EN = CSI_B2[5:4],
+			 USB_CSI_COM_EN = CSI_B2[1:0];
+
+wire[63:0] SYS_TIME;
+
+wire[7:0] USB_DC_Q;
+wire USB_DC_Q_ACCEPTED;
+
+wire [7:0] CCW_BYTE;
+wire CCW_ACCEPTED,
+	  CCW_BUF_IS_READ,
+	  CCW_BUF_RDREQ;
+	  
+	  
 usb_ccw_ctrl USB_CCW_CTRL (
 	.clk(CLK_48),
 	.n_rst(N_RST),
@@ -397,41 +469,14 @@ usb_ccw_ctrl USB_CCW_CTRL (
 	.ccw_buf_is_read(CCW_BUF_IS_READ),
 	.ccw_repeat_req(CCW_REPEAT_REQ),
 	.n_rst_ccw_buf_ptrs(N_RST_CCW_BUF_PTRS)
-);
-
-
-wire[63:0] SYS_TIME;
-
-wire USB_SD_BUSY     = SDI_FLAGS[0],
-	  USB_SERVICE_REQ = SDI_FLAGS[1],
-	  USB_ERR_IN_MSG  = SDI_FLAGS[2];
-	  
-
-wire[2:0] SDI_FLAGS;
-wire SDI_ON;
-wire[1:0] SDI_DAT_SRC,
-			 SDI_COM_SRC;
-	
-wire CSI_BTC_EN,
-	  CSI_TM_EN,
-	  CSI_ON;
-wire[1:0] CSI_DAT_SRC,
-			 CSI_COM_SRC;
-wire [5:0] CSI_CCW_LEN;
-
-
-wire[7:0] USB_DC_Q;
-wire USB_DC_Q_ACCEPTED;
-
-wire [7:0] CCW_BYTE;
-wire CCW_ACCEPTED,
-	  CCW_BUF_IS_READ,
-	  CCW_BUF_RDREQ;
+);	  
 
 
 hsi_slave HSI_SLV (
 	.clk(CLK_48),
 	.n_rst(N_RST),
+	
+	.en(USB_SDI_ON),
 	
 	.sd_d_tx_rdy(SD_D_TX_RDY),
 	.sd_d_tx_en(SD_D_TX_EN),
@@ -442,12 +487,14 @@ hsi_slave HSI_SLV (
 	.sd_has_next_dp(SD_HAS_NEXT_DP),
 	
 	
-	.sd_busy(USB_SD_BUSY),
-	.usb_err_in_msg(USB_ERR_IN_MSG),
+	.sd_busy(USB_SDI_FLAG_SD_BUSY),
+	.usb_err_in_msg(USB_SDI_FLAG_ERR_IN_MSG),
 	
+	.com_en(USB_SDI_COM_EN),
 	.com1(COM1),
 	.com2(COM2),
 	
+	.dat_en(USB_SDI_DAT_EN),
 	.dat1(DAT1),
 	.dat2(DAT2),
 	
@@ -456,8 +503,8 @@ hsi_slave HSI_SLV (
 
 signal_trimmer SIGNAL_TRIMMER (
 	.clk(CLK_48),
-	.s(USB_SERVICE_REQ & ~SD_D_TX_EN),
-	.trim_s(USB_SERVICE_REQ_TRIMMED)
+	.s(USB_SDI_FLAG_SERVICE_REQ & ~SD_D_TX_EN),
+	.trim_s(USB_SDI_FLAG_SERVICE_REQ_TRIMMED)
 );
 
 
@@ -465,7 +512,7 @@ wire [7:0] SD_D;
 sd_d_gen SD_D_GEN (
 	.clk(CLK_48),
 	.n_rst(N_RST),
-	.usb_service_req(USB_SERVICE_REQ_TRIMMED),
+	.usb_service_req(USB_SDI_FLAG_SERVICE_REQ_TRIMMED),
 	.sd_d_tx_rdy(SD_D_TX_RDY),
 	.sd_d_tx_en(SD_D_TX_EN),
 	.sd_d(SD_D),
@@ -474,4 +521,30 @@ sd_d_gen SD_D_GEN (
 	.sd_has_next_dp(SD_HAS_NEXT_DP)
 );
 
-endmodule
+
+
+	  
+	  
+usb_coder_connector USB_CD_CONNECTOR (
+	.clk(FCLK_OUT),
+	.n_rst(N_RST),
+	
+	.st_bytes(ST_BYTES),
+	
+	.sdi_bytes(SDI_BYTES),
+
+	.csi_bytes(CSI_BYTES),
+	
+	.crc(), 
+	
+	.byte_4_tx(),
+	.byte_4_tx_rdy(),
+
+	.start_commutation(l00_MS_IS_LEFT),
+	
+	.byte_sent()	  
+); 
+	  
+
+	 
+endmodule 

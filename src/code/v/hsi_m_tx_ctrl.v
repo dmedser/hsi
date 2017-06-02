@@ -3,6 +3,8 @@ module hsi_m_tx_ctrl (
 	input clk_en,
 	input n_rst,
 	
+	input  en,
+	
 	input  sdreq_en,
 	input  sr_tx_rdy,
 	output sr_tx_ack,
@@ -260,7 +262,7 @@ begin
 		begin
 			tx_state = TX_STATE_CTRL;
 		end
-	else
+	else if (en)
 		begin
 			case(tx_state)
 			TX_STATE_CTRL:
