@@ -1,6 +1,5 @@
 module usb_ctrl_regs (
 	input clk_ftdi,
-	input clk_prj,
 	input n_rst,
 	
 	input [7:0] d,
@@ -20,9 +19,10 @@ module usb_ctrl_regs (
 	
 	output [7:0] ccw_byte,
 	output ccw_accepted,
-	output ccw_buf_is_read,
-	input  ccw_buf_rdreq,
-	input  n_rst_ccw_buf_ptrs
+	output ccwb_is_read,
+	input  ccwb_rdreq
+//	input  n_rst_ccwb_ptrs
+//	output ccwb_last_byte
 );
 
 `include "src/code/vh/usb_ctrl_regs_addrs.vh"
@@ -43,8 +43,8 @@ assign csi_bytes[7:0] = CSI_CR_BYTE_3;
 
 
 assign ccw_byte = CCW_BUF_Q;
-assign ccw_buf_is_read = CCW_BUF_IS_READ;
-
+assign ccwb_is_read = CCW_BUF_IS_READ;
+//assign ccwb_last_byte = CCW_BUF_IS_READ; 
 
 reg[1:0] packer_state;
 parameter CTRL = 0,
@@ -183,15 +183,15 @@ csi_ctrl_reg CSI_CR (
 
 ccw_buf CCW_BUF ( 
 	.clk_ftdi(clk_ftdi),
-	.clk_prj(clk_prj),
 	.n_rst(n_rst),
 	.wrreq(CCW_BUF_EN),
-	.rdreq(ccw_buf_rdreq),
+	.rdreq(ccwb_rdreq),
 	.ccw_accepted(ccw_accepted), 
 	.d(d),
 	.q(CCW_BUF_Q),
-	.buf_is_read(CCW_BUF_IS_READ),
-	.n_rst_ptrs(n_rst_ccw_buf_ptrs)
+	.buf_is_read(CCW_BUF_IS_READ)
+//	.n_rst_ptrs(n_rst_ccwb_ptrs)
+	//.last_byte(ccwb_last_byte)
 );
 
 
@@ -543,21 +543,50 @@ endmodule
 
 module ccw_buf (
 	input  clk_ftdi,
-	input  clk_prj,
 	input  n_rst,
 	input  wrreq,
 	input  rdreq,
-	input  n_rst_ptrs,
+//	input  n_rst_ptrs,
 	input  [7:0] d,
 	output [7:0] q,
-	output buf_is_read,
+	output reg buf_is_read,
 	output ccw_accepted
+//	output reg last_byte
 );
 
-assign buf_is_read = (rd_ptr == usedw);
+assign q = ccwb_q_asserted ? RAM_64B_Q : `CCW_BUF_ADDR;
+
+reg rdreq_sync;
+always@(posedge clk_ftdi or negedge n_rst)
+begin
+	if(n_rst == 0)
+		rdreq_sync = 0;
+	else
+		rdreq_sync = rdreq;
+end
+
+reg ccwb_q_asserted;
+always@(posedge clk_ftdi or negedge n_rst)
+begin
+	if(n_rst == 0)
+		ccwb_q_asserted = 0;
+	else
+		ccwb_q_asserted = rdreq_sync;
+end
+
+
+
+always@(posedge clk_ftdi or negedge n_rst)
+begin
+	if(n_rst == 0)
+		buf_is_read = 0;
+	else
+		buf_is_read = rdreq & (rd_ptr == (usedw - 1));
+end
+
 
 reg wrreq_sync;
-always@(posedge clk_prj or negedge n_rst)
+always@(posedge clk_ftdi or negedge n_rst)
 begin
 	if(n_rst == 0)
 		wrreq_sync = 0;
@@ -570,8 +599,9 @@ assign ccw_accepted = TICK_AFTER_WRREQ;
 
 reg[5:0] wr_ptr,
 			rd_ptr;
+
 			
-wire N_RST_PTRS = n_rst & n_rst_ptrs;			
+wire N_RST_PTRS = n_rst & ~rst_ptrs_after_buf_is_read;			
 always@(posedge clk_ftdi or negedge N_RST_PTRS)
 begin
 	if(N_RST_PTRS == 0)
@@ -589,7 +619,7 @@ begin
 		usedw = d[5:0] + 2;
 end
 
-always@(posedge clk_prj or negedge N_RST_PTRS)
+always@(posedge clk_ftdi or negedge N_RST_PTRS)
 begin
 	if(N_RST_PTRS == 0)
 		rd_ptr = 0;
@@ -597,17 +627,38 @@ begin
 		rd_ptr = rd_ptr + 1;
 end
 
+reg buf_is_read_sync;
+always@(posedge clk_ftdi or negedge n_rst)
+begin
+	if(n_rst == 0)
+		buf_is_read_sync = 0;
+	else 
+		buf_is_read_sync = buf_is_read;
+end
+
+wire TICK_AFTER_BUF_IS_READ = ~buf_is_read & buf_is_read_sync;
+
+reg rst_ptrs_after_buf_is_read;
+always@(posedge clk_ftdi or negedge n_rst)
+begin
+	if(n_rst == 0)
+		rst_ptrs_after_buf_is_read = 0;
+	else 
+		rst_ptrs_after_buf_is_read = TICK_AFTER_BUF_IS_READ;
+end
+
 wire[5:0] addr = wrreq ? wr_ptr : rd_ptr; 
 			
 ram_64B RAM_64B (
-	.inclock(clk_ftdi),
-	.outclock(clk_prj),
+	.clock(clk_ftdi),
 	.address(addr),
 	.data(d),
 	.wren(wrreq),
 	.rden(rdreq),
-	.q(q)
+	.q(RAM_64B_Q) 
 );
+
+wire[7:0] RAM_64B_Q;
 endmodule 
 
 

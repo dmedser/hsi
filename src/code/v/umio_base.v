@@ -313,7 +313,7 @@ hsi_master HSI_MSTR(
 	.ccw_accepted(CCW_ACCEPTED),
 	.ccw_tx_rdy(CCW_TX_RDY),
 	.ccw_rx_rdy(CCW_RX_RDY),
-	.ccw_byte(CCW_BYTE),
+	.ccw_byte(CCWB_BYTE),
 	.ccw_repeat_req(CCW_REPEAT_REQ),
 	
 	
@@ -334,6 +334,7 @@ hsi_master HSI_MSTR(
 
 tm_sr_gen TM_SR_GEN(
 	.clk(CLK_48),
+	.fclk_out(FCLK_OUT),
 	.n_rst(N_RST),
 	.tm_tx_rdy(TM_TX_RDY),
 	.tm_tx_ack(TM_TX_ACK),
@@ -344,19 +345,6 @@ tm_sr_gen TM_SR_GEN(
 	.l00_ms_is_left(l00_MS_IS_LEFT)
 );
 
-ftdi_ctrl FTDI_CTRL (
-	.clk(FCLK_OUT),
-	.n_rst(N_RST),
-	.oe(FOE),
-	.rxf(FRXF),
-	.rd(FRD),
-	.txe(FTXE),
-	.wr(FWR),
-	.dq(FU_D),
-	.d(),
-	.q(FTDI_Q)
-);
-wire[7:0] FTDI_Q;
 
 usb_decoder USB_DC (
 	.clk(FCLK_OUT),
@@ -369,7 +357,6 @@ usb_decoder USB_DC (
 
 usb_ctrl_regs USB_CTRL_REGS (
 	.clk_ftdi(FCLK_OUT),
-	.clk_prj(CLK_48),
 	.n_rst(N_RST),
 	.d(USB_DC_Q),
 	.d_asserted(USB_DC_Q_ASSERTED),
@@ -388,13 +375,15 @@ usb_ctrl_regs USB_CTRL_REGS (
 	
 	.csi_bytes(CSI_BYTES),
 	
-	.ccw_byte(CCW_BYTE),
+	.ccw_byte(CCWB_BYTE),
 	.ccw_accepted(CCW_ACCEPTED),
-	.ccw_buf_is_read(CCW_BUF_IS_READ),
-	.ccw_buf_rdreq(CCW_BUF_RDREQ),
-	.n_rst_ccw_buf_ptrs(N_RST_CCW_BUF_PTRS)
+	.ccwb_is_read(CCWB_IS_READ),
+	.ccwb_rdreq(CCWB_RDREQ_HSI | CCWB_RDREQ_USB)
+	//.n_rst_ccwb_ptrs(~USB_CD_PACKET_IS_SENT)
+	//.ccwb_last_byte(CCWB_LAST_BYTE)
 );
 
+wire CCWB_USB_TX_START = CCW_ACCEPTED;
 
 system_timer SYS_TIM (
 	.clk(FCLK_OUT),
@@ -453,24 +442,31 @@ wire[63:0] SYS_TIME;
 wire[7:0] USB_DC_Q;
 wire USB_DC_Q_ACCEPTED;
 
-wire [7:0] CCW_BYTE;
+wire [7:0] CCWB_BYTE;
 wire CCW_ACCEPTED,
-	  CCW_BUF_IS_READ,
-	  CCW_BUF_RDREQ;
+	  CCWB_IS_READ,
+	  HSI_CD_RDREQ_CCWB;
 	  
 	  
 usb_ccw_ctrl USB_CCW_CTRL (
-	.clk(CLK_48),
+	.clk_prj(CLK_48),
+	.clk_ftdi(FCLK_OUT),
 	.n_rst(N_RST),
+	
 	.ccw_accepted(CCW_ACCEPTED),
+	
 	.ccw_tx_rdy(CCW_TX_RDY),
 	.ccw_rx_rdy(CCW_RX_RDY),
-	.ccw_buf_rdreq(CCW_BUF_RDREQ),
-	.ccw_buf_is_read(CCW_BUF_IS_READ),
+	
 	.ccw_repeat_req(CCW_REPEAT_REQ),
-	.n_rst_ccw_buf_ptrs(N_RST_CCW_BUF_PTRS)
+	
+	.ccwb_is_read(CCWB_IS_READ & ~CCWB_RDREQ_MASK),
+	.ccwb_rdreq(CCWB_RDREQ_HSI),
+	
+	//.n_rst_ccwb_ptrs(N_RST_CCWB_PTRS)
+	
+	//.n_rst_ccwb_ptrs(N_RST_CCWB_PTRS)
 );	  
-
 
 hsi_slave HSI_SLV (
 	.clk(CLK_48),
@@ -525,26 +521,111 @@ sd_d_gen SD_D_GEN (
 
 	  
 	  
-usb_coder_connector USB_CD_CONNECTOR (
+usb_ctrl_regs_reader USB_CTRL_REGS_READER (
 	.clk(FCLK_OUT),
 	.n_rst(N_RST),
 	
 	.st_bytes(ST_BYTES),
-	
 	.sdi_bytes(SDI_BYTES),
-
 	.csi_bytes(CSI_BYTES),
 	
-	.crc(), 
 	
-	.byte_4_tx(),
-	.byte_4_tx_rdy(),
+	.l00_ms_is_left(l00_MS_IS_LEFT),
+	.usb_tx_start(CRS_USB_TX_START),
 
-	.start_commutation(l00_MS_IS_LEFT),
+	.q(CRS_BYTE),
 	
-	.byte_sent()	  
+   .rdreq(CRS_RDREQ_USB),
+	.last_byte(CRS_LAST_BYTE) 
 ); 
-	  
 
-	 
+
+wire[7:0] CRS_BYTE;
+  
+	  
+usb_coder USB_CD (
+	.clk(FCLK_OUT),
+	.n_rst(N_RST),
+	.tx_start(CRS_USB_TX_START | CCWB_USB_TX_START),
+	.rdreqs_mask(USB_RDREQS_MASK),
+	.rdreqs(USB_RDREQS),
+	.d(USB_CD_D),
+	.last_byte(CCWB_IS_READ | CRS_LAST_BYTE),
+	.q(USB_CD_Q),
+	.q_asserted(USB_CD_Q_ASSERTED),
+	.pck_sent(USB_CD_PACKET_IS_SENT)
+);  
+
+
+wire[7:0] USB_CD_Q;
+wire[1:0] USB_RDREQS;
+wire CRS_RDREQ_USB  = USB_RDREQS[0],
+	  CCWB_RDREQ_USB = USB_RDREQS[1]; 			 
+
+usb_cd_connector USB_CD_CONNECTOR (
+	.clk(FCLK_OUT),
+	.n_rst(N_RST),
+	.tx_start_srcs(TX_START_SRCS),
+	.pck_sent(USB_CD_PACKET_IS_SENT),
+	.rdreqs_mask(USB_RDREQS_MASK),
+	.ccwb_byte(CCWB_BYTE),
+	.crs_byte(CRS_BYTE),
+	.usb_cd_d(USB_CD_D)
+);
+
+wire[7:0] USB_CD_D;
+	  
+wire[1:0] TX_START_SRCS;
+assign TX_START_SRCS[0] = CRS_USB_TX_START;
+assign TX_START_SRCS[1] = CCW_ACCEPTED;
+
+wire[1:0] USB_RDREQS_MASK;	  
+wire CCWB_RDREQ_MASK = USB_RDREQS_MASK[1];
+
+	  
+ftdi_ctrl FTDI_CTRL (
+	.clk(FCLK_OUT),
+	.n_rst(N_RST),
+	.oe(FOE),
+	.rxf(FRXF),
+	.rd(FRD),
+	.txe(FTXE),
+	.wr(FWR),
+	.dq(FU_D),
+	.d(USB_CD_Q),
+	.d_asserted(USB_CD_Q_ASSERTED),
+	.q(FTDI_Q)
+);
+wire[7:0] FTDI_Q; 
+ 
+endmodule 
+
+
+module usb_cd_connector (
+	input clk, 
+	input n_rst,
+	input [7:0] ccwb_byte,
+	input [7:0] crs_byte,
+	input [1:0] tx_start_srcs,
+	output reg [1:0] rdreqs_mask,
+	output [7:0] usb_cd_d,
+   input pck_sent
+);
+
+assign usb_cd_d = (CRS_BYTE_MASK & crs_byte) | (CCWB_BYTE_MASK & ccwb_byte);
+
+wire N_RST = n_rst & ~pck_sent;
+always@(posedge clk or negedge N_RST)
+begin
+	if(N_RST == 0)
+		rdreqs_mask = 0;
+	else if(tx_start_srcs) 
+		rdreqs_mask = tx_start_srcs;
+end
+
+wire[7:0] CRS_BYTE_MASK  = rdreqs_mask[0] ? 8'hFF : 0,
+			 CCWB_BYTE_MASK = rdreqs_mask[1] ? 8'hFF : 0;
+			 
+			 
+
 endmodule 

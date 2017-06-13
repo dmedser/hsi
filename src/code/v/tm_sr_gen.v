@@ -1,5 +1,6 @@
 module tm_sr_gen (
 	input clk,
+	input fclk_out,
 	input n_rst,
 	output reg tm_tx_rdy,
 	input      tm_tx_ack,
@@ -33,8 +34,9 @@ module tm_sr_gen (
  * +-------------------+--------------------+
  *
  */
-assign l00_ms_is_left = l00_MS_IS_LEFT; 
  
+assign l00_ms_is_left = l00_MS_IS_LEFT;
+
 tim_100_ms_tm TIM_100_MS (
 	.clk(clk),
 	.n_rst(n_rst),

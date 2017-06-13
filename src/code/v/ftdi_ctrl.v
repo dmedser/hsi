@@ -8,9 +8,10 @@ module ftdi_ctrl (
 	output  wr,
 	inout   [7:0] dq,
 	input   [7:0] d,
+	input   d_asserted,
 	output  [7:0] q
 );
-assign wr = 1;
+assign wr = ~d_asserted;
 assign dq = oe ? d : 8'hZZ;	
 assign q = oe ? 0 : dq;
 
