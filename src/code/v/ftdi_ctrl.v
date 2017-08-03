@@ -12,6 +12,9 @@ module ftdi_ctrl (
 	output  [7:0] q
 );
 assign wr = ~d_asserted;
+
+
+
 assign dq = oe ? d : 8'hZZ;	
 assign q = oe ? 0 : dq;
 

@@ -25,6 +25,7 @@ module hsi_master (
 	
 	input base_com,
 	input [1:0] com_en,
+	output curr_com_src,
 	
 	input dat_src,
 	input [1:0] dat_en,
@@ -147,10 +148,12 @@ com_src_ctrl COM_SRC_CTRL (
 	.frame_to_reply_end(FRAME_TO_REPLY_END),
    .base_com(base_com),
 	.cd_q(CD_Q),
+	.curr_com_src(curr_com_src),
 	.com1(CSC_COM1),
 	.com2(CSC_COM2)
 );
 
+wire COM_SRC;
 wire CSC_COM1,
 	  CSC_COM2;
 
@@ -164,12 +167,15 @@ module com_src_ctrl (
 	input frame_to_reply_end,
    input base_com,
 	input cd_q,
+	output curr_com_src,
 	output com1,
 	output com2
 );
 
-assign com1 = (base_com ^ (switch_com_src_en & flip)) ? 1 : cd_q;
-assign com2 = (base_com ^ (switch_com_src_en & flip)) ? cd_q : 1;
+assign curr_com_src = base_com ^ (switch_com_src_en & flip);
+
+assign com1 = curr_com_src ? 1 : cd_q;
+assign com2 = curr_com_src ? cd_q : 1;
 
 reg switch_com_src_en;
 always@(posedge clk or negedge n_rst)

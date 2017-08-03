@@ -2,95 +2,162 @@ module usb_ctrl_regs_reader (
 	input clk,
 	input n_rst,
 	
-	output reg usb_tx_start,
-	input  l00_ms_is_left,
+	input l00_ms_is_left,
+	input st_rdreq, 
+	
+	output tx_rdy,
+	input  tx_ack, 
+	
 	
 	input [63:0] st_bytes,
-	
 	input [15:0] sdi_bytes,
-	
 	input [23:0] csi_bytes,
 		
 	output reg[7:0] q,
-   input  rdreq,
-	output last_byte 
+	
+	output reg st_last_byte,
+	output reg sdi_last_byte,
+	output reg csi_last_byte
 );
+
+assign tx_rdy = all_crs_tx_rdy | str_tx_rdy;
+
+reg all_crs_tx_rdy;			 
+always@(posedge clk or negedge n_rst)
+begin
+	if(n_rst == 0)
+		all_crs_tx_rdy = 0;
+	else if(tx_ack)
+		all_crs_tx_rdy = 0;
+	else if(l00_ms_is_left)
+		all_crs_tx_rdy = 1;
+	else if(bc == 13)
+		all_crs_tx_rdy = 1;
+	else if(bc == 23)
+		all_crs_tx_rdy = 1;
+end
+
+
+
+
+reg str_tx_rdy;			 
+always@(posedge clk or negedge n_rst)
+begin
+	if(n_rst == 0)
+		str_tx_rdy = 0;
+	else if(tx_ack)
+		str_tx_rdy = 0;
+	else if(st_rdreq)
+		str_tx_rdy = 1;
+end	
+
 
 `include "src/code/vh/usb_ctrl_regs_addrs.vh"
 
-always@(posedge clk or negedge n_rst)
-begin
-	if(n_rst == 0)
-		usb_tx_start = 0;
-	else if(l00_ms_is_left)
-		usb_tx_start = 1;
-	else if(CRS_ARE_READ)
-		usb_tx_start = 0;
-end
-
-
-assign last_byte = ST_LAST_BYTE | SDI_LAST_BYTE | CSI_LAST_BYTE; 
-
-wire[7:0] st_b1 = st_bytes[63:56], st_b5 = st_bytes[31:24],
-  		    st_b2 = st_bytes[55:48], st_b6 = st_bytes[23:16],
-		    st_b3 = st_bytes[47:40], st_b7 = st_bytes[15:8],
-		    st_b4 = st_bytes[39:32], st_b8 = st_bytes[7:0];
+wire[7:0] st1 = st_bytes[63:56], st5 = st_bytes[31:24],
+  		    st2 = st_bytes[55:48], st6 = st_bytes[23:16],
+		    st3 = st_bytes[47:40], st7 = st_bytes[15:8],
+		    st4 = st_bytes[39:32], st8 = st_bytes[7:0];
 			  
-wire[7:0] sdi_b1 = sdi_bytes[15:8],
-			 sdi_b2 = sdi_bytes[7:0];
+wire[7:0] sdi1 = sdi_bytes[15:8],
+			 sdi2 = sdi_bytes[7:0];
 			  
-wire[7:0] csi_b1 = csi_bytes[23:16],
-	       csi_b2 = csi_bytes[15:8],
-	       csi_b3 = csi_bytes[7:0];
+wire[7:0] csi1 = csi_bytes[23:16],
+	       csi2 = csi_bytes[15:8],
+	       csi3 = csi_bytes[7:0];
+
 			 
-reg[4:0] regs_bytes_cntr;
+			 
+reg bc_en;
 always@(posedge clk or negedge n_rst)
 begin
 	if(n_rst == 0)
-		regs_bytes_cntr = 0;
-	else if(CRS_ARE_READ)
-		regs_bytes_cntr = 0;
-	else if(rdreq)
-		regs_bytes_cntr = regs_bytes_cntr + 1;
+		bc_en = 0;
+	else if(bc == 34)
+		bc_en = 0;
+	else if(tx_ack)
+		bc_en = 1;
 end
 
-always@(posedge clk)
+reg[5:0] bc;
+always@(posedge clk or negedge n_rst)
 begin
-	case(regs_bytes_cntr)
-	0:  q = `SYS_TIME_REG_ADDR;
-	1:  q = 0;
-	2:  q = 8;
-	3:  q = st_b1;
-	4:  q = st_b2;
-	5:  q = st_b3;
-	6:  q = st_b4;
-	7:  q = st_b5;
-	8:  q = st_b6;
-	9:  q = st_b7;
-	10: q = st_b8;
-	
-	11: q = `SDI_CTRL_REG_ADDR;
-	12: q = 0;
-	13: q = 2; 
-	14: q = sdi_b1;
-	15: q = sdi_b2;
-	
-	16: q = `CSI_CTRL_REG_ADDR;
-	17: q = 0;
-	18: q = 3;
-	19: q = csi_b1;
-	20: q = csi_b2;
-	21: q = csi_b3;
-	default:
-		begin
-		end
-	endcase
+	if(n_rst == 0)
+		bc = 0;
+	else if(bc_en)
+		bc = bc + 1;
+	else 
+		bc = 0;
 end
 
-wire ST_LAST_BYTE  = (regs_bytes_cntr == 10),
-     SDI_LAST_BYTE = (regs_bytes_cntr == 15),
-	  CSI_LAST_BYTE = (regs_bytes_cntr == 21);
+always@(posedge clk or negedge n_rst)
+begin
+	if(n_rst == 0)
+		q = 0;
+	else 
+		begin
+			case(bc)
+			0: q = bc_en ? 8'h4D : 8'h5E;
+			1: q = `SYS_TIME_REG_ADDR;
+			2: q = 0;
+			3: q = 8;
+			
+			5: q = st1;
+			6: q = st2;
+			7: q = st3;
+			8: q = st4;
+			9: q = st5;
+			10: q = st6;
+			11: q = st7;
+			12: q = st8;
+			
+			15: q = 8'h5E;
+			16: q = 8'h4D;
+			17: q = `SDI_CTRL_REG_ADDR;
+			18: q = 0;
+			19: q = 2;
+			
+			21: q = sdi1;
+			22: q = sdi2;
+			
+			25: q = 8'h5E;
+			26: q = 8'h4D;
+			27: q = `CSI_CTRL_REG_ADDR;
+			28: q = 0;
+			29: q = 3;
+			
+			31: q = csi1;
+			32: q = csi2;
+			33: q = csi3;
+			
+			default: q = 8'hFF;
+			endcase
+		end
+end
 
-wire CRS_ARE_READ = CSI_LAST_BYTE;
+always@(posedge clk or negedge n_rst)
+begin
+	if(n_rst == 0)
+		st_last_byte = 0;
+	else 
+		st_last_byte = (bc == 12);
+end	
+
+always@(posedge clk or negedge n_rst)
+begin
+	if(n_rst == 0)
+		sdi_last_byte = 0;
+	else 
+		sdi_last_byte = (bc == 22);
+end
+
+always@(posedge clk or negedge n_rst)
+begin
+	if(n_rst == 0)
+		csi_last_byte = 0;
+	else 
+		csi_last_byte = (bc == 33);
+end
 
 endmodule 
+

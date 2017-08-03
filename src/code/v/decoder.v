@@ -6,7 +6,7 @@ module decoder (
 	output  [7:0] q,
 	output  q_rdy,
 	output  pb_err,
-	output frame_end,
+	output reg frame_end,
 	output start_bit_accepted
 );
 
@@ -54,7 +54,16 @@ dc_sample_ctrl DC_SAMPLE_CTRL (
 	.fr_idx(FRAME_IDX)
 );		
 
-assign frame_end = ITS_MSG_END_CHECK_TIME & (d == STOP_BIT);
+//assign frame_end = ITS_MSG_END_CHECK_TIME & (d == STOP_BIT);
+always@(posedge clk or negedge n_rst)
+begin
+	if(n_rst == 0)
+		frame_end = 0;
+	else 
+		frame_end = ITS_MSG_END_CHECK_TIME & (d == STOP_BIT);
+end
+				
+				
 				
 /********** DECODER STATE MACHINE **********/
 			 

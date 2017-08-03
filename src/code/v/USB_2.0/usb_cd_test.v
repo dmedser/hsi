@@ -1,36 +1,27 @@
-module usb_coder (
+module usb_coder_test (
 	input  clk,
 	input  n_rst,
 	
 	input  tx_rdy,
-	
+	output reg tx_ack,
 	input  last_byte,
-	
-	output rd_a,
-	output rd_nh,
-	output rd_nl,
-	output rd_d,
 	
 	input [7:0] d,
 
-	//output reg [7:0] q,
 	output [7:0] q,
 	
 	output q_asserted,
 	output pck_sent
 );
 
-assign rd_a  = UCD_STATE_PHH;
-assign rd_nh = UCD_STATE_PHL;
-assign rd_nl = UCD_STATE_ADDR;
-assign rd_d  = UCD_STATE_NUMH | UCD_STATE_NUML | UCD_STATE_CRCH | (UCD_STATE_DATA & ~last_byte_sync);
 
-assign pck_sent = UCD_STATE_CRC;
-
-wire CD_BUSY = ~UCD_STATE_CTRL;
-assign q_asserted = CD_BUSY;
-
-
+always@(posedge clk or negedge n_rst)
+begin
+	if(n_rst == 0)
+		tx_ack = 0;
+	else 
+		tx_ack = tx_rdy;
+end
 
 crc8_atm_calc CRC8_ATM_CALC (
   .clk(clk),
@@ -41,17 +32,6 @@ crc8_atm_calc CRC8_ATM_CALC (
 );
 wire[7:0] CRC8; 
  
- 
-reg last_byte_sync; 
-always@(posedge clk or negedge n_rst)
-begin
-	if(n_rst == 0)
-		last_byte_sync = 0;
-	else 
-		last_byte_sync = last_byte;
-end 
-
-
 
 reg[3:0] ucd_state;
 parameter CTRL = 0,
@@ -83,7 +63,7 @@ begin
 			case(ucd_state)
 			CTRL:
 				begin
-					if(tx_rdy)
+					if(tx_ack)
 						ucd_state = PHH;
 					else 
 						ucd_state = CTRL;
@@ -96,7 +76,7 @@ begin
 			CRCH: ucd_state = DATA;
 			DATA:
 				begin
-					if(last_byte_sync)
+					if(last_byte)
 						ucd_state = CRC;
 					else 
 						ucd_state = DATA;
@@ -108,25 +88,14 @@ begin
 end
 
 
-reg[7:0] d_sync; 
-always@(posedge clk or negedge n_rst)
-begin
-	if(n_rst == 0)
-		d_sync = 0;
-	else 
-		d_sync = d;
-end
+assign pck_sent = UCD_STATE_CRC;
 
-wire UCD_PAYLOAD_STATES = UCD_STATE_ADDR | UCD_STATE_NUMH | UCD_STATE_NUML | UCD_STATE_DATA,
-     UCD_CRC_STATES = UCD_STATE_CRCH | UCD_STATE_CRC;
+wire CD_BUSY = ~UCD_STATE_CTRL;
+assign q_asserted = CD_BUSY;
 
-
-wire[7:0] Q_PHH_MASK     = UCD_STATE_PHH      ? 8'hFF : 0,
-          Q_PHL_MASK     = UCD_STATE_PHL      ? 8'hFF : 0,
-	       Q_PAYLOAD_MASK = UCD_PAYLOAD_STATES ? 8'hFF : 0,
-			 Q_CRC_MASK     = UCD_CRC_STATES     ? 8'hFF : 0;
+wire UCD_CRC_STATES = UCD_STATE_CRCH | UCD_STATE_CRC;
 			  
-assign q = (Q_PHH_MASK & 8'h5E) | (Q_PHL_MASK & 8'h4D) | (Q_PAYLOAD_MASK & d_sync) | (Q_CRC_MASK & CRC8);
+assign q = UCD_CRC_STATES ? CRC8 : d;
 
 
 endmodule 

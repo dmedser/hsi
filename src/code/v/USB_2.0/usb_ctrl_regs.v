@@ -12,6 +12,8 @@ module usb_ctrl_regs (
 	inout [26:0] st_ms_of_day,
 	inout [9:0]  st_us_of_ms,
 	
+	//input st_update_disable,
+	
 	output [63:0] st_bytes,
 	
 	input  st_tim_100ms_wrreq,
@@ -21,8 +23,6 @@ module usb_ctrl_regs (
 	output ccw_accepted,
 	output ccwb_is_read,
 	input  ccwb_rdreq
-//	input  n_rst_ccwb_ptrs
-//	output ccwb_last_byte
 );
 
 `include "src/code/vh/usb_ctrl_regs_addrs.vh"
@@ -43,8 +43,7 @@ assign csi_bytes[7:0] = CSI_CR_BYTE_3;
 
 
 assign ccw_byte = CCW_BUF_Q;
-assign ccwb_is_read = CCW_BUF_IS_READ;
-//assign ccwb_last_byte = CCW_BUF_IS_READ; 
+assign ccwb_is_read = CCW_BUF_IS_READ;	
 
 reg[1:0] packer_state;
 parameter CTRL = 0,
@@ -159,6 +158,7 @@ sys_time_reg STR (
 	.ms_of_day(st_ms_of_day),
 	.us_of_ms(st_us_of_ms),
 	
+	
 	.q(st_bytes)
 );
 
@@ -190,8 +190,6 @@ ccw_buf CCW_BUF (
 	.d(d),
 	.q(CCW_BUF_Q),
 	.buf_is_read(CCW_BUF_IS_READ)
-//	.n_rst_ptrs(n_rst_ccwb_ptrs)
-	//.last_byte(ccwb_last_byte)
 );
 
 
@@ -252,7 +250,7 @@ module sys_time_reg (
 	
 	input [7:0] byte_en,
 	input [7:0] d,
-
+	
 	output st_preset,
 	
 	inout [15:0] day,
@@ -546,35 +544,13 @@ module ccw_buf (
 	input  n_rst,
 	input  wrreq,
 	input  rdreq,
-//	input  n_rst_ptrs,
 	input  [7:0] d,
 	output [7:0] q,
 	output reg buf_is_read,
 	output ccw_accepted
-//	output reg last_byte
 );
 
-assign q = ccwb_q_asserted ? RAM_64B_Q : `CCW_BUF_ADDR;
-
-reg rdreq_sync;
-always@(posedge clk_ftdi or negedge n_rst)
-begin
-	if(n_rst == 0)
-		rdreq_sync = 0;
-	else
-		rdreq_sync = rdreq;
-end
-
-reg ccwb_q_asserted;
-always@(posedge clk_ftdi or negedge n_rst)
-begin
-	if(n_rst == 0)
-		ccwb_q_asserted = 0;
-	else
-		ccwb_q_asserted = rdreq_sync;
-end
-
-
+assign q = (rd_ptr == 1) ? `CCW_BUF_ADDR : RAM_64B_Q;
 
 always@(posedge clk_ftdi or negedge n_rst)
 begin
