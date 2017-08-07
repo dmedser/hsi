@@ -1,6 +1,5 @@
 module hsi_monitor (
-	input clk_ftdi,
-	input clk_prj,
+	input clk,
 	input n_rst, 
 	
 	input [7:0] hsi_m_d,
@@ -16,8 +15,11 @@ module hsi_monitor (
 	
 	input  [7:0] st_d,
 	input  st_last_byte,
-	output reg st_rdreq,
-	output reg rst_crs_reader,
+	input  st_asserted,
+	output st_rdreq,
+	
+	input  st_tx_rdy,
+	output reg st_tx_ack,
 	
 	output reg last_frame_src,
 	
@@ -30,17 +32,26 @@ module hsi_monitor (
 	output [7:0] q
 );
 
-always@(posedge clk_ftdi or negedge n_rst)
+always@(posedge clk or negedge n_rst)
+begin
+	if(n_rst == 0)
+		st_tx_ack = 0;
+	else 
+		st_tx_ack = rst_wr_en & st_tx_rdy;
+end
+
+
+always@(posedge clk or negedge n_rst)
 begin
 	if(n_rst == 0)
 		rd_rdy = 0;
 	else if(rd_rdy_ack)
 		rd_rdy = 0;
-	else if(ST_WRREQ & st_last_byte)
+	else if(rst_wr_en & st_last_byte)
 		rd_rdy = 1;
 end
 
-always@(posedge clk_ftdi or negedge n_rst)
+always@(posedge clk or negedge n_rst)
 begin
 	if(n_rst == 0)
 		last_frame_src = 0;
@@ -56,7 +67,7 @@ wire ANY_ERR = hsi_m_err | hsi_s_err;
 
 wire M_FRAME_END_TT_60M;
 trg_trm M_FRAME_END_TRG_TRM_60M(
-	.clk(clk_ftdi),
+	.clk(clk),
 	.n_rst(n_rst),
 	.s(hsi_m_frame_end),
 	.s_tt(M_FRAME_END_TT_60M)
@@ -64,7 +75,7 @@ trg_trm M_FRAME_END_TRG_TRM_60M(
 
 wire S_FRAME_END_TT_60M;
 trg_trm S_FRAME_END_TRG_TRM_60M(
-	.clk(clk_ftdi),
+	.clk(clk),
 	.n_rst(n_rst),
 	.s(hsi_s_frame_end),
 	.s_tt(S_FRAME_END_TT_60M)
@@ -73,7 +84,7 @@ trg_trm S_FRAME_END_TRG_TRM_60M(
 
 wire M_D_RDY_TT_60M;
 trg_trm M_D_RDY_TRG_TRM_60M(
-	.clk(clk_ftdi),
+	.clk(clk),
 	.n_rst(n_rst),
 	.s(hsi_m_d_rdy),
 	.s_tt(M_D_RDY_TT_60M)
@@ -81,14 +92,14 @@ trg_trm M_D_RDY_TRG_TRM_60M(
 
 wire S_D_RDY_TT_60M;
 trg_trm S_D_RDY_TRG_TRM_60M(
-	.clk(clk_ftdi),
+	.clk(clk),
 	.n_rst(n_rst),
 	.s(hsi_s_d_rdy),
 	.s_tt(S_D_RDY_TT_60M)
 );
 
 reg slv_send;
-always@(posedge clk_ftdi or negedge n_rst)
+always@(posedge clk or negedge n_rst)
 begin
 	if(n_rst == 0)
 		slv_send = 0;
@@ -100,7 +111,7 @@ end
 
 
 reg mstr_send;
-always@(posedge clk_ftdi or negedge n_rst)
+always@(posedge clk or negedge n_rst)
 begin
 	if(n_rst == 0)
 		mstr_send = 0;
@@ -118,7 +129,7 @@ wire ANY_D_RDY_TT_60M = M_D_RDY_TT_60M | S_D_RDY_TT_60M;
 
  
 reg any_d_rdy_tt_sync;
-always@(posedge clk_ftdi or negedge n_rst)
+always@(posedge clk or negedge n_rst)
 begin
 	if(n_rst == 0)
 		any_d_rdy_tt_sync = 0;
@@ -129,7 +140,7 @@ end
 
 wire ANY_FRAME_END_TT_60M = M_FRAME_END_TT_60M | S_FRAME_END_TT_60M; 
 reg any_frame_end_tt_sync;
-always@(posedge clk_ftdi or negedge n_rst)
+always@(posedge clk or negedge n_rst)
 begin
 	if(n_rst == 0)
 		any_frame_end_tt_sync = 0;
@@ -139,66 +150,42 @@ end
 
 
 
-
+wire [7:0] ERR_AND_CH;
+assign ERR_AND_CH[0] = ANY_ERR;
+assign ERR_AND_CH[1] = hsi_m_ch;
+assign ERR_AND_CH[7:2] = 0;
 
 wire[7:0] ANY_SEND_MASK = ANY_SEND ? 8'hFF : 0,
 			 ANY_FRAME_END_TT_60M_MASK = any_frame_end_tt_sync ? 8'hFF : 0,
-			 ST_MASK = ST_WRREQ ? 8'hFF : 0;
+			 ST_MASK = st_asserted ? 8'hFF : 0;
 
-wire[7:0] d_to_buf = (ANY_SEND_MASK & hsi_d) | (ANY_FRAME_END_TT_60M_MASK & ANY_ERR) | (ST_MASK & st_d);		// 8'h01 & ~	 
+wire[7:0] d_to_buf = (ANY_SEND_MASK & hsi_d) | (ANY_FRAME_END_TT_60M_MASK & ERR_AND_CH) | (ST_MASK & st_d);		// 8'h01 & ~	 
 			 
 
-
-
-always@(posedge clk_ftdi or negedge n_rst)
+reg rst_wr_en;
+always@(posedge clk or negedge n_rst)
 begin
 	if(n_rst == 0)
-		st_rdreq = 0;
+		rst_wr_en = 0;
 	else if(st_last_byte)
-		st_rdreq = 0;
-	else if(any_frame_end_tt_sync)
-		st_rdreq  = 1;
+		rst_wr_en = 0;
+	else if(st_rdreq)
+		rst_wr_en = 1;
 end
 
-reg tmp1;
-always@(posedge clk_ftdi or negedge n_rst)
-begin
-	if(n_rst == 0)
-		tmp1 = 0;
-	else
-		tmp1 = st_rdreq;
-end
-reg tmp2;
-always@(posedge clk_ftdi or negedge n_rst)
-begin
-	if(n_rst == 0)
-		tmp2 = 0;
-	else
-		tmp2 = tmp1;
-end
-
-wire ST_WRREQ = tmp2 & st_rdreq;
-
-
-
-always@(posedge clk_ftdi or negedge n_rst)
-begin
-	if(n_rst == 0)
-		rst_crs_reader = 0;
-	else
-		rst_crs_reader = st_last_byte;
-end
-
+wire ST_WRREQ = rst_wr_en & st_asserted; 
 
 fifo_2KB MONITOR_BUF_2KB(
 	.data(d_to_buf),
-	.clock(clk_ftdi),
+	.clock(clk),
 	.rdreq(rdreq),
 	.wrreq(any_d_rdy_tt_sync | any_frame_end_tt_sync | ST_WRREQ),
 	.q(q),
 	.empty(MBUF_EMPTY),
 	.usedw(usedw)
 );
+
+assign st_rdreq = any_frame_end_tt_sync;
 
 endmodule 
 

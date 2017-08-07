@@ -540,18 +540,22 @@ sd_d_gen SD_D_GEN (
 
 usb_ctrl_regs_reader CRS_RDR (
 	.clk(FCLK_OUT),
-	.n_rst(N_RST ),//& ~RST_CRS_RDR_BY_HSI_MNTR),
+	.n_rst(N_RST & ~HSI_MNTR_RD_RDY),
 	
 	.st_bytes(ST_BYTES),
 	.sdi_bytes(SDI_BYTES),
 	.csi_bytes(CSI_BYTES),
 	
 	
-	.l00_ms_is_left(l00_MS_IS_LEFT),
+	.rdreq(l00_MS_IS_LEFT),
 	.tx_rdy(CRS_TX_RDY),
-	.tx_ack(CRS_TX_ACK),
+	.tx_ack(USB_CRS_TX_ACK),
 	
-	.st_rdreq(ST_RDREQ),
+	.st_rdreq(HSI_MNTR_ST_RDREQ),
+	.st_tx_rdy(HSI_MNTR_ST_TX_RDY),
+	.st_tx_ack(HSI_MNTR_ST_TX_ACK),
+	
+	.st_asserted(ST_ASSERTED),
 	
 	.q(CRS_D),
 	
@@ -570,101 +574,39 @@ wire ST_LAST_BYTE,
 wire[7:0] CRS_D;
   
 
-/*	  
-usb_coder USB_CD (
-	.clk(FCLK_OUT),
-	.n_rst(N_RST),
-	.tx_rdy(MONITOR_USB_TX_RDY), //CRS_USB_TX_RDY | MONITOR_USB_TX_RDY),
-	
-	.rd_a(USB_MONITOR_RD_A),//USB_CD_RD_ADDR),
-	.rd_nh(USB_MONITOR_RD_NH),//USB_CD_RD_NUMH),
-	.rd_nl(USB_MONITOR_RD_NL),//USB_CD_RD_NUML),
-	.rd_d(USB_MONITOR_RD_D),//USB_CD_RD_DATA),
-	.d(MONITOR_BYTE),//CRS_BYTE),//USB_CD_D),
-	
-	.last_byte(HSI_MNTR_BUF_LAST_BYTE),//CRS_LAST_BYTE),//ST_LAST_BYTE | MONITOR_LAST_BYTE),
-	.q(USB_CD_Q),
-	.q_asserted(USB_CD_Q_ASSERTED),
-	.pck_sent(USB_CD_PACKET_IS_SENT)
-);  
-*/
+wire[15:0] USB_CD_CNCTR_D;
+assign USB_CD_CNCTR_D[15:8] = CRS_D;
+assign USB_CD_CNCTR_D[7:0]  = HSI_MNTR_D;
 
-wire[7:0] USB_CD_D;
-wire[7:0] USB_CD_Q;
-/*  
-usb_cd_connector USB_CD_CONNECTOR (
-	.clk(FCLK_OUT), 
-	.n_rst(N_RST),
-	
-	.d_src(USB_CD_CONN_D_SRC),
-	.tx_rdy_src(USB_CD_CONN_TX_RDY_SRC),
-	
-	.rd_a_src(USB_CD_RD_ADDR),
-	.rd_nh_src(USB_CD_RD_NUMH),
-	.rd_nl_src(USB_CD_RD_NUML),
-	.rd_d_src(USB_CD_RD_DATA),
-	
-	.rd_a_dst(USB_CD_CONN_RD_A_DST),
-	.rd_nh_dst(USB_CD_CONN_RD_NH_DST),
-	.rd_nl_dst(USB_CD_CONN_RD_NL_DST),
-	.rd_d_dst(USB_CD_CONN_RD_D_DST),
-	
-	.q(USB_CD_D),
-   .pck_sent(USB_CD_PACKET_IS_SENT)
-);
-*/
-/*
-wire[15:0] USB_CD_CONN_D_SRC;
-assign USB_CD_CONN_D_SRC[15:8] = CRS_BYTE;
-assign USB_CD_CONN_D_SRC[7:0]  = MONITOR_BYTE;
-
-wire[1:0] USB_CD_CONN_TX_RDY_SRC;
-assign USB_CD_CONN_TX_RDY_SRC[0] = CRS_USB_TX_RDY;
-assign USB_CD_CONN_TX_RDY_SRC[1] = MONITOR_USB_TX_RDY;
-
-wire[1:0] USB_CD_CONN_RD_A_DST;
-assign USB_CD_CONN_RD_A_DST[0] = USB_CRS_RD_A;
-assign USB_CD_CONN_RD_A_DST[1] = USB_MONITOR_RD_A;
-
-wire[1:0] USB_CD_CONN_RD_NH_DST;
-assign USB_CD_CONN_RD_NH_DST[0] = USB_CRS_RD_NH;
-assign USB_CD_CONN_RD_NH_DST[1] = USB_MONITOR_RD_NH;
-
-wire[1:0] USB_CD_CONN_RD_NL_DST;
-assign USB_CD_CONN_RD_NL_DST[0] = USB_CRS_RD_NL;
-assign USB_CD_CONN_RD_NL_DST[1] = USB_MONITOR_RD_NL;
-
-wire[1:0] USB_CD_CONN_RD_D_DST;
-assign USB_CD_CONN_RD_D_DST[0] = USB_CRS_RD_D;
-assign USB_CD_CONN_RD_D_DST[1] = USB_MONITOR_RD_D;
+wire[1:0] USB_CD_CNCTR_TX_RDY_SRC;
+assign USB_CD_CNCTR_TX_RDY_SRC[1] = HSI_MNTR_TX_RDY;
+assign USB_CD_CNCTR_TX_RDY_SRC[0] = CRS_TX_RDY;
 
 
 
-wire USB_MONITOR_RD_A,
-	  USB_MONITOR_RD_NH,
-	  USB_MONITOR_RD_NL,
-	  USB_MONITOR_RD_D;
-*/
 
 hsi_monitor HSI_MNTR (
-	.clk_ftdi(FCLK_OUT),
-	.clk_prj(CLK_48),
+	.clk(FCLK_OUT),
 	.n_rst(N_RST),
 	
 	.hsi_m_d(HSI_M_D),
 	.hsi_m_d_rdy(HSI_M_D_RDY),
 	.hsi_m_frame_end(HSI_M_FRAME_END),
+	.hsi_m_err(HSI_M_ERR),
+	.hsi_m_ch(CURR_COM_SRC),
 	
 	.hsi_s_d(HSI_S_D),
 	.hsi_s_d_rdy(HSI_S_D_RDY),
 	.hsi_s_frame_end(HSI_S_FRAME_END),
+	.hsi_s_err(HSI_S_ERR),
 	
 	
-	
-	.st_rdreq(ST_RDREQ),
-	.st_d(CRS_BYTE),
+	.st_rdreq(HSI_MNTR_ST_RDREQ),
+	.st_d(CRS_D),
 	.st_last_byte(ST_LAST_BYTE),
-	.rst_crs_reader(RST_CRS_RDR_BY_HSI_MNTR),
+	.st_asserted(ST_ASSERTED),
+	.st_tx_rdy(HSI_MNTR_ST_TX_RDY),
+	.st_tx_ack(HSI_MNTR_ST_TX_ACK),
 	
 	.last_frame_src(HSI_MNTR_LAST_FRAME_SRC),
 	.rd_rdy(HSI_MNTR_RD_RDY),
@@ -675,6 +617,9 @@ hsi_monitor HSI_MNTR (
 	.rdreq(HSI_MNTR_RDREQ),
 	.q(HSI_MNTR_BUF_D)
 );
+
+wire HSI_MNTR_ST_TX_ACK;
+
 
 wire HSI_MNTR_LAST_FRAME_SRC;
 wire[10:0] HSI_MNTR_USEDW;
@@ -700,20 +645,58 @@ hsi_monitor_reader HSI_MNTR_RDR (
 	
 );
 
-usb_coder_test USB_CD_TEST(
+
+wire USB_CRS_TX_ACK,
+	  HSI_MNTR_TX_ACK;
+	  
+wire[1:0] USB_CD_CNCTR_TX_ACK_DST;
+
+assign HSI_MNTR_TX_ACK = USB_CD_CNCTR_TX_ACK_DST[1];
+assign USB_CRS_TX_ACK  = USB_CD_CNCTR_TX_ACK_DST[0];
+
+wire[1:0] USB_CD_CNCTR_LAST_BYTE_SRC;
+assign USB_CD_CNCTR_LAST_BYTE_SRC[1] = HSI_MNTR_LAST_BYTE;
+assign USB_CD_CNCTR_LAST_BYTE_SRC[0] = CRS_LAST_BYTE;
+
+
+usb_cd_connector USB_CD_CNCTR (
+	.clk(FCLK_OUT),  
+	.n_rst(N_RST),
+	
+	.d(USB_CD_CNCTR_D),
+	
+	.tx_rdy_src(USB_CD_CNCTR_TX_RDY_SRC),
+	.tx_rdy_dst(USB_CD_TX_RDY),
+	
+	.tx_ack_src(USB_CD_TX_ACK),
+	.tx_ack_dst(USB_CD_CNCTR_TX_ACK_DST),
+	
+	.last_byte_src(USB_CD_CNCTR_LAST_BYTE_SRC),
+	.last_byte_dst(USB_CD_LAST_BYTE),
+	
+	.q(USB_CD_CNCTR_Q),
+	.pck_sent(USB_CD_PCK_SENT)
+);
+
+wire[7:0] USB_CD_CNCTR_Q,
+			 USB_CD_Q;
+
+usb_coder USB_CD (
 	.clk(FCLK_OUT),
 	.n_rst(N_RST),
 	
-	.tx_rdy(CRS_TX_RDY),
-	.tx_ack(CRS_TX_ACK),
-	.last_byte(CRS_LAST_BYTE),
+	.bus_busy(~FRXF),
 	
-	.d(CRS_D),
+	.tx_rdy(USB_CD_TX_RDY),
+	.tx_ack(USB_CD_TX_ACK),
+	.last_byte(USB_CD_LAST_BYTE),
+	
+	.d(USB_CD_CNCTR_Q),
 
-	.q(),
+	.q(USB_CD_Q),
 	
-	.q_asserted(),
-	.pck_sent(USB_CD_PACKET_IS_SENT)
+	.q_asserted(USB_CD_Q_ASSERTED),
+	.pck_sent(USB_CD_PCK_SENT)
 );
 
 
@@ -730,7 +713,6 @@ ftdi_ctrl FTDI_CTRL (
 	.oe(FOE),
 	.rxf(FRXF),
 	.rd(FRD),
-	.txe(FTXE),
 	.wr(FWR),
 	.dq(FU_D),
 	.d(USB_CD_Q),

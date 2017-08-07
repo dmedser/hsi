@@ -82,13 +82,21 @@ endmodule
 module tim_100_ms_tm (
 	input clk,
 	input n_rst,
-	output l00_ms_is_left,
+	output reg l00_ms_is_left,
 	input pre_tm_en,
 	input tm,
 	output pre_tm
 );
 parameter TICKS_IN_100_MS = (((`CLK_FREQ) / 10) - 1);
-assign l00_ms_is_left = (ticks == TICKS_IN_100_MS);
+
+always@(posedge clk or negedge n_rst)
+begin
+	if(n_rst == 0)
+		l00_ms_is_left = 0;
+	else 
+		l00_ms_is_left = (ticks == (TICKS_IN_100_MS - 1));
+end
+
 reg[22:0] ticks;
 always@(posedge clk or negedge n_rst)
 begin

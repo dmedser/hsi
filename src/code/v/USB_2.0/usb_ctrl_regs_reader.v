@@ -2,17 +2,21 @@ module usb_ctrl_regs_reader (
 	input clk,
 	input n_rst,
 	
-	input l00_ms_is_left,
-	input st_rdreq, 
+	input rdreq,
 	
-	output tx_rdy,
+	output reg tx_rdy,
 	input  tx_ack, 
-	
+
+	input  st_rdreq,
+	output reg st_tx_rdy,
+	input  st_tx_ack,
 	
 	input [63:0] st_bytes,
 	input [15:0] sdi_bytes,
 	input [23:0] csi_bytes,
-		
+	
+	output reg st_asserted,
+	
 	output reg[7:0] q,
 	
 	output reg st_last_byte,
@@ -20,36 +24,44 @@ module usb_ctrl_regs_reader (
 	output reg csi_last_byte
 );
 
-assign tx_rdy = all_crs_tx_rdy | str_tx_rdy;
-
-reg all_crs_tx_rdy;			 
 always@(posedge clk or negedge n_rst)
 begin
 	if(n_rst == 0)
-		all_crs_tx_rdy = 0;
-	else if(tx_ack)
-		all_crs_tx_rdy = 0;
-	else if(l00_ms_is_left)
-		all_crs_tx_rdy = 1;
+		st_asserted = 0;
 	else if(bc == 13)
-		all_crs_tx_rdy = 1;
-	else if(bc == 23)
-		all_crs_tx_rdy = 1;
+		st_asserted = 0;
+	else if(bc == 5)
+		st_asserted = 1;
+end
+
+
+always@(posedge clk or negedge n_rst)
+begin
+	if(n_rst == 0)
+		st_tx_rdy = 0;
+	else if(st_tx_ack)
+		st_tx_rdy = 0;
+	else if(st_rdreq)
+		st_tx_rdy = 1;
 end
 
 
 
-
-reg str_tx_rdy;			 
 always@(posedge clk or negedge n_rst)
 begin
 	if(n_rst == 0)
-		str_tx_rdy = 0;
+		tx_rdy = 0;
 	else if(tx_ack)
-		str_tx_rdy = 0;
-	else if(st_rdreq)
-		str_tx_rdy = 1;
-end	
+		tx_rdy = 0;
+	else if(rdreq)
+		tx_rdy = 1;
+	else if(bc == 14)
+		tx_rdy = 1;
+	else if(bc == 24)
+		tx_rdy = 1;
+end
+
+
 
 
 `include "src/code/vh/usb_ctrl_regs_addrs.vh"
@@ -65,17 +77,18 @@ wire[7:0] sdi1 = sdi_bytes[15:8],
 wire[7:0] csi1 = csi_bytes[23:16],
 	       csi2 = csi_bytes[15:8],
 	       csi3 = csi_bytes[7:0];
-
 			 
+			 
+wire ANY_TX_ACK = tx_ack | st_tx_ack;			 
 			 
 reg bc_en;
 always@(posedge clk or negedge n_rst)
 begin
 	if(n_rst == 0)
 		bc_en = 0;
-	else if(bc == 34)
+	else if(bc == 35)
 		bc_en = 0;
-	else if(tx_ack)
+	else if(ANY_TX_ACK)
 		bc_en = 1;
 end
 
@@ -111,26 +124,25 @@ begin
 			11: q = st7;
 			12: q = st8;
 			
-			15: q = 8'h5E;
-			16: q = 8'h4D;
-			17: q = `SDI_CTRL_REG_ADDR;
-			18: q = 0;
-			19: q = 2;
+			17: q = 8'h4D;
+			18: q = `SDI_CTRL_REG_ADDR;
+			19: q = 0;
+			20: q = 2;
 			
-			21: q = sdi1;
-			22: q = sdi2;
+			22: q = sdi1;
+			23: q = sdi2;
 			
-			25: q = 8'h5E;
-			26: q = 8'h4D;
-			27: q = `CSI_CTRL_REG_ADDR;
-			28: q = 0;
-			29: q = 3;
+			28: q = 8'h4D;
+			29: q = `CSI_CTRL_REG_ADDR;
+			30: q = 0;
+			31: q = 3;
 			
-			31: q = csi1;
-			32: q = csi2;
-			33: q = csi3;
+			33: q = csi1;
+			34: q = csi2;
+			35: q = csi3;
 			
-			default: q = 8'hFF;
+			default: q = 8'h5E;
+			
 			endcase
 		end
 end
@@ -148,7 +160,7 @@ begin
 	if(n_rst == 0)
 		sdi_last_byte = 0;
 	else 
-		sdi_last_byte = (bc == 22);
+		sdi_last_byte = (bc == 23);
 end
 
 always@(posedge clk or negedge n_rst)
@@ -156,7 +168,7 @@ begin
 	if(n_rst == 0)
 		csi_last_byte = 0;
 	else 
-		csi_last_byte = (bc == 33);
+		csi_last_byte = (bc == 35);
 end
 
 endmodule 
