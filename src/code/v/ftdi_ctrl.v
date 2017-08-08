@@ -31,7 +31,7 @@ begin
 			case(fc_state)
 				FC_STATE_CTRL:
 					begin
-						if(~rxf)
+						if(~rxf & ~d_asserted)
 							fc_state = FC_STATE_READ_PREPARE;
 						else
 							fc_state = FC_STATE_CTRL;

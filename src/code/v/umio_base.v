@@ -366,7 +366,7 @@ usb_decoder USB_DC (
 );
 
 usb_ctrl_regs USB_CTRL_REGS (
-	.clk_ftdi(FCLK_OUT),
+	.clk(FCLK_OUT),
 	.n_rst(N_RST),
 	.d(USB_DC_Q),
 	.d_asserted(USB_DC_Q_ASSERTED),

@@ -1,5 +1,5 @@
 module usb_ctrl_regs (
-	input clk_ftdi,
+	input clk,
 	input n_rst,
 	
 	input [7:0] d,
@@ -54,7 +54,7 @@ wire PKR_STATE_CTRL = (packer_state == CTRL),
 	  PKR_STATE_ADDR = (packer_state == ADDR),
 	  PKR_STATE_DATA = (packer_state == DATA);
 			 
-always@(posedge clk_ftdi or negedge n_rst)
+always@(posedge clk or negedge n_rst)
 begin
 	if(n_rst == 0)
 		packer_state = CTRL;
@@ -121,7 +121,7 @@ end
 
  
 reg_byte_en REG_BYTE_EN (
-	.clk(clk_ftdi),
+	.clk(clk),
 	.n_rst(n_rst),
 	.d(d),
 	.a_asserted(PKR_STATE_ADDR),
@@ -148,7 +148,7 @@ wire[1:0] SDI_CR_BYTE_N = BYTE_N_2;
 wire[2:0] CSI_CR_BYTE_N = BYTE_N_3;
 
 sys_time_reg STR (
-	.clk(clk_ftdi),
+	.clk(clk),
 	.n_rst(n_rst),
 	
 	.usb_wrreq(STR_EN),
@@ -167,7 +167,7 @@ sys_time_reg STR (
 );
 
 sdi_ctrl_reg SDI_CR (
-	.clk(clk_ftdi),
+	.clk(clk),
 	.n_rst(n_rst),
 	.d(d),
 	.reg_en(SDI_CR_EN),
@@ -176,7 +176,7 @@ sdi_ctrl_reg SDI_CR (
 );
 
 csi_ctrl_reg CSI_CR (
-	.clk(clk_ftdi),
+	.clk(clk),
 	.n_rst(n_rst),
 	.d(d),
 	.reg_en(CSI_CR_EN),
@@ -186,7 +186,7 @@ csi_ctrl_reg CSI_CR (
 
 
 ccw_buf CCW_BUF ( 
-	.clk_ftdi(clk_ftdi),
+	.clk(clk),
 	.n_rst(n_rst),
 	.wrreq(CCW_BUF_EN),
 	.rdreq(ccwb_rdreq),
@@ -264,7 +264,6 @@ module sys_time_reg (
 	output [63:0] q
 );
 
-wire ANY_WRREQ = usb_wrreq | tim_wrreq;
 
 reg usb_wrreq_sync;
 always@(posedge clk or negedge n_rst)
@@ -279,141 +278,94 @@ wire TICK_AFTER_USB_WRREQ = ~usb_wrreq & usb_wrreq_sync;
 
 assign st_preset = TICK_AFTER_USB_WRREQ;
 
-byte_mx B_MX1 (
-	.select(tim_wrreq),
-	.b_in1(day[15:8]),
-	.b_in2(d),
-	.b_out(B_MX1_Q)
-);
-wire [7:0] B_MX1_Q;
-
-byte_reg STR_B1 (
+byte_reg_al STR_B1 (
 	.clk(clk),
 	.n_rst(n_rst),
-	.en((usb_wrreq & byte_en[0]) | tim_wrreq),
-	.d(B_MX1_Q),
+	.aload(tim_wrreq),
+	.en(usb_wrreq & byte_en[0]),
+	.d_async(day[15:8]),
+	.d_sync(d),
 	.q(B1)
 );
 
-byte_mx B_MX2 (
-	.select(tim_wrreq),
-	.b_in1(day[7:0]),
-	.b_in2(d),
-	.b_out(B_MX2_Q)
-);
-wire [7:0] B_MX2_Q;
 
 
-byte_reg STR_B2 (
+byte_reg_al STR_B2 (
 	.clk(clk),
 	.n_rst(n_rst),
-	.en((usb_wrreq & byte_en[1]) | tim_wrreq),
-	.d(B_MX2_Q),
+	.aload(tim_wrreq),
+	.en(usb_wrreq & byte_en[1]),
+	.d_async(day[7:0]),
+	.d_sync(d),
 	.q(B2)
 );
 
 
-byte_mx B_MX3 (
-	.select(tim_wrreq),
-	.b_in1(ms_of_day[26:24]),
-	.b_in2(d),
-	.b_out(B_MX3_Q)
-);
-wire [7:0] B_MX3_Q;
-
-byte_reg STR_B3 (
+byte_reg_al STR_B3 (
 	.clk(clk),
 	.n_rst(n_rst),
-	.en((usb_wrreq & byte_en[2]) | tim_wrreq),
-	.d(B_MX3_Q),
+	.aload(tim_wrreq),
+	.en(usb_wrreq & byte_en[2]),
+	.d_async(ms_of_day[26:24]),
+	.d_sync(d),
 	.q(B3)
 );
 
 
-byte_mx B_MX4 (
-	.select(tim_wrreq),
-	.b_in1(ms_of_day[23:16]),
-	.b_in2(d),
-	.b_out(B_MX4_Q)
-);
-wire [7:0] B_MX4_Q;
 
-byte_reg STR_B4 (
+byte_reg_al STR_B4 (
 	.clk(clk),
 	.n_rst(n_rst),
-	.en((usb_wrreq & byte_en[3]) | tim_wrreq),
-	.d(B_MX4_Q),
+	.aload(tim_wrreq),
+	.en(usb_wrreq & byte_en[3]),
+	.d_async(ms_of_day[23:16]),
+	.d_sync(d),
 	.q(B4)
 );
 
 
-byte_mx B_MX5 (
-	.select(tim_wrreq),
-	.b_in1(ms_of_day[15:8]),
-	.b_in2(d),
-	.b_out(B_MX5_Q)
-);
-wire [7:0] B_MX5_Q;
 
-
-byte_reg STR_B5 (
+byte_reg_al STR_B5 (
 	.clk(clk),
 	.n_rst(n_rst),
-	.en((usb_wrreq & byte_en[4]) | tim_wrreq),
-	.d(B_MX5_Q),
+	.aload(tim_wrreq),
+	.en(usb_wrreq & byte_en[4]),
+	.d_async(ms_of_day[15:8]),
+	.d_sync(d),
 	.q(B5)
 );
 
 
-byte_mx B_MX6 (
-	.select(tim_wrreq),
-	.b_in1(ms_of_day[7:0]),
-	.b_in2(d),
-	.b_out(B_MX6_Q)
-);
-wire [7:0] B_MX6_Q;
-
-
-byte_reg STR_B6 (
+byte_reg_al STR_B6 (
 	.clk(clk),
 	.n_rst(n_rst),
-	.en((usb_wrreq & byte_en[5]) | tim_wrreq),
-	.d(B_MX6_Q),
+	.aload(tim_wrreq),
+	.en(usb_wrreq & byte_en[5]),
+	.d_async(ms_of_day[7:0]),
+	.d_sync(d),
 	.q(B6)
 );
 
 
-byte_mx B_MX7 (
-	.select(tim_wrreq),
-	.b_in1(us_of_ms[9:8]),
-	.b_in2(d),
-	.b_out(B_MX7_Q)
-);
-wire [7:0] B_MX7_Q;
-
-
-byte_reg STR_B7 (
+byte_reg_al STR_B7 (
 	.clk(clk),
 	.n_rst(n_rst),
-	.en((usb_wrreq & byte_en[6]) | tim_wrreq),
-	.d(B_MX7_Q),
+	.aload(tim_wrreq),
+	.en(usb_wrreq & byte_en[6]),
+	.d_async(us_of_ms[9:8]),
+	.d_sync(d),
 	.q(B7)
 );
 
 
-byte_mx B_MX8 (
-	.select(tim_wrreq),
-	.b_in1(us_of_ms[7:0]),
-	.b_in2(d),
-	.b_out(B_MX8_Q)
-);
-wire [7:0] B_MX8_Q;
 
-byte_reg STR_B8 (
+byte_reg_al STR_B8 (
 	.clk(clk),
 	.n_rst(n_rst),
-	.en((usb_wrreq & byte_en[7]) | tim_wrreq),
-	.d(B_MX8_Q),
+	.aload(tim_wrreq),
+	.en(usb_wrreq & byte_en[7]),
+	.d_async(us_of_ms[7:0]),
+	.d_sync(d),
 	.q(B8)
 );
 
@@ -426,25 +378,17 @@ wire[7:0] B1,
 			 B7,
 			 B8;	 
 
-assign b1 = B1;
-assign b2 = B2;
-assign b3 = B3;
-assign b4 = B4;
 
-assign b5 = B5;			 
-assign b6 = B6;
-assign b7 = B7;
-assign b8 = B8;
 
 assign day[15:8] = st_preset ? B1 : 8'hZZ;
 assign day[7:0]  = st_preset ? B2 : 8'hZZ;
 
-assign ms_of_day[26:24] = st_preset ? B3[2:0] : 3'hZZ;
+assign ms_of_day[26:24] = st_preset ? B3[2:0] : 3'bZZZ;
 assign ms_of_day[23:16] = st_preset ? B4 : 8'hZZ;
 assign ms_of_day[15:8]  = st_preset ? B5 : 8'hZZ;
 assign ms_of_day[7:0]   = st_preset ? B6 : 8'hZZ;
 
-assign us_of_ms[9:8]  = st_preset? B7[1:0] : 2'hZZ;
+assign us_of_ms[9:8]  = st_preset? B7[1:0] : 2'bZZ;
 assign us_of_ms[7:0]	 = st_preset? B8 : 8'hZZ;	
 
 assign q[63:56] = B1;
@@ -454,8 +398,8 @@ assign q[39:32] = B4;
 
 assign q[31:24] = B5;
 assign q[23:16] = B6;
-assign q[15:8] = B7;
-assign q[7:0] = B8;
+assign q[15:8]  = B7;
+assign q[7:0]   = B8;
 endmodule 
 
 
@@ -544,7 +488,7 @@ endmodule
 
 
 module ccw_buf (
-	input  clk_ftdi,
+	input  clk,
 	input  n_rst,
 	input  wrreq,
 	input  rdreq,
@@ -556,7 +500,7 @@ module ccw_buf (
 
 assign q = (rd_ptr == 1) ? `CCW_BUF_ADDR : RAM_64B_Q;
 
-always@(posedge clk_ftdi or negedge n_rst)
+always@(posedge clk or negedge n_rst)
 begin
 	if(n_rst == 0)
 		buf_is_read = 0;
@@ -566,7 +510,7 @@ end
 
 
 reg wrreq_sync;
-always@(posedge clk_ftdi or negedge n_rst)
+always@(posedge clk or negedge n_rst)
 begin
 	if(n_rst == 0)
 		wrreq_sync = 0;
@@ -582,7 +526,7 @@ reg[5:0] wr_ptr,
 
 			
 wire N_RST_PTRS = n_rst & ~rst_ptrs_after_buf_is_read;			
-always@(posedge clk_ftdi or negedge N_RST_PTRS)
+always@(posedge clk or negedge N_RST_PTRS)
 begin
 	if(N_RST_PTRS == 0)
 		wr_ptr = 0;
@@ -591,7 +535,7 @@ begin
 end
 
 reg[5:0] usedw;
-always@(posedge clk_ftdi or negedge n_rst)
+always@(posedge clk or negedge n_rst)
 begin
 	if(n_rst == 0)
 		usedw = 0;
@@ -599,7 +543,7 @@ begin
 		usedw = d[5:0] + 2;
 end
 
-always@(posedge clk_ftdi or negedge N_RST_PTRS)
+always@(posedge clk or negedge N_RST_PTRS)
 begin
 	if(N_RST_PTRS == 0)
 		rd_ptr = 0;
@@ -608,7 +552,7 @@ begin
 end
 
 reg buf_is_read_sync;
-always@(posedge clk_ftdi or negedge n_rst)
+always@(posedge clk or negedge n_rst)
 begin
 	if(n_rst == 0)
 		buf_is_read_sync = 0;
@@ -619,7 +563,7 @@ end
 wire TICK_AFTER_BUF_IS_READ = ~buf_is_read & buf_is_read_sync;
 
 reg rst_ptrs_after_buf_is_read;
-always@(posedge clk_ftdi or negedge n_rst)
+always@(posedge clk or negedge n_rst)
 begin
 	if(n_rst == 0)
 		rst_ptrs_after_buf_is_read = 0;
@@ -630,7 +574,7 @@ end
 wire[5:0] addr = wrreq ? wr_ptr : rd_ptr; 
 			
 ram_64B RAM_64B (
-	.clock(clk_ftdi),
+	.clock(clk),
 	.address(addr),
 	.data(d),
 	.wren(wrreq),
@@ -640,6 +584,7 @@ ram_64B RAM_64B (
 
 wire[7:0] RAM_64B_Q;
 endmodule 
+
 
 
 module byte_reg (
@@ -660,15 +605,17 @@ endmodule
 module byte_reg_al (
 	input clk,
 	input n_rst,
-	input aload,
 	input en,
-	input [7:0] d,
+	input aload,
+	input [7:0] d_sync,
+	input [7:0] d_async,
 	output reg[7:0] q
 );
 always@(posedge clk or negedge n_rst or posedge aload)
 begin
 	if(n_rst == 0) q = 0;
-	else if(aload) q = d;
-	else if(en)    q = d;
+	else if(aload) q = d_async;
+	else if(en)    q = d_sync;
 end
 endmodule
+
